@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador In-App · Brasil Paralelo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 32px 16px;
+  }
+
+  h1 {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.4;
+  }
+
+  /* ── PHONE FRAME ── */
+  .phone {
+    width: 320px;
+    height: 620px;
+    background: #1a1a1a;
+    border-radius: 44px;
+    border: 8px solid #2a2a2a;
+    box-shadow: 0 0 0 1px #333, 0 32px 80px rgba(0,0,0,.8), inset 0 0 0 1px #111;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* notch */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100px; height: 24px;
+    background: #2a2a2a;
+    border-radius: 0 0 16px 16px;
+    z-index: 10;
+  }
+
+  /* ── FAKE APP SCREEN ── */
+  .app-screen {
+    width: 100%; height: 100%;
+    background: #0f0f0f;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .app-topbar {
+    padding: 36px 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .app-topbar .brand {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #C8102E;
+    text-transform: uppercase;
+  }
+
+  .app-topbar .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #2a2a2a;
+  }
+
+  .app-hero {
+    margin: 0 14px 14px;
+    height: 140px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e1e2e 0%, #2d1b1b 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .app-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.7));
+  }
+
+  .app-hero-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+    letter-spacing: .5px;
+  }
+
+  .app-hero-sub {
+    font-size: 9px;
+    color: rgba(255,255,255,.5);
+    position: relative;
+    z-index: 1;
+    margin-top: 2px;
+  }
+
+  .app-section-title {
+    padding: 4px 18px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .app-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 14px;
+    margin-bottom: 10px;
+  }
+
+  .app-card {
+    flex: 1;
+    height: 80px;
+    border-radius: 10px;
+    background: #1c1c1c;
+  }
+
+  .app-card:first-child { background: #1e1a2a; }
+  .app-card:nth-child(2) { background: #1a1e20; }
+
+  .app-nav {
+    margin-top: auto;
+    height: 56px;
+    background: #161616;
+    border-top: 1px solid #222;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #333;
+  }
+
+  .nav-dot.active { background: #C8102E; }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    backdrop-filter: blur(2px);
+  }
+
+  .modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-card {
+    width: 260px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    transform: scale(.88) translateY(16px);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+
+  .modal-overlay.visible .modal-card {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-image {
+    width: 100%;
+    height: 160px;
+    background: var(--img-bg, linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #2a0a0a 100%));
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 14px;
+  }
+
+  .modal-image img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .modal-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.7));
+  }
+
+  .modal-tag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,.7);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  .modal-product {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.5px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.4);
+    border: none;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    line-height: 1;
+  }
+
+  .modal-body {
+    padding: 16px 16px 14px;
+    background: #fff;
+  }
+
+  .modal-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: -.2px;
+  }
+
+  .modal-text {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 11px;
+    background: #2563EB;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: background .15s;
+  }
+
+  .btn-primary:hover { background: #1d4ed8; }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #888;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+
+  .btn-secondary:hover { border-color: #aaa; color: #444; }
+
+  /* ── CONTROLS ── */
+  .controls {
+    width: 320px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #2a2a2a;
+  }
+
+  .controls h2 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .field { margin-bottom: 10px; }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+
+  .field input, .field textarea {
+    width: 100%;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #ddd;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  .field input:focus, .field textarea:focus {
+    border-color: #C8102E;
+  }
+
+  .field textarea { resize: none; height: 52px; }
+
+  .trigger-btn {
+    width: 100%;
+    padding: 12px;
+    background: #C8102E;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background .15s, transform .1s;
+  }
+
+  .trigger-btn:hover { background: #a50d25; }
+  .trigger-btn:active { transform: scale(.98); }
+
+  .log {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #333;
+    text-align: center;
+    min-height: 14px;
+    transition: color .3s;
+  }
+
+  .log.show { color: #16A34A; }
+</style>
+</head>
+<body>
+
+<h1>Simulador In-App · Brasil Paralelo</h1>
+
+<!-- PHONE -->
+<div class="phone">
+  <!-- fake app -->
+  <div class="app-screen">
+    <div class="app-topbar">
+      <span class="brand">Brasil Paralelo</span>
+      <div class="avatar"></div>
+    </div>
+    <div class="app-hero">
+      <div>
+        <div class="app-hero-label">Documentário em destaque</div>
+        <div class="app-hero-sub">Assista agora</div>
+      </div>
+    </div>
+    <div class="app-section-title">Continue assistindo</div>
+    <div class="app-row">
+      <div class="app-card"></div>
+      <div class="app-card"></div>
+    </div>
+    <div class="app-row">
+      <div class="app-card" style="background:#1a2020"></div>
+      <div class="app-card" style="background:#20201a"></div>
+    </div>
+    <div class="app-nav">
+      <div class="nav-dot active"></div>
+      <div class="nav-dot"></div>
+      <div class="nav-dot"></div>
+      <div class="nav-dot"></div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="overlay">
+    <div class="modal-card" id="modalCard">
+      <div class="modal-image" id="modalImage">
+        <img id="modalImg" src="" alt="" style="display:none">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-tag" id="modalTag">OFERTA RELÂMPAGO</div>
+        <div class="modal-product" id="modalProduct">travessia</div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-title" id="modalTitle">BÔNUS: 2 MESES DE TRAVESSIA</div>
+        <div class="modal-text" id="modalText">Mude para o Premium com 50% OFF e ganhe 2 meses de acesso à Travessia.</div>
+        <button class="btn-primary" id="btnCta" onclick="handleCta()">QUERO FALAR COM A BP</button>
+        <button class="btn-secondary" onclick="closeModal()">VOLTAR PARA NAVEGAÇÃO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <h2>Configurar popup</h2>
+
+  <div class="field">
+    <label>URL da imagem (opcional)</label>
+    <input type="text" id="inputImg" placeholder="https://cdn.brasilparalelo.com.br/..." />
+  </div>
+
+  <div class="field">
+    <label>Tag / label superior</label>
+    <input type="text" id="inputTag" value="OFERTA RELÂMPAGO" />
+  </div>
+
+  <div class="field">
+    <label>Nome do produto</label>
+    <input type="text" id="inputProduct" value="travessia" />
+  </div>
+
+  <div class="field">
+    <label>Título</label>
+    <input type="text" id="inputTitle" value="BÔNUS: 2 MESES DE TRAVESSIA" />
+  </div>
+
+  <div class="field">
+    <label>Corpo</label>
+    <textarea id="inputBody">Mude para o Premium com 50% OFF e ganhe 2 meses de acesso à Travessia.</textarea>
+  </div>
+
+  <div class="field">
+    <label>Texto do botão CTA</label>
+    <input type="text" id="inputCta" value="QUERO FALAR COM A BP" />
+  </div>
+
+  <button class="trigger-btn" onclick="firePopup()">▶ Disparar popup</button>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+  function firePopup() {
+    // Aplica os valores do formulário
+    const img = document.getElementById('inputImg').value.trim();
+    const tag = document.getElementById('inputTag').value.trim();
+    const product = document.getElementById('inputProduct').value.trim();
+    const title = document.getElementById('inputTitle').value.trim();
+    const body = document.getElementById('inputBody').value.trim();
+    const cta = document.getElementById('inputCta').value.trim();
+
+    document.getElementById('modalTag').textContent = tag || 'OFERTA RELÂMPAGO';
+    document.getElementById('modalProduct').textContent = product || 'travessia';
+    document.getElementById('modalTitle').textContent = title || '';
+    document.getElementById('modalText').textContent = body || '';
+    document.getElementById('btnCta').textContent = cta || 'SAIBA MAIS';
+
+    const modalImg = document.getElementById('modalImg');
+    if (img) {
+      modalImg.src = img;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.style.display = 'none';
+    }
+
+    // Mostra o overlay
+    document.getElementById('overlay').classList.add('visible');
+
+    // Log
+    const log = document.getElementById('log');
+    log.textContent = '✓ Popup disparado — evento registrado';
+    log.classList.add('show');
+    setTimeout(() => { log.textContent = ''; log.classList.remove('show'); }, 3000);
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('visible');
+  }
+
+  function handleCta() {
+    closeModal();
+    const log = document.getElementById('log');
+    log.textContent = '✓ CTA clicado — PostHog: inapp_clicked';
+    log.classList.add('show');
+    setTimeout(() => { log.textContent = ''; log.classList.remove('show'); }, 3000);
+  }
+
+  // Fecha ao clicar fora do card
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>

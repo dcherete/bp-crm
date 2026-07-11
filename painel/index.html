@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Hub · Brasil Paralelo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#C8102E;--red-lt:rgba(200,16,46,.08);--red-bd:rgba(200,16,46,.22);
+  --green:#16A34A;--green-lt:rgba(22,163,74,.08);--green-bd:rgba(22,163,74,.22);
+  --yellow:#D97706;--yel-lt:rgba(217,119,6,.08);--yel-bd:rgba(217,119,6,.22);
+  --blue:#2563EB;--blue-lt:rgba(37,99,235,.08);--blue-bd:rgba(37,99,235,.22);
+  --purple:#7C3AED;
+  --sb:#0D0D0D;--sbw:224px;
+  --bg:#F4F4F5;--surface:#FFFFFF;--border:#E4E4E7;
+  --text:#111;--muted:#71717A;--light:#A1A1AA;
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg)}
+.layout{display:grid;grid-template-columns:var(--sbw) 1fr;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{background:var(--sb);display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.04)}
+.sb-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.05)}
+.sb-bp{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#2A2A2A;margin-bottom:5px}
+.sb-title{font-size:17px;font-weight:700;color:#EBEBEB;letter-spacing:-.4px}
+.sb-title span{color:var(--red)}
+.sb-nav{flex:1;padding:8px;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+/* SIDEBAR GROUPS */
+.sb-group{margin-bottom:1px}
+.sb-group-hd{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:none;background:none;cursor:pointer;border-radius:9px;color:#5A5A5A;font-size:13px;font-weight:600;text-align:left;transition:all .13s}
+.sb-group-hd:hover{background:rgba(255,255,255,.04);color:#999}
+.sb-group-hd.open{color:#C0C0C0}
+.sb-group-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.04);color:#555;transition:all .13s}
+.sb-group-hd.open .sb-group-ico,.sb-group-hd:hover .sb-group-ico{background:rgba(200,16,46,.12);color:#C84040}
+.sb-group-label{flex:1;font-size:13px;font-weight:600}
+.sb-chevron{width:14px;height:14px;flex-shrink:0;transition:transform .22s;color:#333;margin-left:2px}
+.sb-group-hd.open .sb-chevron{transform:rotate(180deg);color:#555}
+.sb-group-items{overflow:hidden;max-height:0;transition:max-height .22s ease-out}
+.sb-group-items.open{max-height:360px}
+/* Nav sub-items */
+.nav-btn{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 14px;border-radius:7px;cursor:pointer;color:#4A4A4A;font-size:12px;font-weight:500;border:none;background:none;width:100%;text-align:left;transition:all .12s;margin-left:16px;margin-right:4px;width:calc(100% - 20px)}
+.nav-btn:hover{background:rgba(255,255,255,.04);color:#AAA}
+.nav-btn.active{background:rgba(200,16,46,.14);color:#F0F0F0}
+.nav-btn.active .ni{color:var(--red);opacity:1}
+.ni{width:14px;height:14px;flex-shrink:0;opacity:.55}
+.nb{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center}
+.sb-foot{padding:10px;border-top:1px solid rgba(255,255,255,.05)}
+.conn{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:8px;background:rgba(255,255,255,.025);font-size:11px;color:#444;cursor:pointer;border:none;width:100%;text-align:left}
+.conn:hover{background:rgba(255,255,255,.05)}
+.cdot{width:7px;height:7px;border-radius:50%;background:#2A2A2A;flex-shrink:0;transition:all .3s}
+.cdot.ok{background:var(--green);box-shadow:0 0 6px rgba(22,163,74,.5)}
+.cdot.err{background:var(--red);box-shadow:0 0 6px rgba(200,16,46,.4)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .13s;font-family:inherit;line-height:1}
+.btn-primary{background:var(--red);color:#fff}.btn-primary:hover{background:#A50D24}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg)}
+.btn-ghost{background:none;color:var(--muted);padding:6px 10px}.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-danger{background:rgba(200,16,46,.08);color:var(--red);border:1px solid var(--red-bd)}.btn-danger:hover{background:rgba(200,16,46,.15)}
+.btn-green{background:var(--green-lt);color:var(--green);border:1px solid var(--green-bd)}.btn-green:hover{background:rgba(22,163,74,.15)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-header h3{font-size:13px;font-weight:700}
+.card-body{padding:18px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.stat-card .slbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.stat-card .sval{font-size:34px;font-weight:900;letter-spacing:-1.5px;line-height:1;margin-bottom:5px}
+.stat-card .ssub{font-size:11px;color:var(--muted)}
+.c-red{color:var(--red)}.c-green{color:var(--green)}.c-yellow{color:var(--yellow)}.c-blue{color:var(--blue)}.c-purple{color:var(--purple)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:9px 14px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--border)}
+tbody td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(0,0,0,.016)}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.tg-green{background:var(--green-lt);color:var(--green);border:1px solid var(--green-bd)}
+.tg-red{background:var(--red-lt);color:var(--red);border:1px solid var(--red-bd)}
+.tg-yellow{background:var(--yel-lt);color:var(--yellow);border:1px solid var(--yel-bd)}
+.tg-blue{background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-bd)}
+.tg-gray{background:#F4F4F5;color:var(--muted);border:1px solid #E4E4E7}
+
+/* FORM */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+.form-control{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface);font-family:inherit;transition:border-color .13s}
+.form-control:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.08)}
+textarea.form-control{resize:vertical;min-height:80px}
+select.form-control{cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay.hidden{display:none}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-lg{max-width:620px}
+.modal-xl{max-width:860px}
+.recip-list{border:1.5px solid var(--border);border-radius:10px;max-height:150px;overflow-y:auto;background:var(--bg)}
+.recip-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;transition:background .1s}
+.recip-item:last-child{border-bottom:none}
+.recip-item:hover{background:rgba(255,255,255,.04)}
+.recip-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--red);cursor:pointer;flex-shrink:0}
+.recip-item .ri-name{font-weight:600;color:var(--text)}
+.recip-item .ri-sub{font-size:11px;color:var(--muted)}
+.recip-item .ri-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.audience-card{background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;position:sticky;top:0}
+.audience-lbl{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.modal-hd{padding:20px 22px 0;display:flex;align-items:center;justify-content:space-between}
+.modal-hd h2{font-size:17px;font-weight:700}
+.modal-bd{padding:18px 22px}
+.modal-ft{padding:0 22px 20px;display:flex;justify-content:flex-end;gap:8px}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;display:flex}
+.close-btn:hover{background:var(--bg);color:var(--text)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;max-width:280px}
+.search-wrap input{padding-left:34px}
+.search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--light);pointer-events:none}
+
+/* EMPTY / LOADING */
+.empty{padding:48px;text-align:center;color:var(--muted)}
+.empty-ico{width:44px;height:44px;margin:0 auto 14px;opacity:.25}
+.empty h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:5px}
+.empty p{font-size:13px}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--muted);font-size:13px}
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:#111;color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:9px;min-width:220px;animation:slideUp .2s ease}
+.toast.ok .ticon{color:var(--green)}.toast.err .ticon{color:var(--red)}.toast.info .ticon{color:#60A5FA}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGINATION */
+.pager{display:flex;align-items:center;gap:6px;padding:11px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.pager .pi{flex:1}
+.pg-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;font-size:12px;font-weight:500}
+.pg-btn:hover{background:var(--bg)}.pg-btn:disabled{opacity:.4;cursor:not-allowed}
+.pg-btn.cur{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* SEGMENTS */
+.seg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.seg-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:all .13s}
+.seg-card:hover{border-color:rgba(200,16,46,.4);box-shadow:0 0 0 3px rgba(200,16,46,.06)}
+.seg-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.seg-key{font-size:10px;color:var(--muted);font-family:monospace;background:var(--bg);padding:1px 6px;border-radius:4px}
+.seg-count{font-size:12px;color:var(--muted);margin-top:6px}
+.seg-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+
+/* CAMPAIGNS */
+.camp-list{display:flex;flex-direction:column;gap:10px}
+.camp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:14px}
+.camp-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.camp-icon.email{background:var(--blue-lt);color:var(--blue)}
+.camp-icon.push{background:rgba(124,58,237,.08);color:var(--purple)}
+.camp-icon.both{background:var(--red-lt);color:var(--red)}
+.camp-info{flex:1}
+.camp-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.camp-meta{font-size:11px;color:var(--muted)}
+.camp-actions{display:flex;gap:6px;align-items:center}
+
+/* WIZARD */
+.wizard-steps{display:flex;align-items:center;margin-bottom:20px}
+.wstep{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted)}
+.wstep.active{color:var(--red)}.wstep.done{color:var(--green)}
+.wnum{width:24px;height:24px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.wstep.done .wnum{background:var(--green);border-color:var(--green);color:#fff}
+.wstep.active .wnum{background:var(--red);border-color:var(--red);color:#fff}
+.wline{flex:1;height:1px;background:var(--border);margin:0 6px}
+
+/* FEED */
+.feed-tabs{display:flex;gap:4px;margin-bottom:14px}
+.feed-tab{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .13s}
+.feed-tab:hover{background:var(--bg)}.feed-tab.active{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* WORKFLOW CARDS */
+.wf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.wf-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:all .13s}
+.wf-card:hover{border-color:rgba(200,16,46,.3)}
+.wf-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.wf-id{font-size:10px;color:var(--muted);font-family:monospace;background:var(--bg);padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.wf-steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.wf-actions{display:flex;gap:6px;padding-top:10px;border-top:1px solid var(--border)}
+
+/* WORKFLOW TABS */
+.wf-tabs{display:flex;gap:4px;margin-bottom:16px}
+.wf-tab{padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .13s}
+.wf-tab:hover{background:var(--bg)}.wf-tab.active{background:var(--red);color:#fff;border-color:var(--red)}
+.editor-wrap{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#000}
+.editor-wrap iframe{width:100%;display:block;border:none}
+
+/* PROGRESS */
+.progress-wrap{background:var(--bg);border-radius:6px;height:8px;overflow:hidden;margin:8px 0}
+.progress-bar{height:100%;background:var(--green);border-radius:6px;transition:width .3s ease}
+
+/* CHANNEL TOGGLE */
+.ch-toggle{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ch-toggle:last-child{border-bottom:none}
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:#D1D5DB;border-radius:20px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+.toggle input:checked + .toggle-slider{background:var(--green)}
+.toggle input:checked + .toggle-slider:before{transform:translateX(16px)}
+
+/* CSV PREVIEW */
+.csv-preview{font-size:11px;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:10px}
+.csv-preview table{font-size:11px}
+.csv-preview thead th{padding:6px 10px;font-size:9px}
+.csv-preview tbody td{padding:6px 10px}
+
+/* SUPPRESSION */
+.supp-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.supp-item:last-child{border-bottom:none}
+.supp-email{flex:1;font-size:13px}
+.supp-date{font-size:11px;color:var(--muted)}
+
+/* MISC */
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.text-muted{color:var(--muted)}.text-sm{font-size:12px}
+.mt8{margin-top:8px}.mt16{margin-top:16px}
+.chip{display:inline-flex;align-items:center;padding:3px 10px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;color:var(--muted)}
+.check-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+.check-row:last-child{border-bottom:none}
+.check-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--red);cursor:pointer;flex-shrink:0}
+.divider{height:1px;background:var(--border);margin:14px 0}
+code{font-size:11px;background:#f4f4f5;padding:2px 7px;border-radius:4px;letter-spacing:.2px}
+
+/* JORNADAS */
+.jorn-list{display:flex;flex-direction:column;gap:12px}
+.jorn-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;gap:16px;transition:all .13s}
+.jorn-card:hover{border-color:rgba(200,16,46,.3)}
+.jorn-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(124,58,237,.1);color:#7C3AED}
+.jorn-main{flex:1}
+.jorn-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.jorn-trigger{font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.jorn-flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.jorn-step{display:flex;align-items:center;gap:5px}
+.jorn-step-box{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+.jorn-arrow{color:var(--light);font-size:12px}
+.jorn-actions{display:flex;gap:6px;align-items:center}
+.jorn-status-active{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green)}
+.jorn-status-draft{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted)}
+
+/* STEP BUILDER */
+.step-builder{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.step-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative}
+.step-item-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-type{font-size:13px;font-weight:700;flex:1}
+.step-remove{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;border-radius:4px;display:flex;line-height:1}
+.step-remove:hover{color:var(--red);background:var(--red-lt)}
+.step-conn{text-align:center;font-size:11px;color:var(--light);padding:2px 0}
+.add-step-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+
+/* WEBHOOK BOX */
+.webhook-box{background:#0d1117;border-radius:10px;padding:14px 16px;font-family:monospace;font-size:11px;color:#e6edf3;line-height:1.8;overflow-x:auto;position:relative}
+.webhook-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:none;border-radius:5px;color:#e6edf3;font-size:11px;padding:3px 8px;cursor:pointer}
+.webhook-copy:hover{background:rgba(255,255,255,.2)}
+.ph-steps{counter-reset:step}
+.ph-step{counter-increment:step;display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ph-step:last-child{border-bottom:none}
+.ph-step-num{width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ph-step-body{flex:1}
+.ph-step-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.ph-step-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* CAMPAIGN CHANNEL CARDS */
+.ch-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.ch-card{border:2px solid var(--border);border-radius:14px;padding:18px 14px 14px;cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;user-select:none}
+.ch-card:hover{border-color:rgba(200,16,46,.35);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.ch-card.selected{border-color:var(--red);background:var(--red-lt)}
+.ch-card-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.ch-card-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.ch-card-desc{font-size:11px;color:var(--muted);line-height:1.4}
+/* POSTHOG AUDIENCE BUILDER */
+.event-pill,.time-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .13s;background:var(--surface);color:var(--muted);margin:3px 2px}
+.event-pill:hover{border-color:var(--purple);color:var(--purple)}
+.event-pill.sel{border-color:var(--purple);background:rgba(124,58,237,.08);color:var(--purple)}
+.time-pill:hover{border-color:var(--blue);color:var(--blue)}
+.time-pill.sel{border-color:var(--blue);background:var(--blue-lt);color:var(--blue)}
+.ph-audience-banner{background:linear-gradient(135deg,rgba(124,58,237,.07) 0%,rgba(37,99,235,.06) 100%);border:1px solid rgba(124,58,237,.2);border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:flex-start;gap:14px}
+.camp-preview{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:8px}
+.camp-preview-hd{padding:9px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.camp-preview-body{padding:14px 16px;font-size:13px;line-height:1.7;max-height:160px;overflow-y:auto;word-break:break-word}
+.seg-count-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:20px;font-size:11px;font-weight:700;color:var(--blue);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-bp">Brasil Paralelo</div>
+      <div class="sb-title">CRM <span>Hub</span></div>
+    </div>
+    <nav class="sb-nav">
+
+      <!-- ANÁLISES -->
+      <div class="sb-group">
+        <button class="sb-group-hd open" id="ghd-analises" onclick="toggleGroup('analises')">
+          <div class="sb-group-ico">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="10" width="3" height="5" rx="1" opacity=".5"/><rect x="6" y="6" width="3" height="9" rx="1" opacity=".7"/><rect x="11" y="2" width="3" height="13" rx="1"/></svg>
+          </div>
+          <span class="sb-group-label">Análises</span>
+          <svg class="sb-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="sb-group-items open" id="gi-analises">
+          <button class="nav-btn active" onclick="nav('dashboard')" id="nb-dashboard">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+            Dashboard
+          </button>
+          <button class="nav-btn" onclick="nav('feed')" id="nb-feed">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10M3 8h7M3 11h5"/></svg>
+            Feed de Atividade
+          </button>
+        </div>
+      </div>
+
+      <!-- CAMPANHAS -->
+      <div class="sb-group">
+        <button class="sb-group-hd open" id="ghd-campanhas" onclick="toggleGroup('campanhas')">
+          <div class="sb-group-ico">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 5.5v5l3.5-1.5v-2L1 5.5z" fill="currentColor" opacity=".6"/><path d="M4.5 4.5L13 2v12L4.5 11V4.5z" stroke="currentColor" stroke-width="1.3" fill="currentColor" opacity=".25"/><path d="M4.5 4.5L13 2v12L4.5 11V4.5z" stroke="currentColor" stroke-width="1.3"/></svg>
+          </div>
+          <span class="sb-group-label">Campanhas</span>
+          <svg class="sb-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="sb-group-items open" id="gi-campanhas">
+          <button class="nav-btn" onclick="nav('camp-email')" id="nb-camp-email">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M1 5l7 5 7-5"/></svg>
+            Email
+          </button>
+          <button class="nav-btn" onclick="nav('camp-whatsapp')" id="nb-camp-whatsapp">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 6C5.5 5 6.2 4.5 7 4.5c.7 0 1.3.4 1.3 1.1 0 .6-.4 1-.9 1.3-.5.3-.9.6-.9 1.3v.2" stroke-linecap="round"/><circle cx="7.5" cy="10" r=".6" fill="currentColor" stroke="none"/></svg>
+            WhatsApp
+          </button>
+          <button class="nav-btn" onclick="nav('camp-push-app')" id="nb-camp-push-app">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="1" width="8" height="14" rx="2"/><path d="M7 12.5h2" stroke-linecap="round"/></svg>
+            App Push
+          </button>
+          <button class="nav-btn" onclick="nav('camp-inapp')" id="nb-camp-inapp">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M5 7h6M5 10h4" stroke-linecap="round"/></svg>
+            In-App
+          </button>
+          <button class="nav-btn" onclick="nav('camp-push-web')" id="nb-camp-push-web">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10V7a5 5 0 0110 0v3l1.5 2H1.5L3 10z"/><path d="M6 13a2 2 0 004 0"/></svg>
+            Web Push
+          </button>
+          <div style="height:1px;background:rgba(255,255,255,.04);margin:5px 10px 4px 14px"></div>
+          <button class="nav-btn" onclick="nav('jornadas')" id="nb-jornadas">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h3l2-4 2 8 2-4h3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Jornadas
+            <span class="nb" id="badge-jorn" style="display:none">0</span>
+          </button>
+          <button class="nav-btn" onclick="nav('workflows')" id="nb-workflows">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="3" cy="8" r="2"/><circle cx="13" cy="4" r="2"/><circle cx="13" cy="12" r="2"/><path d="M5 8h3l2-4M5 8h3l2 4"/></svg>
+            Workflows
+          </button>
+        </div>
+      </div>
+
+      <!-- AUDIÊNCIA -->
+      <div class="sb-group">
+        <button class="sb-group-hd open" id="ghd-audiencia" onclick="toggleGroup('audiencia')">
+          <div class="sb-group-ico">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" fill="currentColor" opacity=".75"/><circle cx="11.5" cy="5" r="2" fill="currentColor" opacity=".35"/><path d="M1 14c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.3"/><path d="M12.5 9c1.5.6 2.5 2 2.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"/></svg>
+          </div>
+          <span class="sb-group-label">Audiência</span>
+          <svg class="sb-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="sb-group-items open" id="gi-audiencia">
+          <button class="nav-btn" onclick="nav('subscribers')" id="nb-subscribers">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 13c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+            Subscribers
+            <span class="nb" id="badge-sub">—</span>
+          </button>
+          <button class="nav-btn" onclick="nav('segments')" id="nb-segments">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h5M2 8h8M2 12h5"/><circle cx="12" cy="12" r="3"/></svg>
+            Segmentos
+          </button>
+          <button class="nav-btn" onclick="nav('unsubscribes')" id="nb-unsubscribes">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 13c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M10 11l4 4M14 11l-4 4"/></svg>
+            Descadastros
+            <span class="nb" id="badge-unsub" style="display:none">!</span>
+          </button>
+          <button class="nav-btn" onclick="nav('suppression')" id="nb-suppression">
+            <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M4 4l8 8" stroke-linecap="round"/></svg>
+            Supressão
+            <span class="nb" id="badge-supp" style="background:#555">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="sb-group" style="margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04)">
+        <button class="sb-group-hd" id="ghd-settings" onclick="openSettings()">
+          <div class="sb-group-ico">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+          </div>
+          <span class="sb-group-label">Configurações</span>
+        </button>
+      </div>
+
+    </nav>
+    <div class="sb-foot">
+      <button class="conn" onclick="checkConn()">
+        <div class="cdot" id="cdot"></div>
+        <span id="clabel">Verificando...</span>
+      </button>
+      <button class="conn" onclick="openSettings()" style="margin-top:4px">
+        <div class="cdot" id="ph-dot"></div>
+        <span id="ph-label">PostHog</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions" id="page-actions"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div class="overlay hidden" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const CFG = {
+  apiUrl: 'http://localhost:3000',
+  apiKey: 'ba45b4826e9fc72cf277fe77921b0134',
+  phHost: 'https://us.posthog.com',
+  phToken: 'phc_vBnjOoSUQYaiDtMBhXQCa4b4dFsSr1nr5D7S377YJwP',
+  phApiKey: '',
+  phProjectId: ''
+};
+try { Object.assign(CFG, JSON.parse(localStorage.getItem('crm-cfg') || '{}')); } catch(e) {}
+
+// ── POSTHOG CAPTURE ───────────────────────────────────────
+async function phCapture(event, props = {}) {
+  if (!CFG.phToken || !CFG.phHost) return;
+  try {
+    await fetch(CFG.phHost + '/capture/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: CFG.phToken,
+        event,
+        distinct_id: 'crm-panel',
+        properties: { ...props, $lib: 'crm-hub', source: 'painel' }
+      })
+    });
+  } catch(e) {} // falha silenciosa — PostHog é analytics, não bloqueia operação
+}
+
+function phStatus() {
+  return !!(CFG.phToken && CFG.phHost);
+}
+
+// ── API ───────────────────────────────────────────────────
+const api = {
+  h() { return { 'Authorization': `ApiKey ${CFG.apiKey}`, 'Content-Type': 'application/json' }; },
+  async get(p) {
+    const r = await fetch(CFG.apiUrl + p, { headers: this.h() });
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  },
+  async post(p, b) {
+    const r = await fetch(CFG.apiUrl + p, { method: 'POST', headers: this.h(), body: JSON.stringify(b) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || r.status);
+    return j;
+  },
+  async del(p) {
+    const r = await fetch(CFG.apiUrl + p, { method: 'DELETE', headers: this.h() });
+    if (!r.ok) throw new Error(r.status);
+    return r.json().catch(() => ({}));
+  },
+  async patch(p, b) {
+    const r = await fetch(CFG.apiUrl + p, { method: 'PATCH', headers: this.h(), body: JSON.stringify(b) });
+    if (!r.ok) throw new Error(r.status);
+    return r.json().catch(() => ({}));
+  }
+};
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const ico = { ok:'<path d="M3 8l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', err:'<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', info:'<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<svg class="ticon" width="16" height="16" viewBox="0 0 16 16" fill="none">${ico[type]||ico.info}</svg><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(title, body, footer, large = false) {
+  const szCls = large === 'xl' ? ' modal-xl' : large ? ' modal-lg' : '';
+  document.getElementById('modal').className = 'modal' + szCls;
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-hd"><h2>${title}</h2><button class="close-btn" onclick="closeModal()"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <div class="modal-bd">${body}</div>
+    <div class="modal-ft">${footer}</div>`;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('overlay').classList.add('hidden'); }
+function handleOverlayClick(e) { if (e.target.id === 'overlay') closeModal(); }
+
+// ── HELPERS ───────────────────────────────────────────────
+const loader = () => `<div class="loading"><div class="spin"></div> Carregando...</div>`;
+function emptyState(icon, h, p) { return `<div class="empty">${icon}<h3>${h}</h3><p>${p}</p></div>`; }
+function fdate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }); }
+function slug(s) { return (s||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').replace(/(^-|-$)/g,'')||'item-'+Date.now(); }
+function apiErr() { return emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="16" stroke="currentColor" stroke-width="2"/><path d="M22 14v8M22 28v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,'Não foi possível conectar','Verifique se o ambiente está rodando. <button class="btn btn-secondary btn-sm" onclick="openSettings()" style="margin-top:8px">Configurações</button>'); }
+function chTag(ch) { if(ch==='email') return '<span class="tag tg-blue">Email</span>'; if(ch==='push') return '<span class="tag" style="background:rgba(124,58,237,.08);color:#7C3AED;border:1px solid rgba(124,58,237,.2)">Push</span>'; return `<span class="tag tg-gray">${ch||'—'}</span>`; }
+function statusTag(s) { if(s==='completed'||s==='sent') return '<span class="tag tg-green">Entregue</span>'; if(s==='failed') return '<span class="tag tg-red">Falha</span>'; if(s==='seen') return '<span class="tag tg-blue">Visualizado</span>'; return '<span class="tag tg-yellow">Pendente</span>'; }
+
+// ── CONNECTION ────────────────────────────────────────────
+async function checkConn() {
+  const dot = document.getElementById('cdot'), lbl = document.getElementById('clabel');
+  lbl.textContent = 'Verificando...'; dot.className = 'cdot';
+  try {
+    await api.get('/v1/health-check');
+    dot.className = 'cdot ok'; lbl.textContent = 'Novu conectado';
+    loadSubBadge();
+  } catch(e) { dot.className = 'cdot err'; lbl.textContent = 'Novu sem conexão'; }
+  checkPhConn();
+}
+async function checkPhConn() {
+  const dot = document.getElementById('ph-dot'), lbl = document.getElementById('ph-label');
+  if (!dot || !lbl) return;
+  if (!CFG.phToken) { dot.className = 'cdot'; lbl.textContent = 'PostHog (sem token)'; return; }
+  try {
+    // Envia evento de heartbeat para verificar se o token é válido
+    const r = await fetch(CFG.phHost + '/capture/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: CFG.phToken, event: 'crm_panel_opened', distinct_id: 'crm-panel', properties: { $lib: 'crm-hub' } })
+    });
+    if (r.ok || r.status === 200) { dot.className = 'cdot ok'; lbl.textContent = 'PostHog conectado'; }
+    else { dot.className = 'cdot err'; lbl.textContent = 'PostHog erro ' + r.status; }
+  } catch(e) { dot.className = 'cdot err'; lbl.textContent = 'PostHog sem conexão'; }
+}
+async function loadSubBadge() {
+  try {
+    const r = await api.get('/v1/subscribers?limit=1&page=0');
+    const n = r.totalCount ?? r.data?.length ?? 0;
+    document.getElementById('badge-sub').textContent = n > 999 ? (n/1000).toFixed(1)+'k' : n;
+  } catch(e) {}
+}
+function updateSuppBadge() {
+  const n = getSupp().length;
+  const el = document.getElementById('badge-supp');
+  if (el) el.textContent = n;
+}
+
+// ── SIDEBAR GROUPS ────────────────────────────────────────
+const _grpOpen = {analises:true, campanhas:true, audiencia:true};
+function toggleGroup(id) {
+  _grpOpen[id] = !_grpOpen[id];
+  document.getElementById('ghd-'+id)?.classList.toggle('open', _grpOpen[id]);
+  document.getElementById('gi-'+id)?.classList.toggle('open', _grpOpen[id]);
+}
+const _sectionGroup = {
+  dashboard:'analises', feed:'analises',
+  'camp-email':'campanhas','camp-whatsapp':'campanhas','camp-push-app':'campanhas','camp-push-web':'campanhas','camp-inapp':'campanhas',
+  campaigns:'campanhas', jornadas:'campanhas', workflows:'campanhas',
+  subscribers:'audiencia', segments:'audiencia', unsubscribes:'audiencia', suppression:'audiencia'
+};
+
+// ── ROUTER ────────────────────────────────────────────────
+let _cur = 'dashboard', _feedTimer = null;
+function nav(section) {
+  clearInterval(_feedTimer);
+  _cur = section;
+  document.getElementById('content').style.padding = '24px 28px';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nb-' + section);
+  if (nb) nb.classList.add('active');
+  // auto-expand the group that owns this section
+  const grp = _sectionGroup[section];
+  if (grp && !_grpOpen[grp]) toggleGroup(grp);
+  const titles = { dashboard:'Dashboard', subscribers:'Subscribers', workflows:'Workflows', segments:'Segmentos', campaigns:'Campanhas', jornadas:'Jornadas', feed:'Feed de Atividade', unsubscribes:'Descadastros', suppression:'Lista de Supressão', 'camp-email':'Campanhas — Email', 'camp-whatsapp':'Campanhas — WhatsApp', 'camp-push-app':'Campanhas — App Push', 'camp-push-web':'Campanhas — Web Push', 'camp-inapp':'Campanhas — In-App' };
+  document.getElementById('page-title').textContent = titles[section] || section;
+  document.getElementById('page-actions').innerHTML = '';
+  const chMap = {'camp-email':'email','camp-whatsapp':'whatsapp','camp-push-app':'push-app','camp-push-web':'push-web'};
+  if (section === 'camp-email') { renderEmailPage(); return; }
+  if (section === 'camp-inapp') { renderInApp(); return; }
+  if (chMap[section]) { renderCampaigns(chMap[section]); return; }
+  ({ dashboard:renderDashboard, subscribers:renderSubscribers, workflows:renderWorkflows, segments:renderSegments, campaigns:renderCampaigns, jornadas:renderJornadas, feed:renderFeed, unsubscribes:renderUnsubscribes, suppression:renderSuppression })[section]?.();
+}
+
+// ════════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  const el = document.getElementById('content');
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="slbl">Subscribers</div><div class="sval c-blue" id="ds-subs"><div class="spin" style="width:22px;height:22px;border-width:3px;display:inline-block"></div></div><div class="ssub">na base</div></div>
+      <div class="stat-card"><div class="slbl">Notificações</div><div class="sval c-red" id="ds-notifs">—</div><div class="ssub">registradas</div></div>
+      <div class="stat-card"><div class="slbl">Segmentos</div><div class="sval c-green" id="ds-segs">—</div><div class="ssub">grupos criados</div></div>
+      <div class="stat-card"><div class="slbl">Jornadas Ativas</div><div class="sval c-purple" id="ds-jorn">—</div><div class="ssub">automatizadas</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px" id="dash-cards">
+      <div class="card" style="cursor:pointer" onclick="nav('jornadas')">
+        <div class="card-body" style="display:flex;align-items:center;gap:14px">
+          <div style="width:42px;height:42px;border-radius:11px;background:rgba(124,58,237,.1);color:#7C3AED;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M2 11h4l2.5-5 3 10 2.5-5H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Jornadas automatizadas</div><div style="font-size:11px;color:var(--muted)" id="dash-jorn-sum">Carregando...</div></div>
+          <span style="color:var(--light)">→</span>
+        </div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="nav('campaigns')">
+        <div class="card-body" style="display:flex;align-items:center;gap:14px">
+          <div style="width:42px;height:42px;border-radius:11px;background:var(--blue-lt);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Campanhas avulsas</div><div style="font-size:11px;color:var(--muted)" id="dash-camp-sum">Carregando...</div></div>
+          <span style="color:var(--light)">→</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Atividade Recente</h3><button class="btn btn-ghost btn-sm" onclick="nav('feed')">Ver tudo →</button></div>
+      <div id="dash-feed">${loader()}</div>
+    </div>`;
+
+  const [subRes, notifRes, segRes] = await Promise.allSettled([
+    api.get('/v1/subscribers?limit=1&page=0'),
+    api.get('/v1/notifications?limit=10&page=0'),
+    api.get('/v1/topics?page=0&pageSize=1')
+  ]);
+
+  if (subRes.status==='fulfilled') { const n=subRes.value.totalCount??0; document.getElementById('ds-subs').textContent=n.toLocaleString('pt-BR'); document.getElementById('badge-sub').textContent=n>999?(n/1000).toFixed(1)+'k':n; }
+  else document.getElementById('ds-subs').textContent='—';
+  if (notifRes.status==='fulfilled') document.getElementById('ds-notifs').textContent=(notifRes.value.totalCount??notifRes.value.data?.length??0).toLocaleString('pt-BR');
+  if (segRes.status==='fulfilled') document.getElementById('ds-segs').textContent=(segRes.value.totalCount??segRes.value.data?.length??0).toLocaleString('pt-BR');
+  const jornadas=getJornadas();
+  const jornsAtivas=jornadas.filter(j=>j.status==='ativa').length;
+  document.getElementById('ds-jorn').textContent=jornsAtivas;
+  document.getElementById('dash-jorn-sum').textContent=jornsAtivas?`${jornsAtivas} ativa(s) · ${jornadas.length} total`:'Nenhuma jornada criada ainda';
+
+  const camps=getCamps();
+  const campsEnviadas=camps.filter(c=>c.status==='enviada').length;
+  document.getElementById('dash-camp-sum').textContent=campsEnviadas?`${campsEnviadas} enviada(s) · ${camps.length} total`:'Nenhuma campanha disparada ainda';
+
+  const dfEl = document.getElementById('dash-feed');
+  if (notifRes.status!=='fulfilled'||!notifRes.value.data?.length) { dfEl.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><rect x="6" y="10" width="32" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M6 14l16 10 16-10" stroke="currentColor" stroke-width="2"/></svg>`,'Nenhuma atividade ainda','Dispare uma campanha para ver o histórico aqui.'); return; }
+  const rows = notifRes.value.data.slice(0,8).map(n=>`<tr><td>${n.subscriber?.email||n.subscriber?.subscriberId||'—'}</td><td>${chTag(n.channel)}</td><td>${n.template?.name||n._template?.name||'—'}</td><td>${statusTag(n.status)}</td><td class="text-muted text-sm">${fdate(n.createdAt)}</td></tr>`).join('');
+  dfEl.innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Subscriber</th><th>Canal</th><th>Workflow</th><th>Status</th><th>Data</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// SUBSCRIBERS
+// ════════════════════════════════════════════════════════════
+let _subPage = 0;
+async function renderSubscribers(page = 0) {
+  _subPage = page;
+  document.getElementById('page-actions').innerHTML = `
+    <button class="btn btn-secondary" onclick="openImportCSV()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10v2h11v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Importar CSV
+    </button>
+    <button class="btn btn-primary" onclick="openAddSub()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Adicionar
+    </button>`;
+  const el = document.getElementById('content');
+  el.innerHTML = loader();
+  try {
+    const r = await api.get(`/v1/subscribers?limit=20&page=${page}`);
+    const subs = r.data || [], total = r.totalCount ?? subs.length, pages = Math.ceil(total/20);
+    const supp = getSupp().map(s=>s.email);
+
+    if (!subs.length && page===0) { el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="14" r="8" stroke="currentColor" stroke-width="2"/><path d="M6 38c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="currentColor" stroke-width="2"/></svg>`,'Nenhum subscriber','Adicione o primeiro subscriber ou importe um CSV.'); return; }
+
+    const rows = subs.map(s => {
+      const name = [s.firstName,s.lastName].filter(Boolean).join(' ')||'—';
+      const ch = [s.email?'<span class="tag tg-blue" style="font-size:10px">Email</span>':'', s.phone?'<span class="tag tg-green" style="font-size:10px">SMS</span>':'', s.channels?.length?'<span class="tag" style="background:rgba(124,58,237,.08);color:#7C3AED;border:1px solid rgba(124,58,237,.2);font-size:10px">Push</span>':''].filter(Boolean).join(' ');
+      const suppressed = supp.includes(s.email);
+      return `<tr ${suppressed?'style="opacity:.5"':''}>
+        <td><code>${s.subscriberId}</code> ${suppressed?'<span class="tag tg-red" style="font-size:10px">Suprimido</span>':''}</td>
+        <td><span style="font-weight:600">${name}</span></td>
+        <td>${s.email||'<span class="text-muted">—</span>'}</td>
+        <td>${ch||'<span class="text-muted text-sm">—</span>'}</td>
+        <td class="text-muted text-sm">${fdate(s.createdAt)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteSub('${s.subscriberId}','${(s.email||s.subscriberId).replace(/'/g,"\\'")}')">Remover</button></td>
+      </tr>`;
+    }).join('');
+
+    let pager = '';
+    if (pages>1) { const btns=Array.from({length:Math.min(pages,8)},(_,i)=>`<button class="pg-btn ${i===page?'cur':''}" onclick="renderSubscribers(${i})">${i+1}</button>`).join(''); pager=`<div class="pager"><span class="pi">${total.toLocaleString('pt-BR')} subscribers · pág. ${page+1} de ${pages}</span>${btns}</div>`; }
+
+    el.innerHTML = `
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg class="search-ico" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="form-control" placeholder="Filtrar por nome, email ou ID..." oninput="filterTbl('sub-tbody',this.value)">
+        </div>
+        <span class="chip">${total.toLocaleString('pt-BR')} total</span>
+        ${getSupp().length ? `<span class="chip" style="color:var(--red);border-color:var(--red-bd)">${getSupp().length} suprimidos</span>` : ''}
+      </div>
+      <div class="card"><div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Canais</th><th>Criado</th><th></th></tr></thead><tbody id="sub-tbody">${rows}</tbody></table></div>${pager}</div>`;
+  } catch(e) { el.innerHTML = apiErr(); }
+}
+
+function filterTbl(id, q) {
+  const sel = `#${id} tr, #${id} .supp-item`;
+  document.querySelectorAll(sel).forEach(r => { r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'; });
+}
+
+function openAddSub() {
+  openModal('Adicionar Subscriber',
+    `<div class="form-row"><div class="form-group"><label>Primeiro nome</label><input class="form-control" id="sf-fn" placeholder="João"></div><div class="form-group"><label>Sobrenome</label><input class="form-control" id="sf-ln" placeholder="Silva"></div></div>
+     <div class="form-group"><label>Email <span style="color:var(--red)">*</span></label><input class="form-control" id="sf-email" type="email" placeholder="joao@email.com"></div>
+     <div class="form-group"><label>ID personalizado <span class="text-muted text-sm">(opcional)</span></label><input class="form-control" id="sf-id" placeholder="Gerado automaticamente se vazio"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doAddSub()">Adicionar</button>`
+  );
+  setTimeout(() => document.getElementById('sf-email')?.focus(), 100);
+}
+
+async function doAddSub() {
+  const email = document.getElementById('sf-email')?.value?.trim();
+  if (!email) { toast('Email é obrigatório','err'); return; }
+  if (getSupp().some(s=>s.email===email)) { toast('Este email está na lista de supressão','err'); return; }
+  const fn = document.getElementById('sf-fn')?.value?.trim();
+  const ln = document.getElementById('sf-ln')?.value?.trim();
+  const sid = document.getElementById('sf-id')?.value?.trim() || 'sub-'+Date.now();
+  try {
+    await api.post('/v1/subscribers', { subscriberId:sid, email, firstName:fn, lastName:ln });
+    phCapture('subscriber_added', { subscriber_id:sid, email, source:'manual' });
+    toast('Subscriber adicionado!','ok'); closeModal(); renderSubscribers();
+  } catch(e) { toast('Erro: '+e.message,'err'); }
+}
+
+async function deleteSub(id, label) {
+  if (!confirm(`Remover "${label}"?`)) return;
+  try { await api.del(`/v1/subscribers/${encodeURIComponent(id)}`); toast('Subscriber removido','ok'); renderSubscribers(_subPage); }
+  catch(e) { toast('Erro: '+e.message,'err'); }
+}
+
+// ── CSV IMPORT ────────────────────────────────────────────
+function openImportCSV() {
+  openModal('Importar Subscribers via CSV',
+    `<div class="form-group"><label>Arquivo CSV <span style="color:var(--red)">*</span></label>
+      <input type="file" class="form-control" id="csv-file" accept=".csv,.txt" onchange="previewCSV(this)">
+      <div class="form-hint">Colunas aceitas: <strong>email</strong> (obrigatório), firstName, lastName, subscriberId. Primeira linha = cabeçalho.</div>
+    </div>
+    <div id="csv-preview-wrap"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="csv-import-btn" onclick="doImportCSV()" disabled>Importar</button>`,
+    true
+  );
+}
+
+let _csvRows = [];
+function previewCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split(/\r?\n/);
+    if (lines.length < 2) { toast('CSV vazio ou sem dados','err'); return; }
+    const headers = lines[0].split(/[,;]/).map(h=>h.trim().toLowerCase().replace(/['"]/g,''));
+    const emailIdx = headers.findIndex(h=>h.includes('email'));
+    if (emailIdx === -1) { toast('Coluna "email" não encontrada','err'); return; }
+    const fnIdx = headers.findIndex(h=>h.includes('first')||h==='nome'||h==='name');
+    const lnIdx = headers.findIndex(h=>h.includes('last')||h.includes('sobrenome'));
+    const sidIdx = headers.findIndex(h=>h.includes('id'));
+    const supp = getSupp().map(s=>s.email);
+
+    _csvRows = lines.slice(1).map(line => {
+      const cols = line.split(/[,;]/).map(c=>c.trim().replace(/['"]/g,''));
+      return { email:cols[emailIdx]||'', firstName:fnIdx>=0?cols[fnIdx]:'', lastName:lnIdx>=0?cols[lnIdx]:'', subscriberId:sidIdx>=0&&sidIdx!==emailIdx?cols[sidIdx]:'' };
+    }).filter(r=>r.email && r.email.includes('@') && !supp.includes(r.email));
+
+    const skipped = lines.length - 1 - _csvRows.length;
+    const previewRows = _csvRows.slice(0,5).map(r=>`<tr><td>${r.email}</td><td>${r.firstName||'—'}</td><td>${r.lastName||'—'}</td><td>${r.subscriberId||'<span class="text-muted">auto</span>'}</td></tr>`).join('');
+    document.getElementById('csv-preview-wrap').innerHTML = `
+      <div style="font-size:12px;margin-bottom:8px;color:var(--muted)">
+        <strong style="color:var(--text)">${_csvRows.length}</strong> subscribers para importar${skipped?' · <span style="color:var(--red)">'+skipped+' ignorados (suprimidos/inválidos)</span>':''}
+        ${_csvRows.length>5?` · mostrando 5 de ${_csvRows.length}`:''}
+      </div>
+      <div class="csv-preview"><table><thead><tr><th>Email</th><th>Nome</th><th>Sobrenome</th><th>ID</th></tr></thead><tbody>${previewRows}</tbody></table></div>`;
+    document.getElementById('csv-import-btn').disabled = _csvRows.length === 0;
+  };
+  reader.readAsText(file);
+}
+
+async function doImportCSV() {
+  if (!_csvRows.length) return;
+  closeModal();
+  const total = _csvRows.length;
+  let done = 0, errors = 0;
+  toast(`Importando ${total} subscribers...`, 'info');
+
+  // show progress in content area
+  const el = document.getElementById('content');
+  el.innerHTML = `<div class="card"><div class="card-body">
+    <h3 style="margin-bottom:14px">Importando CSV</h3>
+    <div class="flex-between text-sm text-muted" style="margin-bottom:6px"><span id="imp-status">Iniciando...</span><span id="imp-count">0/${total}</span></div>
+    <div class="progress-wrap"><div class="progress-bar" id="imp-bar" style="width:0%"></div></div>
+    <p class="text-sm text-muted mt8">Não feche esta aba durante a importação.</p>
+  </div></div>`;
+
+  for (let i = 0; i < _csvRows.length; i++) {
+    const r = _csvRows[i];
+    try {
+      await api.post('/v1/subscribers', { subscriberId: r.subscriberId||'csv-'+Date.now()+'-'+i, email: r.email, firstName: r.firstName, lastName: r.lastName });
+      done++;
+    } catch(e) { errors++; }
+    const pct = Math.round(((i+1)/total)*100);
+    const bar = document.getElementById('imp-bar'), cnt = document.getElementById('imp-count'), st = document.getElementById('imp-status');
+    if (bar) bar.style.width = pct+'%';
+    if (cnt) cnt.textContent = `${i+1}/${total}`;
+    if (st) st.textContent = `Importando ${r.email}...`;
+    if ((i+1) % 10 === 0) await new Promise(r => setTimeout(r, 50));
+  }
+
+  toast(`Importação concluída: ${done} adicionados${errors?' · '+errors+' erros':''}`, errors?'info':'ok');
+  phCapture('subscribers_imported', { total, imported: done, errors, source: 'csv' });
+  loadSubBadge();
+  setTimeout(() => renderSubscribers(), 800);
+}
+
+// ════════════════════════════════════════════════════════════
+// WORKFLOWS
+// ════════════════════════════════════════════════════════════
+let _wfTab = 'lista';
+async function renderWorkflows(tab) {
+  if (tab) _wfTab = tab;
+  const el = document.getElementById('content');
+  document.getElementById('page-actions').innerHTML = `
+    <button class="btn btn-primary" onclick="openCreateWorkflow()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Novo Workflow
+    </button>`;
+
+  const tabs = `
+    <div class="wf-tabs">
+      <button class="wf-tab ${_wfTab==='lista'?'active':''}" onclick="renderWorkflows('lista')">Lista</button>
+      <button class="wf-tab ${_wfTab==='editor'?'active':''}" onclick="renderWorkflows('editor')">Editor Visual</button>
+    </div>`;
+
+  if (_wfTab === 'editor') {
+    // Remove content padding for full-height iframe
+    el.style.padding = '0';
+    const h = `calc(100vh - 54px)`;
+    el.innerHTML = `
+      <div style="padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        ${['lista','editor'].map(t=>`<button class="wf-tab ${t===_wfTab?'active':''}" onclick="renderWorkflows('${t}')">${t==='lista'?'Lista':'Editor Visual'}</button>`).join('')}
+        <span class="text-sm text-muted" style="margin-left:8px">Crie e edite workflows com templates, condições e delays.</span>
+      </div>
+      <iframe src="http://localhost:4000" style="width:100%;height:calc(${h} - 49px);border:none;display:block" id="novu-iframe"></iframe>`;
+    return;
+  }
+
+  // Restore padding for list view
+  el.style.padding = '24px 28px';
+  el.innerHTML = tabs + loader();
+
+  try {
+    let wfs = [];
+    try { const r = await api.get('/v2/workflows?limit=50&status[]=ACTIVE&status[]=INACTIVE'); wfs = r.data?.workflows || r.workflows || r.data || []; }
+    catch(e) { const r = await api.get('/v1/workflows?limit=50'); wfs = r.data || []; }
+
+    if (!wfs.length) {
+      el.innerHTML = tabs + emptyState(
+        `<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="8" cy="22" r="5" stroke="currentColor" stroke-width="2"/><circle cx="36" cy="12" r="5" stroke="currentColor" stroke-width="2"/><circle cx="36" cy="32" r="5" stroke="currentColor" stroke-width="2"/><path d="M13 22h8l8-10M13 22h8l8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        'Nenhum workflow criado',
+        `Crie um workflow simples acima, ou use o <button class="btn btn-secondary btn-sm" onclick="renderWorkflows('editor')" style="margin-left:4px">Editor Visual →</button> para workflows com condições e delays.`
+      );
+      return;
+    }
+
+    const cards = wfs.map(w => {
+      const id = w.workflowId || w.identifier || w._id || '—';
+      const steps = (w.steps||[]).map(s=>chTag(s.type||s.channel)).join(' ') || '<span class="text-muted text-sm">—</span>';
+      const active = w.active !== false;
+      return `<div class="wf-card">
+        <div class="wf-name">${w.name}</div>
+        <div class="wf-id">${id}</div>
+        <div class="wf-steps">${steps}</div>
+        <div class="flex-between">
+          ${active?'<span class="tag tg-green">Ativo</span>':'<span class="tag tg-gray">Inativo</span>'}
+          <span class="text-muted text-sm">${fdate(w.createdAt)}</span>
+        </div>
+        <div class="wf-actions">
+          <button class="btn btn-secondary btn-sm" onclick="renderWorkflows('editor')">Editar no editor →</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = tabs + `<div class="wf-grid">${cards}</div>`;
+  } catch(e) { el.innerHTML = tabs + apiErr(); }
+}
+
+function openCreateWorkflow() {
+  openModal('Novo Workflow',
+    `<div class="form-group"><label>Nome <span style="color:var(--red)">*</span></label><input class="form-control" id="wf-name" placeholder="Ex: Email de Boas-vindas"></div>
+     <div class="form-group"><label>Identificador</label><input class="form-control" id="wf-id" placeholder="email-boas-vindas (gerado automaticamente)"></div>
+     <div class="form-group"><label>Canal</label>
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px" id="wf-ch-pick">
+         ${['email','push','both'].map(ch=>{const lb={email:'📧 Email',push:'🔔 Push',both:'📧 + 🔔 Ambos'}[ch]; return `<label style="display:flex;align-items:center;gap:7px;padding:10px 11px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600" id="wfcl-${ch}" onclick="pickWfCh('${ch}')"><input type="radio" name="wf-ch" value="${ch}" style="accent-color:var(--red)"> ${lb}</label>`;}).join('')}
+       </div>
+     </div>
+     <div id="wf-email-fields" style="display:none">
+       <div class="form-group"><label>Assunto padrão</label><input class="form-control" id="wf-subj" placeholder="Olá {{subscriber.firstName}}!"></div>
+     </div>
+     <div class="form-group"><label>Mensagem padrão</label><textarea class="form-control" id="wf-body" placeholder="Conteúdo da mensagem. Use {{payload.body}} para conteúdo dinâmico."></textarea></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doCreateWorkflow()">Criar Workflow</button>`
+  );
+  setTimeout(() => document.getElementById('wf-name')?.focus(), 100);
+  document.getElementById('wf-name').addEventListener('input', function() {
+    const idEl = document.getElementById('wf-id'); if (!idEl._manual) idEl.value = slug(this.value);
+  });
+  document.getElementById('wf-id').addEventListener('input', function() { this._manual=true; });
+}
+
+function pickWfCh(ch) {
+  ['email','push','both'].forEach(c => { const el=document.getElementById('wfcl-'+c); if(el){el.style.borderColor=c===ch?'var(--red)':'var(--border)';el.style.background=c===ch?'var(--red-lt)':'';} });
+  document.querySelector(`input[value="${ch}"]`).checked=true;
+  document.getElementById('wf-email-fields').style.display = (ch==='email'||ch==='both') ? '' : 'none';
+}
+
+async function doCreateWorkflow() {
+  const name = document.getElementById('wf-name')?.value?.trim();
+  const wfId = document.getElementById('wf-id')?.value?.trim() || slug(name||'workflow');
+  const ch = document.querySelector('input[name="wf-ch"]:checked')?.value || 'email';
+  const subj = document.getElementById('wf-subj')?.value || 'Olá {{subscriber.firstName}}!';
+  const body = document.getElementById('wf-body')?.value || '{{payload.body}}';
+  if (!name) { toast('Nome é obrigatório','err'); return; }
+
+  const steps = [];
+  if (ch==='email'||ch==='both') steps.push({ name:'Email', type:'email', controlValues:{ subject:subj, body:`<p>${body}</p>` } });
+  if (ch==='push'||ch==='both') steps.push({ name:'Push', type:'push', controlValues:{ subject:'{{payload.title||subscriber.firstName}}', body } });
+
+  try {
+    await api.post('/v2/workflows', { name, workflowId:wfId, active:true, steps });
+    toast('Workflow criado!','ok'); closeModal(); renderWorkflows();
+  } catch(e) {
+    // fallback: try v1 notification-templates endpoint
+    try {
+      await api.post('/v1/notification-templates', { name, notificationGroupId:null, active:true, steps: steps.map(s=>({ type:s.type==='email'?'EMAIL':'PUSH', template:{ type:s.type==='email'?'EMAIL':'PUSH', content:body, subject:subj } })) });
+      toast('Workflow criado!','ok'); closeModal(); renderWorkflows();
+    } catch(e2) {
+      toast('Use o editor avançado (localhost:4000) para criar workflows','err');
+      setTimeout(()=>window.open('http://localhost:4000','_blank'),1000);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// SEGMENTS — PostHog Cohorts + Novu Topics
+// ════════════════════════════════════════════════════════════
+async function renderSegments() {
+  const el = document.getElementById('content');
+  el.innerHTML = loader();
+  const hasPH = !!(CFG.phApiKey && CFG.phProjectId);
+  document.getElementById('page-actions').innerHTML = `
+    <button class="btn btn-secondary" onclick="openAudienceBuilder()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5"/><path d="M12 2l3 3M15 2l-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Segmento Comportamental
+    </button>
+    <button class="btn btn-primary" onclick="openNewSeg()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Novo Segmento
+    </button>`;
+
+  // Status bar
+  const statusBar = hasPH
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:12px;margin-bottom:18px;font-size:12px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#16A34A;flex-shrink:0"></span>
+        <span style="color:#16A34A;font-weight:600">PostHog conectado</span>
+        <span style="color:var(--muted)">— Segmentos criados aqui aparecem nos <strong style="color:var(--text)">Cohorts</strong> do PostHog automaticamente.</span>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="openAudienceBuilder()">+ Comportamental</button>
+      </div>`
+    : `<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(217,119,6,.07);border:1px solid rgba(217,119,6,.2);border-radius:12px;margin-bottom:18px;font-size:12px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0"></span>
+        <span style="color:var(--yellow);font-weight:600">PostHog não configurado</span>
+        <span style="color:var(--muted)">— Configure a API Key em <button onclick="openSettings()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:12px;font-weight:600;padding:0">Configurações</button> para criar cohorts no PostHog.</span>
+      </div>`;
+
+  let phCohorts = [], novuTopics = [];
+  if (hasPH) {
+    try {
+      const r = await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/cohorts/?limit=100`, {headers:{'Authorization':`Bearer ${CFG.phApiKey}`}});
+      const d = await r.json();
+      phCohorts = (d.results||[]).map(c=>({id:c.id,name:c.name,count:c.count||0,description:c.description||'',createdAt:c.created_at,type:'posthog',isStatic:c.is_static}));
+    } catch(e) {}
+  }
+  try {
+    const r = await api.get('/v1/topics?page=0&pageSize=50');
+    novuTopics = (r.data||[]).map(t=>({key:t.key,name:t.name,createdAt:t.createdAt,type:'novu'}));
+  } catch(e) {}
+
+  if (!phCohorts.length && !novuTopics.length) {
+    el.innerHTML = statusBar + emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="15" stroke="currentColor" stroke-width="2"/><path d="M14 22h16M22 14v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,'Nenhum segmento criado','Crie segmentos estáticos ou comportamentais para organizar sua base.');
+    return;
+  }
+
+  const phCards = phCohorts.map(c=>`
+    <div class="seg-card">
+      <div class="flex-between" style="margin-bottom:4px">
+        <div class="seg-name">${c.name}</div>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(124,58,237,.1);color:var(--purple)">${c.isStatic?'Estático':'Dinâmico'}</span>
+      </div>
+      ${c.description?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${c.description}</div>`:''}
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;color:var(--purple)">${c.count.toLocaleString('pt-BR')} <span style="font-weight:400;color:var(--muted)">pessoas</span></span>
+        <span style="font-size:11px;color:var(--muted)">${fdate(c.createdAt)}</span>
+        <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(124,58,237,.08);color:var(--purple);margin-left:auto">PostHog Cohort</span>
+      </div>
+      <div class="seg-actions">
+        <a href="${CFG.phHost}/cohorts/${c.id}" target="_blank" class="btn btn-secondary btn-sm">Ver no PostHog ↗</a>
+        <button class="btn btn-secondary btn-sm" onclick="syncCohortToNovu(${c.id},'${c.name.replace(/'/g,"\\'")}')">Sincronizar Novu</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePHCohort(${c.id},'${c.name.replace(/'/g,"\\'")}')">Remover</button>
+      </div>
+    </div>`).join('');
+
+  const novuCards = novuTopics.map(s=>`
+    <div class="seg-card">
+      <div class="flex-between" style="margin-bottom:4px">
+        <div class="seg-name">${s.name}</div>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--blue-lt);color:var(--blue)">Novu Topic</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px"><code style="font-size:10px">${s.key}</code> · ${fdate(s.createdAt)}</div>
+      <div class="seg-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openAddToSeg('${s.key}','${s.name.replace(/'/g,"\\'")}')">+ Subscribers</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSeg('${s.key}','${s.name.replace(/'/g,"\\'")}')">Remover</button>
+      </div>
+    </div>`).join('');
+
+  const sections = [];
+  if (phCohorts.length) sections.push(`
+    <div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">
+      PostHog Cohorts (${phCohorts.length})
+    </div>
+    <div class="seg-grid">${phCards}</div>`);
+  if (novuTopics.length) sections.push(`
+    <div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin:${phCohorts.length?'22px':0} 0 10px">
+      Novu Topics (${novuTopics.length})
+    </div>
+    <div class="seg-grid">${novuCards}</div>`);
+
+  el.innerHTML = statusBar + sections.join('');
+}
+
+function openNewSeg() {
+  const hasPH = !!(CFG.phApiKey && CFG.phProjectId);
+  const phNotice = hasPH
+    ? `<div style="font-size:11px;color:#16A34A;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;margin-bottom:14px">Este segmento será criado como <strong>Cohort estático no PostHog</strong>. Você pode adicionar pessoas diretamente no PostHog ou sincronizar via Novu.</div>`
+    : `<div style="font-size:11px;color:var(--yellow);background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:8px 12px;margin-bottom:14px">PostHog não configurado — o segmento será criado como <strong>Novu Topic</strong>.</div>`;
+  openModal('Novo Segmento',
+    `${phNotice}
+     <div class="form-group"><label>Nome <span style="color:var(--red)">*</span></label><input class="form-control" id="sg-name" placeholder="Ex: Leads Premium, Inativos 30 dias..."></div>
+     <div class="form-group"><label>Descrição <span style="color:var(--muted);font-weight:400">(opcional)</span></label><input class="form-control" id="sg-desc" placeholder="Ex: Clientes que compraram nos últimos 90 dias"></div>
+     ${!hasPH?`<div class="form-group"><label>Chave única (Novu)</label><input class="form-control" id="sg-key" placeholder="gerada-automaticamente"><div class="form-hint">Identificador interno sem espaços.</div></div>`:''}`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doNewSeg(${hasPH})">Criar</button>`
+  );
+  const n=document.getElementById('sg-name'), k=document.getElementById('sg-key');
+  if(n&&k){n.addEventListener('input',()=>{if(!k._manual)k.value=slug(n.value);}); k.addEventListener('input',()=>{k._manual=true;});}
+  setTimeout(()=>document.getElementById('sg-name')?.focus(),100);
+}
+
+async function doNewSeg(usePH) {
+  const name=document.getElementById('sg-name')?.value?.trim();
+  if(!name){toast('Nome é obrigatório','err');return;}
+  const desc=document.getElementById('sg-desc')?.value?.trim()||'';
+  if(usePH){
+    try{
+      const r=await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/cohorts/`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${CFG.phApiKey}`},
+        body:JSON.stringify({name,description:desc,is_static:true,groups:[]})
+      });
+      if(!r.ok)throw new Error(await r.text());
+      toast('Cohort criado no PostHog!','ok');closeModal();renderSegments();
+    }catch(e){toast('Erro PostHog: '+e.message,'err');}
+  } else {
+    const key=document.getElementById('sg-key')?.value?.trim()||slug(name);
+    try{await api.post('/v1/topics',{key,name});toast('Segmento Novu criado!','ok');closeModal();renderSegments();}
+    catch(e){toast('Erro Novu: '+e.message,'err');}
+  }
+}
+
+async function deletePHCohort(id, name) {
+  if(!confirm(`Remover cohort "${name}" do PostHog?`))return;
+  try{
+    await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/cohorts/${id}/`,{method:'DELETE',headers:{'Authorization':`Bearer ${CFG.phApiKey}`}});
+    toast('Cohort removido','ok');renderSegments();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+async function syncCohortToNovu(cohortId, cohortName) {
+  toast('Buscando pessoas do cohort...','info');
+  try{
+    const r=await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/cohorts/${cohortId}/persons?limit=1000`,{headers:{'Authorization':`Bearer ${CFG.phApiKey}`}});
+    const d=await r.json();
+    const ids=(d.results||[]).map(p=>p.distinct_ids?.[0]).filter(Boolean);
+    if(!ids.length){toast('Cohort vazio — nenhum subscriber para sincronizar','err');return;}
+    const key='ph-cohort-'+cohortId;
+    try{await api.post('/v1/topics',{key,name:cohortName});}catch(e){}
+    for(let i=0;i<ids.length;i+=100)await api.post(`/v1/topics/${key}/subscribers`,{subscribers:ids.slice(i,i+100)});
+    toast(`${ids.length} pessoas sincronizadas para Novu Topic "${cohortName}"!`,'ok');
+    renderSegments();
+  }catch(e){toast('Erro na sincronização: '+e.message,'err');}
+}
+
+async function openAddToSeg(topicKey, topicName) {
+  let subs=[]; try{subs=(await api.get('/v1/subscribers?limit=100&page=0')).data||[];}catch(e){}
+  const list=subs.length?subs.map(s=>`<label class="check-row"><input type="checkbox" class="seg-chk" value="${s.subscriberId}"><span>${[s.firstName,s.lastName].filter(Boolean).join(' ')||s.subscriberId} <span class="text-muted"> — ${s.email||s.subscriberId}</span></span></label>`).join(''):'<p class="text-muted text-sm">Nenhum subscriber encontrado.</p>';
+  openModal(`Adicionar ao segmento: ${topicName}`,`<div style="max-height:300px;overflow-y:auto">${list}</div>`,`<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doAddToSeg('${topicKey}')">Adicionar Selecionados</button>`);
+}
+async function doAddToSeg(topicKey) {
+  const ids=Array.from(document.querySelectorAll('.seg-chk:checked')).map(el=>el.value);
+  if(!ids.length){toast('Selecione ao menos um subscriber','err');return;}
+  try{await api.post(`/v1/topics/${topicKey}/subscribers`,{subscribers:ids});toast(`${ids.length} subscriber(s) adicionado(s)!`,'ok');closeModal();}
+  catch(e){toast('Erro: '+e.message,'err');}
+}
+async function deleteSeg(key,name) {
+  if(!confirm(`Remover segmento "${name}"?`))return;
+  try{await api.del(`/v1/topics/${key}`);toast('Segmento removido','ok');renderSegments();}
+  catch(e){toast('Erro: '+e.message,'err');}
+}
+
+// ── POSTHOG AUDIENCE BUILDER ──────────────────────────────
+let _ab = {};
+function openAudienceBuilder() {
+  _ab = { event:'notification_opened', days:30, workflowFilter:'' };
+  const hasKey = !!(CFG.phApiKey && CFG.phProjectId);
+  const keyWarn = !hasKey ? `<div style="padding:10px 14px;background:var(--yel-lt);border:1px solid var(--yel-bd);border-radius:10px;font-size:12px;color:var(--yellow);margin-bottom:16px">
+    <strong>PostHog Personal API Key não configurada.</strong> Vá em <button onclick="closeModal();openSettings()" style="background:none;border:none;color:var(--yellow);text-decoration:underline;cursor:pointer;font-size:12px;font-weight:600">Configurações</button> e adicione sua Personal API Key e Project ID.</div>` : '';
+  const evDefs = [
+    {id:'notification_opened',lbl:'Abriu email'},
+    {id:'notification_clicked',lbl:'Clicou em link'},
+    {id:'notification_sent',lbl:'Recebeu notificação'},
+    {id:'notification_delivered',lbl:'Email entregue'}
+  ];
+  const evPills = evDefs.map(e=>`<span class="event-pill ${e.id==='notification_opened'?'sel':''}" onclick="abPickEvent('${e.id}',this)">${e.lbl}</span>`).join('')
+    + `<span class="event-pill" onclick="abPickCustom(this)">+ Outro evento</span>`;
+  const timePills = [7,15,30,60,90].map(d=>`<span class="time-pill ${d===30?'sel':''}" onclick="abPickDays(${d},this)">${d} dias</span>`).join('');
+  openModal('Criar Audiência PostHog', `
+    ${keyWarn}
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Evento</div>
+      <div>${evPills}</div>
+      <div id="ab-custom-event" style="display:none;margin-top:8px">
+        <input class="form-control" id="ab-event-input" placeholder="Nome exato do evento PostHog" oninput="_ab.event=this.value">
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Janela de tempo</div>
+      <div>${timePills}</div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Filtrar por Workflow ID <span class="text-muted text-sm">(opcional)</span></label>
+      <input class="form-control" id="ab-wf-filter" placeholder="tracking-email, campanha-email..." oninput="_ab.workflowFilter=this.value">
+      <div class="form-hint">Deixe vazio para incluir todos os workflows.</div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Nome do segmento a criar</label>
+      <input class="form-control" id="ab-seg-name" placeholder="Ex: Abriram email — últimos 30 dias">
+    </div>
+    <div id="ab-result" style="min-height:36px"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-secondary" id="ab-search-btn" onclick="doAudienceSearch()">🔍 Buscar audiência</button><button class="btn btn-primary" id="ab-create-btn" style="display:none" onclick="doCreateAudience()">Criar segmento</button>`,
+    true);
+  setTimeout(()=>{ const n=document.getElementById('ab-seg-name'); if(n)n.value='Abriram email — últimos 30 dias'; },50);
+}
+
+function abPickEvent(eventId, el) {
+  _ab.event = eventId;
+  document.querySelectorAll('.event-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('ab-custom-event').style.display = 'none';
+  const labels = {notification_opened:'Abriram email',notification_clicked:'Clicaram em link',notification_sent:'Receberam notificação',notification_delivered:'Email entregue'};
+  const nameEl = document.getElementById('ab-seg-name');
+  if(nameEl) nameEl.value = `${labels[eventId]||eventId} — últimos ${_ab.days||30} dias`;
+}
+function abPickCustom(el) {
+  document.querySelectorAll('.event-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('ab-custom-event').style.display = '';
+  _ab.event = '';
+}
+function abPickDays(d, el) {
+  _ab.days = d;
+  document.querySelectorAll('.time-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  const nameEl = document.getElementById('ab-seg-name');
+  if(nameEl && nameEl.value) nameEl.value = nameEl.value.replace(/últimos \d+ dias/,`últimos ${d} dias`);
+}
+
+async function doAudienceSearch() {
+  if(!CFG.phApiKey || !CFG.phProjectId) { toast('Configure a PostHog Personal API Key nas Configurações','err'); return; }
+  if(!_ab.event) { toast('Selecione ou informe um evento','err'); return; }
+  const el = document.getElementById('ab-result');
+  el.innerHTML = '<div class="loading" style="padding:14px 0"><div class="spin"></div> Consultando PostHog...</div>';
+  const btn = document.getElementById('ab-search-btn');
+  btn.disabled = true;
+  try {
+    const ids = await queryPostHogAudience(_ab.event, _ab.days||30, _ab.workflowFilter);
+    _ab.resultIds = ids;
+    if(!ids.length) {
+      el.innerHTML = `<div style="padding:10px 14px;background:var(--yel-lt);border:1px solid var(--yel-bd);border-radius:10px;font-size:12px;color:var(--yellow)">Nenhum subscriber encontrado com esses critérios no PostHog.</div>`;
+      document.getElementById('ab-create-btn').style.display = 'none';
+    } else {
+      el.innerHTML = `<div style="padding:12px 14px;background:var(--green-lt);border:1px solid var(--green-bd);border-radius:10px;font-size:13px;color:var(--green);display:flex;align-items:center;gap:8px">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5 9l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong>${ids.length.toLocaleString('pt-BR')}</strong> subscribers encontrados. Clique em "Criar segmento" para adicionar ao Novu.</span>
+      </div>`;
+      document.getElementById('ab-create-btn').style.display = '';
+    }
+  } catch(e) {
+    el.innerHTML = `<div style="padding:10px 14px;background:var(--red-lt);border:1px solid var(--red-bd);border-radius:10px;font-size:12px;color:var(--red)"><strong>Erro:</strong> ${e.message}</div>`;
+  }
+  btn.disabled = false;
+}
+
+async function queryPostHogAudience(event, days, workflowFilter) {
+  let where = `event = '${event}' AND timestamp > now() - interval ${days} day`;
+  if(workflowFilter) where += ` AND properties.workflow_id = '${workflowFilter}'`;
+  const query = `SELECT DISTINCT distinct_id FROM events WHERE ${where} LIMIT 10000`;
+  const r = await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/query/`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${CFG.phApiKey}`},
+    body:JSON.stringify({query:{kind:'HogQLQuery',query}})
+  });
+  if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.detail||`PostHog API erro ${r.status}`);}
+  const data = await r.json();
+  return (data.results||[]).map(row=>row[0]).filter(Boolean);
+}
+
+async function doCreateAudience() {
+  const name = document.getElementById('ab-seg-name')?.value?.trim();
+  if(!name){toast('Informe o nome do segmento','err');return;}
+  if(!_ab.resultIds?.length){toast('Busque a audiência primeiro','err');return;}
+  const key = slug(name);
+  const btn = document.getElementById('ab-create-btn');
+  btn.disabled = true; btn.textContent = 'Criando...';
+  try {
+    await api.post('/v1/topics',{key,name});
+    const ids = _ab.resultIds;
+    let added = 0;
+    for(let i=0;i<ids.length;i+=100){
+      try{await api.post(`/v1/topics/${key}/subscribers`,{subscribers:ids.slice(i,i+100)});added+=Math.min(100,ids.length-i);}catch(e){}
+    }
+    toast(`Segmento "${name}" criado com ${added} subscribers!`,'ok');
+    phCapture('audience_created',{event:_ab.event,days:_ab.days,count:added,source:'posthog_query'});
+    closeModal(); renderSegments();
+  } catch(e) {
+    toast('Erro ao criar segmento: '+e.message,'err');
+    btn.disabled=false; btn.textContent='Criar segmento';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// EMAIL PAGE — Campanhas | Analytics | Templates
+// ════════════════════════════════════════════════════════════
+let _emailTab = 'campaigns';
+function renderEmailPage(tab) {
+  if (tab) _emailTab = tab;
+  document.getElementById('page-actions').innerHTML = `<button class="btn btn-primary" onclick="openNewCamp('email')">+ Nova Campanha de Email</button>`;
+  const tabs = ['campaigns','analytics','templates'];
+  const labels = {campaigns:'Campanhas', analytics:'Analytics', templates:'Templates'};
+  const tabHtml = `<div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px">
+    ${tabs.map(t=>`<button onclick="renderEmailPage('${t}')" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:${_emailTab===t?'var(--blue)':'var(--muted)'};border-bottom:${_emailTab===t?'2px solid var(--blue)':'2px solid transparent'};margin-bottom:-2px;transition:all .13s">${labels[t]}</button>`).join('')}
+  </div>`;
+  document.getElementById('content').innerHTML = tabHtml + `<div id="email-tab-content">${loader()}</div>`;
+  if (_emailTab === 'campaigns') renderEmailCampaignsTab();
+  else if (_emailTab === 'analytics') renderEmailAnalytics();
+  else renderEmailTemplates();
+}
+
+// ── EMAIL CAMPAIGNS TABLE ───────────────────────────────────
+let _ectFilter = { status:'', type:'', tag:'', q:'' };
+
+function renderEmailCampaignsTab() {
+  const el = document.getElementById('email-tab-content');
+  el.innerHTML = _buildEmailCampTable();
+}
+
+function _buildEmailCampTable() {
+  const allCamps = getCamps();
+  let camps = allCamps.map((c,i)=>({...c,_idx:i})).filter(c=>c.channel==='email'||c.channel==='both');
+
+  // collect all tags
+  const allTags = [...new Set(camps.flatMap(c=>c.tags||[]))].sort();
+
+  // apply filters
+  if (_ectFilter.status) camps = camps.filter(c=>_campStatus(c)===_ectFilter.status);
+  if (_ectFilter.type)   camps = camps.filter(c=>(c.type||'single')===_ectFilter.type);
+  if (_ectFilter.tag)    camps = camps.filter(c=>(c.tags||[]).includes(_ectFilter.tag));
+  if (_ectFilter.q)      camps = camps.filter(c=>c.name.toLowerCase().includes(_ectFilter.q.toLowerCase()));
+
+  camps = camps.slice().reverse();
+
+  const statusOpts = ['','completo','programado','rascunho','cancelado'];
+  const typeOpts   = ['','single','experiment','recurring'];
+  const typeLbl    = {single:'Único', experiment:'Experimento', recurring:'Recorrente'};
+  const statusLbl  = {'':'Status', completo:'Completo', programado:'Programado', rascunho:'Rascunho', cancelado:'Cancelado'};
+
+  const filterBar = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <select id="ect-f-status" onchange="_ectFilter.status=this.value;renderEmailCampaignsTab()" style="height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
+      ${statusOpts.map(s=>`<option value="${s}" ${_ectFilter.status===s?'selected':''}>${statusLbl[s]||s}</option>`).join('')}
+    </select>
+    <select id="ect-f-type" onchange="_ectFilter.type=this.value;renderEmailCampaignsTab()" style="height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
+      <option value="">Tipo</option>
+      ${typeOpts.slice(1).map(t=>`<option value="${t}" ${_ectFilter.type===t?'selected':''}>${typeLbl[t]}</option>`).join('')}
+    </select>
+    ${allTags.length?`<select id="ect-f-tag" onchange="_ectFilter.tag=this.value;renderEmailCampaignsTab()" style="height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">
+      <option value="">Tags</option>
+      ${allTags.map(t=>`<option value="${t}" ${_ectFilter.tag===t?'selected':''}>${t}</option>`).join('')}
+    </select>`:''}
+    <input id="ect-f-q" type="text" placeholder="Buscar campanha..." value="${_ectFilter.q}"
+      oninput="_ectFilter.q=this.value;renderEmailCampaignsTab()"
+      style="height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;width:200px;outline:none">
+    ${(_ectFilter.status||_ectFilter.type||_ectFilter.tag||_ectFilter.q)?`<button onclick="_ectFilter={status:'',type:'',tag:'',q:''};renderEmailCampaignsTab()" style="height:34px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:none;color:var(--muted);font-size:12px;cursor:pointer">Limpar</button>`:''}
+    <span style="margin-left:auto;font-size:12px;color:var(--muted)">${camps.length} campanha${camps.length!==1?'s':''}</span>
+  </div>`;
+
+  if (!camps.length) {
+    return filterBar + emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><rect x="6" y="10" width="32" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M6 14l16 10 16-10" stroke="currentColor" stroke-width="2"/></svg>`,'Nenhuma campanha encontrada','Ajuste os filtros ou crie uma nova campanha.');
+  }
+
+  const rows = camps.map(c=>{
+    const st   = _campStatus(c);
+    const dot  = {completo:'#16A34A', programado:'#D97706', rascunho:'#9CA3AF', cancelado:'#EF4444'}[st]||'#9CA3AF';
+    const stLbl= {completo:'Completo', programado:'Programado', rascunho:'Rascunho', cancelado:'Cancelado'}[st]||st;
+    const type = c.type||'single';
+    const typeLblMap = {single:'Único', experiment:'Experimento', recurring:'Recorrente'};
+    const typeCol  = {single:'var(--blue)', experiment:'var(--purple)', recurring:'#16A34A'};
+    const typeBg   = {single:'var(--blue-lt)', experiment:'rgba(124,58,237,.08)', recurring:'rgba(22,163,74,.08)'};
+    const tagsHtml = (c.tags||[]).length ? (c.tags||[]).map(t=>`<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(200,16,46,.08);color:var(--red);letter-spacing:.3px;white-space:nowrap">${t}</span>`).join(' ') : '<span style="color:var(--muted);font-size:12px">—</span>';
+    const fire = st==='rascunho'||st==='programado' ? `<button class="btn btn-primary btn-sm" onclick="fireCamp(${c._idx})" style="font-size:11px;padding:4px 10px">Disparar</button>` : '';
+    return `<tr class="camp-tbl-row" onmouseenter="this.style.background='rgba(255,255,255,.03)'" onmouseleave="this.style.background=''" style="border-bottom:1px solid var(--border);cursor:default;transition:background .1s">
+      <td style="padding:12px 14px;white-space:nowrap">
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text)">
+          <span style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;box-shadow:0 0 0 2px ${dot}22"></span>
+          ${stLbl}
+        </span>
+      </td>
+      <td style="padding:12px 14px;max-width:240px">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.name}">${c.name}</div>
+        ${c.subject?`<div style="font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.subject}">${c.subject}</div>`:''}
+      </td>
+      <td style="padding:12px 14px;white-space:nowrap">
+        <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${typeBg[type]};color:${typeCol[type]}">${typeLblMap[type]||type}</span>
+      </td>
+      <td style="padding:12px 14px;font-size:12px;color:var(--muted);white-space:nowrap">${fdate(c.createdAt)}</td>
+      <td style="padding:12px 14px;font-size:12px;color:var(--muted);white-space:nowrap">${c.sentAt||c.sendDate?fdate(c.sentAt||c.sendDate):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="padding:12px 14px">${tagsHtml}</td>
+      <td style="padding:12px 14px;white-space:nowrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          ${fire}
+          <button onclick="deleteCamp(${c._idx})" title="Remover" style="width:28px;height:28px;border:1.5px solid var(--border);border-radius:7px;background:none;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .13s" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return filterBar + `<div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:rgba(255,255,255,.03);border-bottom:1.5px solid var(--border)">
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;white-space:nowrap">STATUS</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">NOME</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;white-space:nowrap">TIPO</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;white-space:nowrap">CRIADO EM</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;white-space:nowrap">DATA DE ENVIO</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">TAGS</th>
+          <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function _campStatus(c) {
+  if (c.status==='enviada'||c.status==='completo') return 'completo';
+  if (c.status==='cancelado') return 'cancelado';
+  if (c.status==='programado'||c.sendDate) return 'programado';
+  return 'rascunho';
+}
+
+async function renderEmailAnalytics() {
+  const el = document.getElementById('email-tab-content');
+  el.innerHTML = loader();
+  let notifs = [], phData = null;
+  try { const r = await api.get('/v1/notifications?limit=200&page=0'); notifs = (r.data||[]).filter(n=>n.channel==='email'); } catch(e) {}
+
+  const total = notifs.length;
+  const delivered = notifs.filter(n=>n.status==='completed'||n.status==='sent').length;
+  const failed = notifs.filter(n=>n.status==='failed').length;
+  const delivRate = total ? Math.round(delivered/total*100) : 0;
+
+  // Try PostHog for opens/clicks
+  let opens = 0, clicks = 0, phNote = '';
+  if (CFG.phApiKey && CFG.phProjectId) {
+    try {
+      const [oRes, cRes] = await Promise.allSettled([
+        queryPostHogAudience('notification_opened', 30, ''),
+        queryPostHogAudience('notification_clicked', 30, '')
+      ]);
+      if (oRes.status==='fulfilled') opens = oRes.value.length;
+      if (cRes.status==='fulfilled') clicks = cRes.value.length;
+    } catch(e) {}
+    const openRate = delivered ? Math.round(opens/delivered*100) : 0;
+    const clickRate = opens ? Math.round(clicks/opens*100) : 0;
+    phNote = `<div style="font-size:11px;color:var(--muted);margin-top:4px">Últimos 30 dias · via PostHog</div>`;
+    const phCards = `
+      <div class="stat-card"><div class="slbl">Taxa de abertura</div><div class="sval c-blue">${openRate}%</div><div class="ssub">${opens.toLocaleString('pt-BR')} únicos abriram</div></div>
+      <div class="stat-card"><div class="slbl">Taxa de clique</div><div class="sval c-green">${clickRate}%</div><div class="ssub">${clicks.toLocaleString('pt-BR')} únicos clicaram</div></div>`;
+    el.innerHTML = buildEmailAnalyticsHtml(total, delivered, failed, delivRate, phCards, phNote, notifs);
+  } else {
+    phNote = `<div style="padding:10px 14px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);border-radius:10px;font-size:12px;color:#7C3AED;margin-bottom:16px">
+      <strong>Configure PostHog Personal API Key</strong> nas Configurações para ver taxas de abertura e clique em tempo real.
+    </div>`;
+    const phCards = `
+      <div class="stat-card"><div class="slbl">Taxa de abertura</div><div class="sval" style="color:var(--muted);font-size:22px">—</div><div class="ssub">Requer PostHog API Key</div></div>
+      <div class="stat-card"><div class="slbl">Taxa de clique</div><div class="sval" style="color:var(--muted);font-size:22px">—</div><div class="ssub">Requer PostHog API Key</div></div>`;
+    el.innerHTML = buildEmailAnalyticsHtml(total, delivered, failed, delivRate, phCards, phNote, notifs);
+  }
+}
+
+function buildEmailAnalyticsHtml(total, delivered, failed, delivRate, phCards, phNote, notifs) {
+  const recentRows = notifs.slice(0,10).map(n=>`<tr>
+    <td>${n.subscriber?.email||n.subscriber?.subscriberId||'—'}</td>
+    <td>${n.template?.name||n._template?.name||'—'}</td>
+    <td>${statusTag(n.status)}</td>
+    <td class="text-muted text-sm">${fdate(n.createdAt)}</td>
+  </tr>`).join('');
+  return `
+    ${phNote}
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card"><div class="slbl">Total enviados</div><div class="sval c-blue">${total.toLocaleString('pt-BR')}</div><div class="ssub">emails disparados</div></div>
+      <div class="stat-card"><div class="slbl">Entregues</div><div class="sval c-green">${delivered.toLocaleString('pt-BR')}</div><div class="ssub">${delivRate}% taxa de entrega</div></div>
+      ${phCards}
+    </div>
+    ${failed ? `<div style="padding:8px 14px;background:var(--red-lt);border:1px solid var(--red-bd);border-radius:8px;font-size:12px;color:var(--red);margin-bottom:14px">${failed} emails falharam na entrega.</div>` : ''}
+    ${recentRows ? `<div class="card"><div class="card-header"><h3>Últimos envios de email</h3></div><div class="tbl-wrap"><table><thead><tr><th>Subscriber</th><th>Campanha/Workflow</th><th>Status</th><th>Data</th></tr></thead><tbody>${recentRows}</tbody></table></div></div>` : ''}`;
+}
+
+// ── EMAIL TEMPLATES ────────────────────────────────────────
+function getTemplates(){return JSON.parse(localStorage.getItem('crm-email-tpl')||'[]');}
+function saveTemplates(t){localStorage.setItem('crm-email-tpl',JSON.stringify(t));}
+
+function renderEmailTemplates() {
+  const el = document.getElementById('email-tab-content');
+  const tpls = getTemplates();
+  // change page-actions to include template button
+  document.getElementById('page-actions').innerHTML = `
+    <button class="btn btn-secondary" onclick="openNewCamp('email')">+ Nova Campanha</button>
+    <button class="btn btn-primary" onclick="openNewTemplate()">+ Novo Template</button>`;
+  if (!tpls.length) {
+    el.innerHTML = `
+      <div style="background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+        <div style="width:36px;height:36px;border-radius:9px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:3px">Biblioteca de Templates</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Crie templates reutilizáveis de email. Ao criar uma campanha, você pode selecionar um template para pré-preencher o assunto e o corpo automaticamente.</div></div>
+      </div>` + emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><rect x="6" y="8" width="32" height="28" rx="3" stroke="currentColor" stroke-width="2"/><path d="M12 16h20M12 21h14M12 26h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,'Nenhum template criado','Crie templates reutilizáveis para agilizar a criação de campanhas.');
+    return;
+  }
+  const cards = tpls.map((t,i)=>`
+    <div class="card" style="display:flex;flex-direction:column;transition:all .13s" onmouseover="this.style.borderColor='rgba(37,99,235,.4)'" onmouseout="this.style.borderColor=''">
+      <div class="card-body" style="flex:1">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:14px;font-weight:700">${t.name}</div>
+          <div style="display:flex;gap:4px">
+            ${(t.tags||[]).map(tag=>`<span class="chip" style="font-size:10px">${tag}</span>`).join('')}
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic">${t.subject||'(sem assunto)'}</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.5;max-height:60px;overflow:hidden;word-break:break-word;opacity:.7">${t.body?.replace(/<[^>]*>/g,'').slice(0,120)||'(sem conteúdo)'}${(t.body?.replace(/<[^>]*>/g,'').length||0)>120?'...':''}</div>
+        <div style="font-size:10px;color:var(--light);margin-top:8px">${fdate(t.createdAt)}</div>
+      </div>
+      <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="useTplInCampaign(${i})">Usar em campanha</button>
+        <button class="btn btn-secondary btn-sm" onclick="openEditTemplate(${i})">Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteTpl(${i})" style="margin-left:auto">✕</button>
+      </div>
+    </div>`).join('');
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">${cards}</div>`;
+}
+
+function openNewTemplate(prefill) {
+  const t = prefill || {};
+  openModal('Novo Template de Email',`
+    <div class="form-group"><label>Nome do template <span style="color:var(--red)">*</span></label><input class="form-control" id="tpl-name" placeholder="Ex: Email de boas-vindas, Black Friday..." value="${t.name||''}"></div>
+    <div class="form-group"><label>Assunto <span style="color:var(--red)">*</span></label><input class="form-control" id="tpl-subj" placeholder="Olá {{subscriber.firstName}}!" value="${t.subject||''}"></div>
+    <div class="form-group"><label>Corpo do email <span class="text-muted text-sm">(HTML ou texto)</span></label>
+      <textarea class="form-control" id="tpl-body" style="min-height:140px;font-family:monospace;font-size:12px" placeholder="&lt;p&gt;Olá {{subscriber.firstName}},&lt;/p&gt;...">${t.body||''}</textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="btn btn-ghost btn-sm" onclick="previewTpl()">👁 Pré-visualizar</button></div>
+      <div id="tpl-preview" style="display:none"><div class="camp-preview"><div class="camp-preview-hd">📧 Pré-visualização</div><div class="camp-preview-body" id="tpl-preview-body"></div></div></div>
+    </div>
+    <div class="form-group"><label>Tags <span class="text-muted text-sm">(separadas por vírgula, opcional)</span></label><input class="form-control" id="tpl-tags" placeholder="boas-vindas, lançamento, promocional" value="${(t.tags||[]).join(', ')}"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doSaveTemplate()">Salvar Template</button>`,
+    true);
+  setTimeout(()=>document.getElementById('tpl-name')?.focus(),100);
+}
+
+let _editTplIdx = -1;
+function openEditTemplate(idx) {
+  _editTplIdx = idx;
+  const t = getTemplates()[idx];
+  if (!t) return;
+  openModal('Editar Template',`
+    <div class="form-group"><label>Nome <span style="color:var(--red)">*</span></label><input class="form-control" id="tpl-name" value="${t.name}"></div>
+    <div class="form-group"><label>Assunto</label><input class="form-control" id="tpl-subj" value="${t.subject||''}"></div>
+    <div class="form-group"><label>Corpo</label>
+      <textarea class="form-control" id="tpl-body" style="min-height:140px;font-family:monospace;font-size:12px">${t.body||''}</textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="btn btn-ghost btn-sm" onclick="previewTpl()">👁 Pré-visualizar</button></div>
+      <div id="tpl-preview" style="display:none"><div class="camp-preview"><div class="camp-preview-hd">📧 Pré-visualização</div><div class="camp-preview-body" id="tpl-preview-body"></div></div></div>
+    </div>
+    <div class="form-group"><label>Tags</label><input class="form-control" id="tpl-tags" value="${(t.tags||[]).join(', ')}"></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doSaveTemplate(true)">Salvar</button>`,
+    true);
+}
+
+function previewTpl() {
+  const el = document.getElementById('tpl-preview');
+  if (el.style.display==='none') {
+    document.getElementById('tpl-preview-body').innerHTML = document.getElementById('tpl-body')?.value || '';
+    el.style.display = '';
+  } else { el.style.display = 'none'; }
+}
+
+function doSaveTemplate(edit) {
+  const name = document.getElementById('tpl-name')?.value?.trim();
+  if (!name) { toast('Nome é obrigatório','err'); return; }
+  const tpl = {
+    name,
+    subject: document.getElementById('tpl-subj')?.value?.trim()||'',
+    body: document.getElementById('tpl-body')?.value||'',
+    tags: document.getElementById('tpl-tags')?.value?.split(',').map(t=>t.trim()).filter(Boolean)||[],
+    createdAt: edit ? getTemplates()[_editTplIdx]?.createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  const tpls = getTemplates();
+  if (edit && _editTplIdx >= 0) tpls[_editTplIdx] = tpl; else tpls.push(tpl);
+  saveTemplates(tpls);
+  toast(edit ? 'Template atualizado!' : 'Template salvo!','ok');
+  closeModal(); renderEmailTemplates();
+}
+
+function deleteTpl(idx) {
+  const tpls = getTemplates();
+  if (!confirm(`Remover template "${tpls[idx]?.name}"?`)) return;
+  tpls.splice(idx,1); saveTemplates(tpls);
+  toast('Template removido','ok'); renderEmailTemplates();
+}
+
+async function useTplInCampaign(idx) {
+  const tpl = getTemplates()[idx];
+  if (!tpl) return;
+  toast('Carregando workflows e segmentos...','info');
+  let workflows=[],segments=[];
+  try{const r=await api.get('/v2/workflows?limit=50&status[]=ACTIVE&status[]=INACTIVE').catch(()=>api.get('/v1/workflows?limit=50'));workflows=r.data?.workflows||r.workflows||r.data||[];}catch(e){}
+  try{const r=await api.get('/v1/topics?page=0&pageSize=50');segments=r.data||[];}catch(e){}
+  _cd = { step:1, channel:'email', subject:tpl.subject, body:tpl.body, workflows, segments };
+  campStep2(); // skip step1 - go directly to audience+content with template pre-filled
+}
+
+// ════════════════════════════════════════════════════════════
+// CAMPAIGNS
+// ════════════════════════════════════════════════════════════
+function getCamps(){return JSON.parse(localStorage.getItem('crm-camps')||'[]');}
+function saveCamps(c){localStorage.setItem('crm-camps',JSON.stringify(c));}
+
+const _chDef = {
+  email:      {label:'Email',        ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5"/></svg>`,    bg:'var(--blue-lt)',       col:'var(--blue)'},
+  whatsapp:   {label:'WhatsApp',     ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 5.5c0 3.5 5 6 5 6s-1.5-6-5-6z" fill="currentColor" opacity=".5"/></svg>`, bg:'rgba(34,197,94,.08)',   col:'#16A34A'},
+  'push-app': {label:'App Push',     ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="8" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 12.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,  bg:'rgba(124,58,237,.08)', col:'var(--purple)'},
+  'push-web': {label:'Web Push',     ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 10V7a5 5 0 0110 0v3l1.5 2H1.5L3 10z" stroke="currentColor" stroke-width="1.4"/><path d="M6 13a2 2 0 004 0" stroke="currentColor" stroke-width="1.4"/></svg>`, bg:'rgba(217,119,6,.08)',   col:'var(--yellow)'},
+  push:       {label:'Push',         ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 9V6a5 5 0 0110 0v3l1.5 2.5H1.5L3 9z" stroke="currentColor" stroke-width="1.5"/><path d="M6 12a2 2 0 004 0" stroke="currentColor" stroke-width="1.5"/></svg>`, bg:'rgba(124,58,237,.08)', col:'var(--purple)'},
+  both:       {label:'Email + Push', ico:`<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="8" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5l4 3 4-3" stroke="currentColor" stroke-width="1.3"/><path d="M10 8V6a3 3 0 016 0v2l1 1.5H9L10 8z" stroke="currentColor" stroke-width="1.3"/></svg>`, bg:'var(--red-lt)', col:'var(--red)'},
+};
+
+// ════════════════════════════════════════════════════════════
+// IN-APP
+// ════════════════════════════════════════════════════════════
+function renderInApp() {
+  const main = document.getElementById('content');
+  main.innerHTML = `
+  <div style="max-width:680px;margin:0 auto;padding:24px 0 48px">
+
+    <!-- Preview do modal -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px">Prévia do popup</div>
+      <div style="display:flex;gap:20px;align-items:flex-start">
+        <!-- Phone mockup -->
+        <div style="flex-shrink:0;width:160px;height:300px;background:#0f0f0f;border-radius:22px;border:5px solid #2a2a2a;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:2">
+            <div style="width:130px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+              <div id="prev-header" style="height:80px;background:linear-gradient(135deg,#0a0a1a,#1a1a3a);display:flex;flex-direction:column;justify-content:flex-end;padding:8px;position:relative">
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,.4)"></div>
+                <div id="prev-tag" style="font-size:6px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.7);text-transform:uppercase;position:relative;z-index:1">OFERTA RELÂMPAGO</div>
+                <div id="prev-produto" style="font-size:12px;font-weight:800;color:#fff;position:relative;z-index:1">travessia</div>
+              </div>
+              <div style="padding:8px">
+                <div id="prev-titulo" style="font-size:7px;font-weight:800;color:#111;text-align:center;margin-bottom:4px">BÔNUS: 2 MESES</div>
+                <div id="prev-corpo" style="font-size:6px;color:#666;text-align:center;line-height:1.4;margin-bottom:8px">Mude para o Premium com 50% OFF.</div>
+                <div id="prev-cta" style="background:#2563EB;color:#fff;font-size:6px;font-weight:800;text-align:center;padding:5px;border-radius:5px;margin-bottom:4px;letter-spacing:.5px">QUERO FALAR COM A BP</div>
+                <div id="prev-dismiss" style="border:1px solid #ddd;color:#888;font-size:6px;font-weight:700;text-align:center;padding:4px;border-radius:5px;letter-spacing:.5px">VOLTAR</div>
+              </div>
+            </div>
+          </div>
+          <!-- App de fundo -->
+          <div style="position:absolute;inset:0;background:#0f0f0f">
+            <div style="height:24px;background:#161616;border-bottom:1px solid #222;display:flex;align-items:center;padding:0 8px">
+              <div style="font-size:6px;font-weight:800;letter-spacing:1.5px;color:#C8102E">BRASIL PARALELO</div>
+            </div>
+          </div>
+        </div>
+        <!-- Info -->
+        <div style="flex:1">
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">Configure o popup abaixo. Ao disparar, o app exibe o modal em cima da tela atual — em qualquer tela onde o usuário estiver.</p>
+          <div style="background:var(--blue-lt);border:1px solid var(--blue-bd);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--blue)">
+            <strong>Como funciona:</strong> CRM Hub → Novu → subscriber → app polling → modal aparece em até 3s
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">Configurar campanha</div>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Tag / label superior</label>
+            <input id="ia-tag" class="inp" value="OFERTA RELÂMPAGO" oninput="inappPreview()" style="width:100%">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Nome do produto</label>
+            <input id="ia-produto" class="inp" value="travessia" oninput="inappPreview()" style="width:100%">
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Título</label>
+          <input id="ia-titulo" class="inp" value="BÔNUS: 2 MESES DE TRAVESSIA" oninput="inappPreview()" style="width:100%">
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Corpo</label>
+          <textarea id="ia-corpo" class="inp" rows="2" oninput="inappPreview()" style="width:100%;resize:none">Mude para o Premium com 50% OFF e ganhe 2 meses de acesso à Travessia.</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Texto do botão CTA</label>
+            <input id="ia-cta" class="inp" value="QUERO FALAR COM A BP" oninput="inappPreview()" style="width:100%">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Texto de fechar</label>
+            <input id="ia-dismiss" class="inp" value="VOLTAR PARA NAVEGAÇÃO" oninput="inappPreview()" style="width:100%">
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Subscriber ID (ou "all" para todos)</label>
+          <input id="ia-sub" class="inp" value="simulador-davi" style="width:100%">
+        </div>
+
+      </div>
+      <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px">
+        <button class="btn btn-primary" onclick="dispararInApp()" id="ia-btn">
+          ▶&nbsp; Disparar In-App
+        </button>
+        <span id="ia-log" style="font-size:12px;color:var(--green)"></span>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+function inappPreview() {
+  const g = id => document.getElementById(id)?.value || '';
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('prev-tag',     g('ia-tag'));
+  set('prev-produto', g('ia-produto'));
+  set('prev-titulo',  g('ia-titulo').substring(0, 20) + (g('ia-titulo').length > 20 ? '…' : ''));
+  set('prev-corpo',   g('ia-corpo').substring(0, 50)  + (g('ia-corpo').length  > 50 ? '…' : ''));
+  set('prev-cta',     g('ia-cta').substring(0, 22)    + (g('ia-cta').length    > 22 ? '…' : ''));
+  set('prev-dismiss', g('ia-dismiss').substring(0, 18));
+}
+
+async function dispararInApp() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const btn = document.getElementById('ia-btn');
+  const log = document.getElementById('ia-log');
+
+  const subscriberId = g('ia-sub') || 'simulador-davi';
+  const payload = {
+    titulo:       g('ia-titulo'),
+    corpo:        g('ia-corpo'),
+    tag:          g('ia-tag'),
+    produto:      g('ia-produto'),
+    ctaLabel:     g('ia-cta'),
+    dismissLabel: g('ia-dismiss'),
+    template:     'inapp',
+  };
+
+  btn.disabled = true;
+  btn.textContent = 'Disparando…';
+  log.textContent = '';
+  log.style.color = 'var(--muted)';
+
+  try {
+    const res = await api.post('/v1/events/trigger', {
+      name: 'inapp-simulador-v2',
+      to:   { subscriberId },
+      payload,
+    });
+    if (res?.data?.acknowledged) {
+      log.textContent = '✓ Disparado — modal abre em até 3s no app';
+      log.style.color = 'var(--green)';
+    } else {
+      log.textContent = '⚠ Resposta inesperada do Novu';
+      log.style.color = 'var(--yellow)';
+    }
+  } catch(e) {
+    log.textContent = '✗ Erro: ' + (e.message || 'verifique o Novu');
+    log.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶\u00a0 Disparar In-App';
+    setTimeout(() => { log.textContent = ''; }, 5000);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// CAMPANHAS
+// ════════════════════════════════════════════════════════════
+async function renderCampaigns(channelFilter) {
+  const chInfo = _chDef[channelFilter];
+  const newLabel = chInfo ? `Nova campanha de ${chInfo.label}` : 'Nova Campanha';
+  document.getElementById('page-actions').innerHTML=`<button class="btn btn-primary" onclick="openNewCamp(${channelFilter?`'${channelFilter}'`:''})">${newLabel}</button>`;
+
+  const el=document.getElementById('content');
+  let camps=getCamps();
+
+  if(channelFilter==='whatsapp'){
+    el.innerHTML=`
+      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+        <div style="width:40px;height:40px;border-radius:11px;background:rgba(34,197,94,.12);color:#16A34A;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 5.5c0 3.5 5 6 5 6s-1.5-6-5-6z" fill="currentColor" opacity=".5"/></svg>
+        </div>
+        <div><div style="font-size:13px;font-weight:700;color:#16A34A;margin-bottom:3px">WhatsApp — ferramenta própria Brasil Paralelo</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Os envios de WhatsApp são gerenciados pela ferramenta interna da BP. Aqui você pode registrar campanhas para manter histórico unificado.</div></div>
+      </div>`;
+    camps=camps.filter(c=>c.channel==='whatsapp');
+    if(!camps.length){el.innerHTML+=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="16" stroke="currentColor" stroke-width="2"/><path d="M14 14c0 8 16 14 16 14s-6-16-16-14z" fill="currentColor" opacity=".2"/></svg>`,'Nenhum envio de WhatsApp registrado','Registre campanhas de WhatsApp para ter um histórico unificado.');return;}
+  } else if(channelFilter){
+    camps=camps.filter(c=>{
+      if(channelFilter==='email') return c.channel==='email'||c.channel==='both';
+      if(channelFilter==='push-app'||channelFilter==='push-web') return c.channel==='push'||c.channel==='both'||c.channel===channelFilter;
+      return c.channel===channelFilter;
+    });
+    if(!camps.length){el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><rect x="6" y="10" width="32" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M6 14l16 10 16-10" stroke="currentColor" stroke-width="2"/></svg>`,`Nenhuma campanha de ${chInfo?.label||channelFilter}`,`Clique em "${newLabel}" para criar a primeira.`);return;}
+  } else if(!camps.length){
+    el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><rect x="6" y="10" width="32" height="24" rx="4" stroke="currentColor" stroke-width="2"/><path d="M6 14l16 10 16-10" stroke="currentColor" stroke-width="2"/></svg>`,'Nenhuma campanha','Crie sua primeira campanha para disparar para um segmento.');return;
+  }
+
+  const allCamps=getCamps();
+  const cards=camps.slice().reverse().map(c=>{
+    const idx=allCamps.findIndex(x=>x.createdAt===c.createdAt&&x.name===c.name);
+    const def=_chDef[c.channel]||_chDef.email;
+    const st=c.status==='enviada'?'<span class="tag tg-green">Enviada</span>':'<span class="tag tg-gray">Rascunho</span>';
+    const fire=c.status!=='enviada'?`<button class="btn btn-primary btn-sm" onclick="fireCamp(${idx})">🚀 Disparar</button>`:'';
+    return `<div class="camp-card">
+      <div class="camp-icon" style="background:${def.bg};color:${def.col}">${def.ico}</div>
+      <div class="camp-info"><div class="camp-name">${c.name}</div><div class="camp-meta">Segmento: <strong>${c.segName||c.segKey||'—'}</strong> · Workflow: <strong>${c.workflow||'—'}</strong> · ${fdate(c.createdAt)}</div></div>
+      ${st}<div class="camp-actions">${fire}<button class="btn btn-ghost btn-sm" onclick="deleteCamp(${idx})" title="Remover">✕</button></div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="camp-list">${cards}</div>`;
+}
+
+let _cd={};
+async function fetchPHCohorts(){
+  if(!CFG.phApiKey||!CFG.phProjectId)return[];
+  try{
+    const r=await fetch(`${CFG.phHost}/api/projects/${CFG.phProjectId}/cohorts/?limit=100`,{headers:{'Authorization':`Bearer ${CFG.phApiKey}`}});
+    const d=await r.json();return(d.results||[]).map(c=>({key:'ph_'+c.id,id:c.id,name:c.name,count:c.count||0,type:'posthog'}));
+  }catch(e){return[];}
+}
+async function openNewCamp(preChannel){
+  _cd={step:1,channel:preChannel||'email',includeKeys:[],excludeKeys:[],exclTags:''};
+  toast('Carregando...','info');
+  let workflows=[],segments=[],phCohorts=[];
+  try{const r=await api.get('/v2/workflows?limit=50&status[]=ACTIVE&status[]=INACTIVE').catch(()=>api.get('/v1/workflows?limit=50'));workflows=r.data?.workflows||r.workflows||r.data||[];}catch(e){}
+  try{const r=await api.get('/v1/topics?page=0&pageSize=50');segments=(r.data||[]).map(s=>({...s,key:s.key,name:s.name,type:'novu'}));}catch(e){}
+  phCohorts=await fetchPHCohorts();
+  _cd.workflows=workflows;_cd.segments=segments;_cd.phCohorts=phCohorts;campStep1();
+}
+
+function _buildRecipList(listId, excludeMode){
+  const allLists=[
+    ..._cd.segments.map(s=>({key:s.key,name:s.name,count:s._count||0,type:'novu'})),
+    ..._cd.phCohorts.map(c=>({key:c.key,id:c.id,name:c.name,count:c.count||0,type:'posthog'}))
+  ];
+  if(!allLists.length)return`<div style="padding:14px 12px;font-size:12px;color:var(--muted);text-align:center">Nenhum segmento disponível</div>`;
+  const checked=excludeMode?(_cd.excludeKeys||[]):(_cd.includeKeys||[]);
+  return allLists.map(l=>{
+    const badge=l.type==='posthog'
+      ?`<span class="ri-badge" style="background:rgba(124,58,237,.1);color:var(--purple)">PostHog</span>`
+      :`<span class="ri-badge" style="background:var(--blue-lt);color:var(--blue)">Novu</span>`;
+    const cnt=l.count?`<span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted)">${l.count.toLocaleString('pt-BR')}</span>`:'';
+    return`<label class="recip-item">
+      <input type="checkbox" value="${l.key}" data-type="${l.type}" data-count="${l.count}" ${checked.includes(l.key)?'checked':''} onchange="recipToggle('${listId}','${l.key}',this.checked)">
+      <div style="flex:1;min-width:0"><div class="ri-name">${l.name}</div><div class="ri-sub">${l.type==='posthog'?'Cohort PostHog':'Segmento Novu'}</div></div>
+      ${badge}${cnt}
+    </label>`;
+  }).join('');
+}
+
+function recipToggle(listId, key, checked){
+  const field=listId==='excl-list'?'excludeKeys':'includeKeys';
+  if(!_cd[field])_cd[field]=[];
+  if(checked){if(!_cd[field].includes(key))_cd[field].push(key);}
+  else{_cd[field]=_cd[field].filter(k=>k!==key);}
+}
+
+function campStep1(){
+  const hasPH=CFG.phApiKey&&CFG.phProjectId;
+  const phNotice=!hasPH?`<div style="font-size:11px;color:var(--yellow);background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:8px 12px;margin-bottom:12px">
+    ⚠ Configure PostHog API Key e Project ID em <button onclick="closeModal();openSettings()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:700;padding:0">Configurações</button> para ver cohorts PostHog.
+  </div>`:
+  `<div style="font-size:11px;color:#16A34A;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;margin-bottom:12px">
+    ✓ PostHog conectado — cohorts disponíveis ${_cd.phCohorts.length?`(${_cd.phCohorts.length})`:''}.
+  </div>`;
+  openModal('Nova Campanha de Email — Destinatários',`${wizHdr(1)}
+  <div style="display:flex;gap:22px;align-items:flex-start;margin-top:4px">
+    <div style="flex:1;min-width:0">
+      ${phNotice}
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Nome da campanha <span style="color:var(--red)">*</span></label>
+        <input class="form-control" id="c-name" placeholder="Ex: Black Friday — Leads Premium" value="${_cd.name||''}">
+      </div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Selecionar listas de destinatários</div>
+      <p style="font-size:11px;color:var(--muted);margin:0 0 8px">Sem seleção, todos os contatos são o público-alvo.</p>
+      <div class="recip-list" id="incl-list">${_buildRecipList('incl-list',false)}</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Excluir listas</div>
+      <div class="recip-list" id="excl-list">${_buildRecipList('excl-list',true)}</div>
+      <div class="form-group" style="margin-top:14px;margin-bottom:0">
+        <label>Excluir tags <span style="font-weight:400;color:var(--muted)">(separadas por vírgula)</span></label>
+        <input class="form-control" id="c-excl-tags" placeholder="ex: cancelado, inadimplente, vip-excluir" value="${_cd.exclTags||''}">
+      </div>
+    </div>
+    <div style="width:210px;flex-shrink:0">
+      <div class="audience-card">
+        <div class="audience-lbl">Target Audience</div>
+        <svg viewBox="0 0 120 68" width="130" height="74" style="overflow:visible;display:block;margin:0 auto 4px">
+          <path d="M 14 62 A 46 46 0 0 1 106 62" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="12" stroke-linecap="round"/>
+          <path id="gauge-arc" d="M 14 62 A 46 46 0 0 1 106 62" fill="none" stroke="var(--blue)" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="144.51" stroke-dashoffset="144.51" style="transition:stroke-dashoffset .5s ease"/>
+        </svg>
+        <div id="gauge-count" style="font-size:30px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px">—</div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:.5px;font-weight:600;margin-bottom:16px">AUDIÊNCIA ESTIMADA</div>
+        <button id="btn-calc-aud" class="btn btn-secondary" style="width:100%;font-size:12px" onclick="calcAudience()">Calcular Audiência</button>
+        <div id="audience-detail" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:left;min-height:20px"></div>
+      </div>
+    </div>
+  </div>`,
+  `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+   <button class="btn btn-primary" onclick="campNext1()">Design →</button>`,'xl');
+  setTimeout(()=>document.getElementById('c-name')?.focus(),100);
+}
+
+async function calcAudience(){
+  const btn=document.getElementById('btn-calc-aud');
+  const detail=document.getElementById('audience-detail');
+  if(btn)btn.disabled=true;
+  if(detail)detail.innerHTML='<span style="color:var(--muted)">Calculando...</span>';
+  const inclKeys=_cd.includeKeys||[];
+  const exclKeys=_cd.excludeKeys||[];
+  let total=0,lines=[];
+  const allLists=[
+    ..._cd.segments.map(s=>({key:s.key,name:s.name,type:'novu'})),
+    ..._cd.phCohorts.map(c=>({key:c.key,id:c.id,name:c.name,count:c.count||0,type:'posthog'}))
+  ];
+  const toCount=inclKeys.length?allLists.filter(l=>inclKeys.includes(l.key)):allLists;
+  for(const l of toCount){
+    let n=0;
+    if(l.type==='posthog'){n=_cd.phCohorts.find(c=>c.key===l.key)?.count||0;}
+    else{try{const r=await api.get(`/v1/topics/${l.key}/subscribers?limit=1`);n=r.totalCount??r.data?.length??0;}catch(e){}}
+    total+=n;
+    lines.push(`<span style="color:var(--text)">${l.name}:</span> ${n.toLocaleString('pt-BR')}`);
+  }
+  if(exclKeys.length){
+    for(const l of allLists.filter(l=>exclKeys.includes(l.key))){
+      let n=0;
+      if(l.type==='posthog'){n=_cd.phCohorts.find(c=>c.key===l.key)?.count||0;}
+      else{try{const r=await api.get(`/v1/topics/${l.key}/subscribers?limit=1`);n=r.totalCount??r.data?.length??0;}catch(e){}}
+      total=Math.max(0,total-n);
+      lines.push(`<span style="color:#ef4444">- ${l.name}:</span> ${n.toLocaleString('pt-BR')}`);
+    }
+  }
+  _cd._audTotal=total;
+  const pct=total>0?Math.min(100,total/Math.max(total,1)*100):0;
+  const arc=document.getElementById('gauge-arc');
+  if(arc)arc.setAttribute('stroke-dashoffset',String(144.51*(1-pct/100)));
+  const gc=document.getElementById('gauge-count');
+  if(gc)gc.textContent=total.toLocaleString('pt-BR');
+  if(detail)detail.innerHTML=lines.join('<br>');
+  if(btn)btn.disabled=false;
+}
+
+function campNext1(){
+  _cd.name=document.getElementById('c-name')?.value?.trim();
+  _cd.exclTags=document.getElementById('c-excl-tags')?.value?.trim();
+  if(!_cd.name){toast('Nome é obrigatório','err');return;}
+  campStep2();
+}
+
+function campStep2(){
+  const wfOpts=_cd.workflows.length?_cd.workflows.map(w=>`<option value="${w.workflowId||w.identifier||w._id}" ${_cd.workflow===(w.workflowId||w.identifier||w._id)?'selected':''}>${w.name}</option>`).join(''):'<option value="">— Crie um workflow primeiro —</option>';
+  openModal('Nova Campanha de Email — Design',`${wizHdr(2)}
+  <div style="display:flex;gap:22px;align-items:flex-start;margin-top:4px">
+    <div style="flex:1;min-width:0">
+      <div class="form-row">
+        <div class="form-group"><label>De: Nome</label><input class="form-control" id="c-from-name" placeholder="Brasil Paralelo" value="${_cd.fromName||''}"></div>
+        <div class="form-group"><label>De: Email</label><input class="form-control" id="c-from-email" type="email" placeholder="nao-responda@brasilparalelo.com.br" value="${_cd.fromEmail||''}"></div>
+      </div>
+      <div class="form-group">
+        <label>Workflow (template) <span style="color:var(--red)">*</span></label>
+        <select class="form-control" id="c-wf"><option value="">Selecione...</option>${wfOpts}</select>
+        <div class="form-hint">Sem workflows? <button onclick="closeModal();nav('workflows')" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Criar agora →</button></div>
+      </div>
+      <div class="form-group">
+        <label>Assunto <span style="color:var(--red)">*</span></label>
+        <input class="form-control" id="c-subj" placeholder="Ex: Novidade exclusiva para você!" value="${_cd.subject||''}">
+      </div>
+      <div class="form-group">
+        <label>Corpo do email <span class="text-muted text-sm">(HTML ou texto)</span></label>
+        <textarea class="form-control" id="c-body" style="min-height:130px" placeholder="&lt;p&gt;Olá {{subscriber.firstName}},&lt;/p&gt;...">${_cd.body||''}</textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="toggleEmailPreview()">👁 Pré-visualizar</button>
+        </div>
+        <div id="camp-email-preview" style="display:none">
+          <div class="camp-preview">
+            <div class="camp-preview-hd"><span>📧</span> Pré-visualização</div>
+            <div class="camp-preview-body" id="camp-preview-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="width:210px;flex-shrink:0">
+      <div class="audience-card">
+        <div class="audience-lbl">Audiência</div>
+        <div style="font-size:28px;font-weight:800;color:var(--blue);line-height:1;margin-bottom:4px">${(_cd._audTotal||0).toLocaleString('pt-BR')||'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:12px">destinatários</div>
+        ${(_cd.includeKeys||[]).length?`<div style="font-size:11px;color:var(--muted);text-align:left">
+          <strong style="color:var(--text)">Incluídos:</strong><br>${(_cd.includeKeys||[]).map(k=>{const s=[..._cd.segments,..._cd.phCohorts].find(x=>x.key===k);return s?`• ${s.name}`:''}).filter(Boolean).join('<br>')}
+        </div>`:'<div style="font-size:11px;color:var(--muted)">Todos os contatos</div>'}
+        ${(_cd.excludeKeys||[]).length?`<div style="font-size:11px;color:#ef4444;text-align:left;margin-top:8px">
+          <strong>Excluídos:</strong><br>${(_cd.excludeKeys||[]).map(k=>{const s=[..._cd.segments,..._cd.phCohorts].find(x=>x.key===k);return s?`• ${s.name}`:''}).filter(Boolean).join('<br>')}
+        </div>`:''}
+        ${_cd.exclTags?`<div style="font-size:11px;color:var(--yellow);margin-top:8px;text-align:left">Tags excluídas: ${_cd.exclTags}</div>`:''}
+      </div>
+    </div>
+  </div>`,
+  `<button class="btn btn-secondary" onclick="campStep1()">← Destinatários</button>
+   <button class="btn btn-primary" onclick="campNext2()">Envio →</button>`,'xl');
+}
+
+function toggleEmailPreview(){
+  const el=document.getElementById('camp-email-preview');
+  if(el.style.display==='none'){
+    document.getElementById('camp-preview-content').innerHTML=document.getElementById('c-body')?.value||'<span style="color:var(--muted)">Nenhum conteúdo ainda</span>';
+    el.style.display='';
+  }else{el.style.display='none';}
+}
+
+function campNext2(){
+  _cd.workflow=document.getElementById('c-wf')?.value;
+  _cd.fromName=document.getElementById('c-from-name')?.value?.trim();
+  _cd.fromEmail=document.getElementById('c-from-email')?.value?.trim();
+  _cd.subject=document.getElementById('c-subj')?.value?.trim();
+  _cd.body=document.getElementById('c-body')?.value;
+  if(!_cd.workflow){toast('Selecione um workflow','err');return;}
+  if(!_cd.subject){toast('Assunto é obrigatório','err');return;}
+  campStep3();
+}
+
+function campStep3(){
+  const segOpts=_cd.segments.length?_cd.segments.map(s=>`<option value="${s.key}" ${_cd.segKey===s.key?'selected':''}>${s.name}</option>`).join(''):'<option value="">— Crie um segmento primeiro —</option>';
+  const audSummary=(()=>{
+    if((_cd.includeKeys||[]).length){
+      const names=(_cd.includeKeys||[]).map(k=>[..._cd.segments,..._cd.phCohorts].find(x=>x.key===k)?.name).filter(Boolean);
+      return names.join(', ');
+    }
+    return 'Todos os contatos';
+  })();
+  const previewHtml=_cd.body?`
+    <div style="margin-top:14px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Pré-visualização do email</div>
+      <div class="camp-preview">
+        <div class="camp-preview-hd">
+          <span>📧</span><span><strong>Para:</strong> ${audSummary}</span>
+          ${_cd.fromName?`<span style="margin-left:auto;font-size:11px"><strong>De:</strong> ${_cd.fromName}</span>`:''}
+        </div>
+        <div class="camp-preview-body" style="border-top:2px solid var(--red);padding-top:12px">
+          ${_cd.subject?`<div style="font-weight:700;font-size:14px;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px">${_cd.subject}</div>`:''}
+          ${_cd.body}
+        </div>
+      </div>
+    </div>`:'';
+  openModal('Nova Campanha de Email — Envio',`${wizHdr(3)}
+  <div style="display:flex;gap:22px;align-items:flex-start;margin-top:4px">
+    <div style="flex:1;min-width:0">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo</label>
+          <select class="form-control" id="c-type">
+            <option value="single" ${(_cd.type||'single')==='single'?'selected':''}>Único (Single)</option>
+            <option value="recurring" ${_cd.type==='recurring'?'selected':''}>Recorrente</option>
+            <option value="experiment" ${_cd.type==='experiment'?'selected':''}>Experimento (A/B)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tags <span style="font-weight:400;color:var(--muted)">(separadas por vírgula)</span></label>
+          <input class="form-control" id="c-tags" placeholder="ex: black-friday, leads, newsletter" value="${_cd.tags||''}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Envio</label>
+          <select class="form-control" id="c-send-mode" onchange="toggleSendDate(this.value)">
+            <option value="now">Imediato</option>
+            <option value="scheduled" ${_cd.sendDate?'selected':''}>Agendar</option>
+          </select>
+        </div>
+        <div class="form-group" id="send-date-wrap" style="${_cd.sendDate?'':'opacity:.4;pointer-events:none'}">
+          <label>Data / hora</label>
+          <input class="form-control" type="datetime-local" id="c-send-date" value="${_cd.sendDate||''}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Segmento Novu (para disparo) <span style="color:var(--red)">*</span></label>
+        <select class="form-control" id="c-seg"><option value="">Selecione...</option>${segOpts}</select>
+        <div class="form-hint">Segmento do Novu que receberá o disparo via workflow.</div>
+      </div>
+      ${previewHtml}
+    </div>
+    <div style="width:210px;flex-shrink:0">
+      <div class="audience-card">
+        <div class="audience-lbl">Resumo</div>
+        <div style="font-size:12px;color:var(--text);text-align:left;line-height:1.8">
+          <div><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Campanha</span><br><strong>${_cd.name||'—'}</strong></div>
+          <div style="margin-top:8px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Workflow</span><br><code style="font-size:10px">${_cd.workflow||'—'}</code></div>
+          <div style="margin-top:8px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Assunto</span><br><em style="font-size:11px">${_cd.subject||'—'}</em></div>
+          <div style="margin-top:8px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase">Audiência</span><br><span style="font-size:11px">${audSummary}</span></div>
+          ${_cd._audTotal?`<div style="margin-top:4px;font-size:20px;font-weight:800;color:var(--blue)">${_cd._audTotal.toLocaleString('pt-BR')}<span style="font-size:10px;color:var(--muted);font-weight:400"> pessoas</span></div>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`,
+  `<button class="btn btn-secondary" onclick="campStep2()">← Design</button>
+   <button class="btn btn-secondary" onclick="saveDraft()">Rascunho</button>
+   <button class="btn btn-primary" onclick="doFireNew()">🚀 Disparar</button>`,'xl');
+  if(_cd.segKey) setTimeout(()=>{const s=document.getElementById('c-seg');if(s)s.value=_cd.segKey;},80);
+}
+function toggleSendDate(v){
+  const w=document.getElementById('send-date-wrap');
+  if(w){w.style.opacity=v==='scheduled'?'1':'0.4';w.style.pointerEvents=v==='scheduled'?'auto':'none';}
+}
+function wizHdr(a){const s=[['1','Destinatários'],['2','Design'],['3','Envio']];return`<div class="wizard-steps">${s.map(([n,l],i)=>{const c=i+1<a?'done':i+1===a?'active':'';const num=i+1<a?'<div class="wnum">✓</div>':`<div class="wnum">${n}</div>`;return`${i>0?'<div class="wline"></div>':''}<div class="wstep ${c}">${num}<span>${l}</span></div>`;}).join('')}</div>`;}
+function _collectStep3(){
+  _cd.type=document.getElementById('c-type')?.value||'single';
+  _cd.tags=document.getElementById('c-tags')?.value?.trim();
+  const mode=document.getElementById('c-send-mode')?.value;
+  _cd.sendDate=mode==='scheduled'?(document.getElementById('c-send-date')?.value||''):'';
+  const sel=document.getElementById('c-seg');
+  _cd.segKey=sel?.value;
+  _cd.segName=sel?.options[sel?.selectedIndex]?.text;
+}
+function saveDraft(){
+  _collectStep3();
+  const c=getCamps();c.push({..._cd,status:'rascunho',createdAt:new Date().toISOString()});
+  saveCamps(c);toast('Rascunho salvo','ok');closeModal();renderEmailCampaignsTab();
+}
+async function doFireNew(){
+  _collectStep3();
+  if(!_cd.segKey){toast('Selecione um segmento Novu para o disparo','err');return;}
+  const isScheduled=!!_cd.sendDate;
+  const c=getCamps();
+  c.push({..._cd,status:isScheduled?'programada':'enviada',createdAt:new Date().toISOString(),sentAt:isScheduled?'':new Date().toISOString()});
+  saveCamps(c);closeModal();
+  if(!isScheduled)await dispatchCamp({..._cd});
+  else toast(`Campanha agendada para ${new Date(_cd.sendDate).toLocaleString('pt-BR')}`,'ok');
+  renderEmailCampaignsTab();
+}
+async function fireCamp(idx){const camps=getCamps(),c=camps[idx];if(!c)return;if(!confirm(`Disparar "${c.name}" para o segmento "${c.segName||c.segKey}"?`))return;camps[idx].status='enviada';camps[idx].sentAt=new Date().toISOString();saveCamps(camps);await dispatchCamp(c);renderCampaigns();}
+async function dispatchCamp(c){
+  toast('Disparando campanha...','info');
+  const supp=getSupp().map(s=>s.email);
+  try{
+    await api.post('/v1/events/trigger',{name:c.workflow,to:{type:'Topic',topicKey:c.segKey},payload:{subject:c.subject||'',body:c.body||''}});
+    toast(`Campanha "${c.name}" disparada!`,'ok');
+    phCapture('campaign_sent',{campaign_name:c.name,workflow:c.workflow,segment:c.segKey,channel:c.channel||'email'});
+  }catch(e){
+    try{
+      const subs=(await api.get('/v1/subscribers?limit=200&page=0')).data||[];
+      const eligible=subs.filter(s=>!supp.includes(s.email));
+      let sent=0;
+      for(const s of eligible){try{await api.post('/v1/events/trigger',{name:c.workflow,to:{subscriberId:s.subscriberId},payload:{subject:c.subject||'',body:c.body||'',firstName:s.firstName||''}});sent++;}catch(e2){}}
+      toast(`Campanha disparada para ${sent} subscriber(s)!`,'ok');
+      phCapture('campaign_sent',{campaign_name:c.name,workflow:c.workflow,segment:c.segKey,channel:c.channel||'email',recipients:sent});
+    }catch(e3){toast('Erro ao disparar: '+e3.message,'err');}
+  }
+}
+function deleteCamp(idx){const c=getCamps();if(!confirm(`Remover "${c[idx]?.name}"?`))return;c.splice(idx,1);saveCamps(c);renderCampaigns();}
+
+// ════════════════════════════════════════════════════════════
+// FEED
+// ════════════════════════════════════════════════════════════
+let _feedFilter='all',_feedCountdown=30;
+async function renderFeed(){
+  const el=document.getElementById('content');
+  document.getElementById('page-actions').innerHTML=`<button class="btn btn-secondary" onclick="loadFeed()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 6.5A5.5 5.5 0 1012 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 2.5v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Atualizar</button>`;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <div class="feed-tabs">${[['all','Todos'],['email','Email'],['push','Push'],['failed','Falhas']].map(([f,l])=>`<button class="feed-tab ${f===_feedFilter?'active':''}" onclick="setFeedFilter('${f}')">${l}</button>`).join('')}</div>
+    <span id="feed-ts" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
+  </div>
+  <div class="card" id="feed-card">${loader()}</div>`;
+  loadFeed();
+  clearInterval(_feedTimer);_feedCountdown=30;
+  _feedTimer=setInterval(()=>{_feedCountdown--;const ts=document.getElementById('feed-ts');if(ts)ts.textContent=`Atualiza em ${_feedCountdown}s`;if(_feedCountdown<=0){_feedCountdown=30;loadFeed();}},1000);
+}
+function setFeedFilter(f){_feedFilter=f;renderFeed();}
+async function loadFeed(){
+  const el=document.getElementById('feed-card');if(!el)return;
+  try{
+    const r=await api.get('/v1/notifications?limit=60&page=0');
+    let items=r.data||[];
+    if(_feedFilter==='email')items=items.filter(n=>n.channel==='email');
+    if(_feedFilter==='push')items=items.filter(n=>n.channel==='push');
+    if(_feedFilter==='failed')items=items.filter(n=>n.status==='failed');
+    const ts=document.getElementById('feed-ts');if(ts)ts.textContent=`Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+    if(!items.length){el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><path d="M9 16V10a13 13 0 0126 0v6l3.5 5H5.5L9 16z" stroke="currentColor" stroke-width="2"/><path d="M17 34a5 5 0 0010 0" stroke="currentColor" stroke-width="2"/></svg>`,'Nenhum registro','Dispare uma campanha para ver a atividade aqui.');return;}
+    const rows=items.map(n=>`<tr><td>${n.subscriber?.email||n.subscriber?.subscriberId||'—'}</td><td>${chTag(n.channel)}</td><td>${n.template?.name||n._template?.name||'—'}</td><td>${statusTag(n.status)}</td><td class="text-muted text-sm">${fdate(n.createdAt)}</td></tr>`).join('');
+    el.innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Subscriber</th><th>Canal</th><th>Workflow</th><th>Status</th><th>Data</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }catch(e){el.innerHTML=apiErr();}
+}
+
+// ════════════════════════════════════════════════════════════
+// DESCADASTROS (UNSUBSCRIBES)
+// ════════════════════════════════════════════════════════════
+function getUnsubs(){return JSON.parse(localStorage.getItem('crm-unsubs')||'[]');}
+function saveUnsubs(u){localStorage.setItem('crm-unsubs',JSON.stringify(u));}
+
+async function renderUnsubscribes(){
+  const el=document.getElementById('content');
+  el.innerHTML=loader();
+  document.getElementById('page-actions').innerHTML=`
+    <button class="btn btn-primary" onclick="openAddUnsub()">+ Adicionar Descadastro</button>`;
+
+  // Load from API + local storage
+  let subs=[];
+  try{subs=(await api.get('/v1/subscribers?limit=200&page=0')).data||[];}catch(e){}
+  const unsubs=getUnsubs();
+
+  // Merge: local unsubs + try to detect subscribers with no channels
+  const rows_api=subs.filter(s=>!s.channels?.length&&!s.email).map(s=>({
+    subscriberId:s.subscriberId, email:s.email||'—', name:[s.firstName,s.lastName].filter(Boolean).join(' ')||'—',
+    channels:[], source:'auto', date:s.updatedAt
+  }));
+  const rows_manual=unsubs.map(u=>({...u,source:'manual'}));
+  const all=[...rows_manual,...rows_api].filter((v,i,a)=>a.findIndex(t=>t.subscriberId===v.subscriberId)===i);
+
+  if(!all.length){
+    el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="14" r="8" stroke="currentColor" stroke-width="2"/><path d="M6 38c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="currentColor" stroke-width="2"/><path d="M28 30l8 8M36 30l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,'Nenhum descadastro','Subscribers que pedem para parar de receber notificações aparecem aqui.');
+    return;
+  }
+
+  const tableRows=all.map(u=>`<tr>
+    <td><span style="font-weight:600">${u.name||'—'}</span></td>
+    <td>${u.email||'—'}</td>
+    <td><code style="font-size:11px">${u.subscriberId||'—'}</code></td>
+    <td>${u.channels?.map(c=>chTag(c)).join(' ')||'<span class="tag tg-red">Todos</span>'}</td>
+    <td>${u.source==='manual'?'<span class="tag tg-yellow">Manual</span>':'<span class="tag tg-gray">Detectado</span>'}</td>
+    <td class="text-muted text-sm">${fdate(u.date)}</td>
+    <td><button class="btn btn-green btn-sm" onclick="doResubscribe('${u.subscriberId}')">Reativar</button></td>
+  </tr>`).join('');
+
+  el.innerHTML=`
+    <div style="padding:10px 14px;background:var(--yel-lt);border:1px solid var(--yel-bd);border-radius:10px;font-size:12px;color:var(--yellow);margin-bottom:16px">
+      <strong>Atenção:</strong> Subscribers descadastrados são excluídos automaticamente dos disparos de campanhas.
+    </div>
+    <div class="card"><div class="tbl-wrap"><table>
+      <thead><tr><th>Nome</th><th>Email</th><th>ID</th><th>Canais bloqueados</th><th>Origem</th><th>Data</th><th></th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div></div>`;
+}
+
+function openAddUnsub(){
+  openModal('Registrar Descadastro',
+    `<p class="text-sm text-muted" style="margin-bottom:14px">Registre um subscriber que pediu descadastro. Ele será excluído dos próximos disparos.</p>
+     <div class="form-group"><label>Email ou ID do subscriber <span style="color:var(--red)">*</span></label><input class="form-control" id="u-email" placeholder="email@exemplo.com ou subscriber-id"></div>
+     <div class="form-group"><label>Canal(is) a bloquear</label>
+       <div style="display:flex;gap:8px;margin-top:4px">
+         <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="u-email-ch" style="accent-color:var(--red)"> Email</label>
+         <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="u-push-ch" style="accent-color:var(--red)"> Push</label>
+         <label style="display:flex;align-items:center;gap:6px;font-size:13px;margin-left:4px"><input type="checkbox" id="u-all-ch" style="accent-color:var(--red)" onchange="if(this.checked){document.getElementById('u-email-ch').checked=true;document.getElementById('u-push-ch').checked=true;}"> Todos</label>
+       </div>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doAddUnsub()">Registrar</button>`
+  );
+}
+
+async function doAddUnsub(){
+  const val=document.getElementById('u-email')?.value?.trim();
+  if(!val){toast('Informe o email ou ID','err');return;}
+  const channels=[];
+  if(document.getElementById('u-email-ch')?.checked)channels.push('email');
+  if(document.getElementById('u-push-ch')?.checked)channels.push('push');
+
+  // try to find subscriber
+  let sub=null;
+  try{
+    const r=await api.get(`/v1/subscribers?limit=100&page=0`);
+    sub=(r.data||[]).find(s=>s.email===val||s.subscriberId===val);
+  }catch(e){}
+
+  const entry={subscriberId:sub?.subscriberId||val,email:sub?.email||val,name:[sub?.firstName,sub?.lastName].filter(Boolean).join(' ')||'—',channels,date:new Date().toISOString()};
+  const unsubs=getUnsubs();
+  const existing=unsubs.findIndex(u=>u.subscriberId===entry.subscriberId);
+  if(existing>=0) unsubs[existing]=entry; else unsubs.push(entry);
+  saveUnsubs(unsubs);
+
+  // update badge
+  const badge=document.getElementById('badge-unsub');
+  if(badge){badge.style.display='';badge.textContent=unsubs.length;}
+
+  // try to update Novu preferences
+  if(sub){
+    try{
+      const prefChannels={};
+      if(channels.length===0||channels.includes('email'))prefChannels.email=false;
+      if(channels.length===0||channels.includes('push'))prefChannels.push=false;
+      await api.patch(`/v1/subscribers/${sub.subscriberId}/preferences`,{channels:prefChannels});
+    }catch(e){}
+  }
+
+  toast('Descadastro registrado!','ok'); closeModal(); renderUnsubscribes();
+}
+
+async function doResubscribe(subscriberId){
+  if(!confirm('Reativar este subscriber?'))return;
+  const unsubs=getUnsubs().filter(u=>u.subscriberId!==subscriberId);
+  saveUnsubs(unsubs);
+  const badge=document.getElementById('badge-unsub');
+  if(badge){if(unsubs.length===0)badge.style.display='none';else badge.textContent=unsubs.length;}
+  try{await api.patch(`/v1/subscribers/${subscriberId}/preferences`,{channels:{email:true,push:true}});}catch(e){}
+  toast('Subscriber reativado!','ok'); renderUnsubscribes();
+}
+
+// ════════════════════════════════════════════════════════════
+// SUPRESSÃO
+// ════════════════════════════════════════════════════════════
+function getSupp(){return JSON.parse(localStorage.getItem('crm-supp')||'[]');}
+function saveSupp(s){localStorage.setItem('crm-supp',JSON.stringify(s));updateSuppBadge();}
+
+async function renderSuppression(){
+  const el=document.getElementById('content');
+  document.getElementById('page-actions').innerHTML=`<button class="btn btn-primary" onclick="openAddSupp()">+ Adicionar à Supressão</button>`;
+  const supp=getSupp();
+  if(!supp.length){
+    el.innerHTML=emptyState(`<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="16" stroke="currentColor" stroke-width="2"/><path d="M10 10l24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,'Lista de supressão vazia','Emails nesta lista nunca receberão mensagens, independente de segmento ou campanha.');
+    return;
+  }
+
+  const items=supp.map(s=>`
+    <div class="supp-item">
+      <div class="supp-email">
+        <div style="font-weight:600">${s.email}</div>
+        ${s.reason?`<div class="text-sm text-muted">${s.reason}</div>`:''}
+      </div>
+      <span class="supp-date">${fdate(s.date)}</span>
+      <button class="btn btn-ghost btn-sm" onclick="removeSupp('${s.email.replace(/'/g,"\\'")}')">Remover</button>
+    </div>`).join('');
+
+  el.innerHTML=`
+    <div style="padding:10px 14px;background:var(--red-lt);border:1px solid var(--red-bd);border-radius:10px;font-size:12px;color:var(--red);margin-bottom:16px">
+      <strong>${supp.length} email(s)</strong> suprimidos. Estes endereços são ignorados em importações CSV e disparos de campanha.
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-ico" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input class="form-control" placeholder="Buscar email..." oninput="filterTbl('supp-list',this.value)">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="clearAllSupp()">Limpar tudo</button>
+    </div>
+    <div class="card" id="supp-list">${items}</div>`;
+}
+
+function openAddSupp(){
+  openModal('Adicionar à Lista de Supressão',
+    `<div class="form-group"><label>Email <span style="color:var(--red)">*</span></label><input class="form-control" id="sp-email" type="email" placeholder="email@exemplo.com"></div>
+     <div class="form-group"><label>Motivo <span class="text-muted text-sm">(opcional)</span></label>
+       <select class="form-control" id="sp-reason"><option value="">Selecione...</option><option>Bounce permanente</option><option>Spam complaint</option><option>Pedido de descadastro</option><option>Email inválido</option><option>Outro</option></select>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doAddSupp()">Adicionar</button>`
+  );
+  setTimeout(()=>document.getElementById('sp-email')?.focus(),100);
+}
+
+function doAddSupp(){
+  const email=document.getElementById('sp-email')?.value?.trim();
+  if(!email||!email.includes('@')){toast('Email inválido','err');return;}
+  const reason=document.getElementById('sp-reason')?.value;
+  const supp=getSupp();
+  if(supp.some(s=>s.email===email)){toast('Email já está na lista','err');return;}
+  supp.push({email,reason,date:new Date().toISOString()});
+  saveSupp(supp); toast('Email adicionado à supressão!','ok'); closeModal(); renderSuppression();
+}
+
+function removeSupp(email){
+  if(!confirm(`Remover "${email}" da supressão?`))return;
+  saveSupp(getSupp().filter(s=>s.email!==email)); toast('Removido da supressão','ok'); renderSuppression();
+}
+
+function clearAllSupp(){
+  if(!confirm(`Limpar toda a lista de supressão (${getSupp().length} emails)?`))return;
+  saveSupp([]); toast('Lista de supressão limpa','ok'); renderSuppression();
+}
+
+// ════════════════════════════════════════════════════════════
+// JORNADAS
+// ════════════════════════════════════════════════════════════
+function getJornadas(){return JSON.parse(localStorage.getItem('crm-jornadas')||'[]');}
+function saveJornadas(j){localStorage.setItem('crm-jornadas',JSON.stringify(j));updateJornBadge();}
+function updateJornBadge(){
+  const j=getJornadas().filter(j=>j.status==='ativa');
+  const el=document.getElementById('badge-jorn');
+  if(el){el.style.display=j.length?'':'none';el.textContent=j.length;}
+}
+
+async function renderJornadas(){
+  const el=document.getElementById('content');
+  document.getElementById('page-actions').innerHTML=`
+    <button class="btn btn-primary" onclick="openNewJornada()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      Nova Jornada
+    </button>`;
+
+  const jornadas=getJornadas();
+
+  if(!jornadas.length){
+    el.innerHTML=`
+      <div style="margin-bottom:20px;padding:16px 20px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.18);border-radius:12px;display:flex;align-items:flex-start;gap:14px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="color:#7C3AED;flex-shrink:0;margin-top:1px"><path d="M2 11h4l2.5-5 3 10 2.5-5H18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:4px">Jornadas automatizadas</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">Jornadas são sequências automáticas disparadas por comportamento do usuário no PostHog — ex: visitou página de planos 3x, assistiu % de um vídeo, não abriu email em 7 dias. Cada jornada conecta um evento do PostHog a um workflow multi-canal no Novu.</div>
+        </div>
+      </div>
+      `+emptyState(
+        `<svg class="empty-ico" viewBox="0 0 44 44" fill="none"><path d="M4 22h7l4.5-9 5 18 4.5-9H40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        'Nenhuma jornada criada',
+        'Crie a primeira jornada para automatizar sequências de email e push baseadas em comportamento.'
+      );
+    return;
+  }
+
+  const stepIcon=t=>{
+    if(t==='email') return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.5"/></svg>`;
+    if(t==='push') return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 9V6a5 5 0 0110 0v3l1.5 2.5H1.5L3 9z" stroke="currentColor" stroke-width="1.5"/><path d="M6 12a2 2 0 004 0" stroke="currentColor" stroke-width="1.5"/></svg>`;
+    if(t==='delay') return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+    return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/></svg>`;
+  };
+  const stepLabel=s=>{
+    if(s.type==='email') return `Email`;
+    if(s.type==='push') return `Push${s.condition?' (se não abriu)':''}`;
+    if(s.type==='delay') return `Aguardar ${s.amount||1} ${s.unit||'dias'}`;
+    return s.type;
+  };
+  const stepColor=t=>({email:'color:var(--blue)',push:'color:var(--purple)',delay:'color:var(--yellow)'})[t]||'color:var(--muted)';
+
+  const cards=jornadas.slice().reverse().map((j,ri)=>{
+    const idx=jornadas.length-1-ri;
+    const isActive=j.status==='ativa';
+    const flow=(j.steps||[]).map((s,i)=>`
+      ${i>0?'<span class="jorn-arrow">→</span>':''}
+      <div class="jorn-step-box" style="${stepColor(s.type)}">${stepIcon(s.type)} ${stepLabel(s)}</div>
+    `).join('');
+    return `<div class="jorn-card">
+      <div class="jorn-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 11h4l2.5-5 3 10 2.5-5H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="jorn-main">
+        <div class="jorn-name">${j.name}</div>
+        <div class="jorn-trigger">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/></svg>
+          Disparo: evento PostHog <code style="font-size:10px">${j.phEvent||'—'}</code>
+          ${j.workflowId?` · Workflow: <code style="font-size:10px">${j.workflowId}</code>`:''}
+        </div>
+        <div class="jorn-flow">${flow}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${isActive?'<span class="jorn-status-active"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px rgba(22,163,74,.5);display:inline-block"></span>Ativa</span>':'<span class="jorn-status-draft">Inativa</span>'}
+          <span style="font-size:11px;color:var(--muted)">${fdate(j.createdAt)}</span>
+        </div>
+      </div>
+      <div class="jorn-actions">
+        <button class="btn btn-secondary btn-sm" onclick="showJornadaWebhook(${idx})">Webhook PostHog</button>
+        <button class="btn btn-secondary btn-sm" onclick="testFireJornada(${idx})">▷ Testar</button>
+        ${isActive
+          ?`<button class="btn btn-danger btn-sm" onclick="toggleJornada(${idx},false)">Pausar</button>`
+          :`<button class="btn btn-green btn-sm" onclick="toggleJornada(${idx},true)">Ativar</button>`}
+        <button class="btn btn-ghost btn-sm" onclick="deleteJornada(${idx})" title="Remover">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="jorn-list">${cards}</div>`;
+}
+
+// ── JORNADA BUILDER ───────────────────────────────────────
+let _jd={steps:[]};
+
+function openNewJornada(){
+  _jd={steps:[]};
+  showJornadaStep1();
+}
+
+async function showJornadaStep1(){
+  let workflows=[];
+  try{const r=await api.get('/v2/workflows?limit=50&status[]=ACTIVE&status[]=INACTIVE').catch(()=>api.get('/v1/workflows?limit=50'));workflows=r.data?.workflows||r.workflows||r.data||[];}catch(e){}
+  _jd.availableWf=workflows;
+  const wfOpts=workflows.length
+    ?`<option value="">Selecione um existente...</option>`+workflows.map(w=>`<option value="${w.workflowId||w.identifier||w._id}">${w.name}</option>`).join('')
+    :`<option value="">— Crie um workflow primeiro —</option>`;
+
+  openModal('Nova Jornada',
+    `${jornWizHdr(1)}
+     <div class="form-group"><label>Nome da jornada <span style="color:var(--red)">*</span></label><input class="form-control" id="jn-name" placeholder="Ex: Ativação — Visitou Planos 3x"></div>
+     <div class="form-group"><label>Evento do PostHog que dispara esta jornada <span style="color:var(--red)">*</span></label>
+       <input class="form-control" id="jn-event" placeholder="Ex: visited_pricing_3x, video_watched_70pct">
+       <div class="form-hint">Nome exato do evento configurado no PostHog (Data Management → Actions). Pode ser qualquer evento rastreado.</div>
+     </div>
+     <div class="divider"></div>
+     <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--muted)">Workflow Novu (opcional — pule para usar o construtor de passos)</div>
+     <div class="form-group" style="margin-bottom:0"><label>Usar workflow existente</label>
+       <select class="form-control" id="jn-wf">${wfOpts}</select>
+       <div class="form-hint">Se selecionar um workflow, ele será usado diretamente. Deixe em branco para construir os passos abaixo.</div>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="jornNext1()">Próximo →</button>`,
+    true
+  );
+  setTimeout(()=>document.getElementById('jn-name')?.focus(),100);
+}
+
+function jornNext1(){
+  _jd.name=document.getElementById('jn-name')?.value?.trim();
+  _jd.phEvent=document.getElementById('jn-event')?.value?.trim();
+  _jd.workflowId=document.getElementById('jn-wf')?.value||'';
+  if(!_jd.name){toast('Nome é obrigatório','err');return;}
+  if(!_jd.phEvent){toast('Informe o evento do PostHog','err');return;}
+  if(_jd.workflowId){
+    // skip step builder, go to confirm
+    showJornadaConfirm();
+  } else {
+    showJornadaStepBuilder();
+  }
+}
+
+function showJornadaStepBuilder(){
+  renderStepBuilderModal();
+}
+
+function renderStepBuilderModal(){
+  const stepsHtml=_jd.steps.map((s,i)=>renderStepItem(s,i)).join('');
+  openModal('Nova Jornada — Passos',
+    `${jornWizHdr(2)}
+     <p class="text-sm text-muted" style="margin-bottom:12px">Construa a sequência de ações. A jornada executa os passos em ordem para cada subscriber que disparar o evento.</p>
+     <div class="step-builder" id="step-builder">
+       ${stepsHtml||'<p class="text-sm text-muted" style="padding:8px 0;text-align:center">Nenhum passo ainda. Adicione abaixo.</p>'}
+     </div>
+     <div style="margin-top:10px">
+       <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Adicionar passo</div>
+       <div class="add-step-bar">
+         <button class="btn btn-secondary btn-sm" onclick="addStep('email')">📧 Email</button>
+         <button class="btn btn-secondary btn-sm" onclick="addStep('delay')">⏱ Aguardar</button>
+         <button class="btn btn-secondary btn-sm" onclick="addStep('push')">🔔 Push</button>
+         <button class="btn btn-secondary btn-sm" onclick="addStep('push-cond')">🔔 Push (só se não abriu email)</button>
+       </div>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="showJornadaStep1()">← Voltar</button><button class="btn btn-primary" onclick="jornNext2()">Próximo →</button>`,
+    true
+  );
+}
+
+function renderStepItem(s,i){
+  const icons={email:'📧',push:'🔔','push-cond':'🔔',delay:'⏱'};
+  const labels={email:'Email',push:'Push',delay:'Aguardar','push-cond':'Push condicional'};
+  let fields='';
+  if(s.type==='email'){
+    fields=`
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0"><label style="font-size:11px">Assunto</label><input class="form-control" value="${s.subject||''}" oninput="_jd.steps[${i}].subject=this.value" placeholder="Olá {{firstName}}!"></div>
+        <div class="form-group" style="margin-bottom:0"><label style="font-size:11px">Workflow ID</label><input class="form-control" value="${s.workflowId||_jd.workflowId||''}" oninput="_jd.steps[${i}].workflowId=this.value" placeholder="id-do-workflow-email"></div>
+      </div>`;
+  } else if(s.type==='push'||s.type==='push-cond'){
+    fields=`
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0"><label style="font-size:11px">Título</label><input class="form-control" value="${s.title||''}" oninput="_jd.steps[${i}].title=this.value" placeholder="Nova mensagem para você"></div>
+        <div class="form-group" style="margin-bottom:0"><label style="font-size:11px">Workflow ID</label><input class="form-control" value="${s.workflowId||''}" oninput="_jd.steps[${i}].workflowId=this.value" placeholder="id-do-workflow-push"></div>
+      </div>
+      ${s.type==='push-cond'?`<p style="font-size:11px;color:var(--purple);margin-top:6px">⚡ Este push só será enviado se o email anterior não foi aberto.</p>`:''}`;
+  } else if(s.type==='delay'){
+    fields=`
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" class="form-control" style="width:80px" value="${s.amount||1}" min="1" oninput="_jd.steps[${i}].amount=parseInt(this.value)||1">
+        <select class="form-control" style="width:120px" onchange="_jd.steps[${i}].unit=this.value">
+          <option value="minutos" ${s.unit==='minutos'?'selected':''}>minutos</option>
+          <option value="horas" ${s.unit==='horas'?'selected':''}>horas</option>
+          <option value="dias" ${(!s.unit||s.unit==='dias')?'selected':''}>dias</option>
+        </select>
+        <span style="font-size:12px;color:var(--muted)">de espera antes do próximo passo</span>
+      </div>`;
+  }
+  return `<div class="step-item" id="step-${i}">
+    <div class="step-item-hd">
+      <div class="step-num">${i+1}</div>
+      <div class="step-type">${icons[s.type]||''} ${labels[s.type]||s.type}</div>
+      <button class="step-remove" onclick="removeStep(${i})" title="Remover passo">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    ${fields}
+  </div>${i<_jd.steps.length-1?'<div class="step-conn">↓</div>':''}`;
+}
+
+function addStep(type){
+  const defaults={email:{type:'email',subject:'',workflowId:''},push:{type:'push',title:'',workflowId:''},'push-cond':{type:'push-cond',title:'',workflowId:'',condition:'email_not_seen'},delay:{type:'delay',amount:2,unit:'dias'}};
+  _jd.steps.push({...defaults[type]||{type}});
+  renderStepBuilderModal();
+}
+
+function removeStep(i){
+  _jd.steps.splice(i,1);
+  renderStepBuilderModal();
+}
+
+function jornNext2(){
+  if(!_jd.steps.length){toast('Adicione ao menos um passo','err');return;}
+  showJornadaConfirm();
+}
+
+function showJornadaConfirm(){
+  const stepSummary=_jd.steps.map((s,i)=>{
+    const icon={email:'📧',push:'🔔','push-cond':'🔔',delay:'⏱'}[s.type]||'•';
+    const label={email:'Email',push:'Push',delay:`Aguardar ${s.amount||1} ${s.unit||'dias'}`,'push-cond':'Push (só se não abriu email)'}[s.type]||s.type;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">${i<_jd.steps.length-1?'':''}<span style="width:18px;text-align:center">${icon}</span><span style="font-weight:600">${label}</span>${s.workflowId?`<code style="font-size:10px;margin-left:auto">${s.workflowId}</code>`:''}</div>`;
+  }).join('');
+
+  const hasWorkflow=_jd.workflowId||_jd.steps.some(s=>s.workflowId);
+  const warnNoWf=!hasWorkflow?`<div style="padding:10px 12px;background:var(--yel-lt);border:1px solid var(--yel-bd);border-radius:8px;font-size:11px;color:var(--yellow);margin-top:10px"><strong>Atenção:</strong> Nenhum workflow Novu vinculado. Você pode configurar os IDs depois ou criar os workflows em <strong>Workflows</strong>.</div>`:'';
+
+  openModal('Nova Jornada — Confirmar',
+    `${jornWizHdr(_jd.workflowId?2:3)}
+     <div class="card" style="margin-bottom:12px"><div class="card-body" style="padding:14px 16px">
+       <div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:600;color:var(--muted);width:30%">Nome</span><span style="font-size:13px;font-weight:700">${_jd.name}</span></div>
+       <div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:600;color:var(--muted);width:30%">Evento PostHog</span><code>${_jd.phEvent}</code></div>
+       ${_jd.workflowId?`<div style="display:flex;gap:8px"><span style="font-size:11px;font-weight:600;color:var(--muted);width:30%">Workflow</span><code>${_jd.workflowId}</code></div>`:''}
+     </div></div>
+     ${_jd.steps.length?`<div style="font-size:12px;font-weight:700;margin-bottom:6px">Sequência de passos</div>${stepSummary}`:''}
+     ${warnNoWf}
+     <div style="padding:10px 12px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.18);border-radius:8px;font-size:11px;color:#7C3AED;margin-top:10px">
+       <strong>Próximo passo:</strong> Após salvar, clique em "Webhook PostHog" para obter a URL e configurar no PostHog Actions.
+     </div>`,
+    `<button class="btn btn-secondary" onclick="${_jd.workflowId?'showJornadaStep1()':'showJornadaStepBuilder()'}">← Voltar</button><button class="btn btn-primary" onclick="doSaveJornada()">Salvar Jornada</button>`,
+    true
+  );
+}
+
+function jornWizHdr(active){
+  const steps=_jd.workflowId?[['1','Configuração'],['2','Confirmar']]:[['1','Configuração'],['2','Passos'],['3','Confirmar']];
+  return`<div class="wizard-steps">${steps.map(([n,l],i)=>{const c=i+1<active?'done':i+1===active?'active':'';return`${i>0?'<div class="wline"></div>':''}<div class="wstep ${c}">${i+1<active?'<div class="wnum">✓</div>':`<div class="wnum">${n}</div>`}<span>${l}</span></div>`;}).join('')}</div>`;
+}
+
+async function doSaveJornada(){
+  const jornadas=getJornadas();
+  const j={
+    id:'jorn-'+Date.now(),
+    name:_jd.name,
+    phEvent:_jd.phEvent,
+    workflowId:_jd.workflowId||(_jd.steps.find(s=>s.workflowId)?.workflowId)||'',
+    steps:_jd.steps,
+    status:'ativa',
+    createdAt:new Date().toISOString()
+  };
+  jornadas.push(j);
+  saveJornadas(jornadas);
+  phCapture('jornada_created',{jornada_name:j.name,ph_event:j.phEvent,workflow:j.workflowId,steps:j.steps.length});
+  toast('Jornada criada!','ok');
+  closeModal();
+  renderJornadas();
+  // Show webhook config right away
+  setTimeout(()=>showJornadaWebhook(jornadas.length-1),400);
+}
+
+function toggleJornada(idx,active){
+  const j=getJornadas();
+  if(!j[idx])return;
+  j[idx].status=active?'ativa':'inativa';
+  saveJornadas(j);
+  phCapture(active?'jornada_activated':'jornada_paused',{jornada_name:j[idx].name,ph_event:j[idx].phEvent});
+  toast(active?'Jornada ativada!':'Jornada pausada','ok');
+  renderJornadas();
+}
+
+function deleteJornada(idx){
+  const j=getJornadas();
+  if(!confirm(`Remover jornada "${j[idx]?.name}"?`))return;
+  j.splice(idx,1);
+  saveJornadas(j);
+  toast('Jornada removida','ok');
+  renderJornadas();
+}
+
+async function testFireJornada(idx){
+  const j=getJornadas()[idx];
+  if(!j){toast('Jornada não encontrada','err');return;}
+  if(!j.workflowId){toast('Esta jornada não tem um workflow Novu vinculado.','err');return;}
+
+  // load subscribers for selection
+  let subs=[];
+  try{subs=(await api.get('/v1/subscribers?limit=100&page=0')).data||[];}catch(e){}
+  const subOpts=subs.length
+    ?subs.map(s=>`<option value="${s.subscriberId}">${[s.firstName,s.lastName].filter(Boolean).join(' ')||s.subscriberId} — ${s.email||''}</option>`).join('')
+    :'<option value="">Nenhum subscriber encontrado</option>';
+
+  openModal(`Testar Jornada: ${j.name}`,
+    `<p class="text-sm text-muted" style="margin-bottom:14px">Dispara o workflow <code>${j.workflowId}</code> manualmente para um subscriber de teste, simulando o que aconteceria quando o PostHog enviasse o evento <code>${j.phEvent}</code>.</p>
+     <div class="form-group"><label>Subscriber de teste <span style="color:var(--red)">*</span></label>
+       <select class="form-control" id="tjn-sub">${subOpts}</select>
+     </div>
+     <div class="form-group"><label>Payload adicional <span class="text-muted text-sm">(JSON, opcional)</span></label>
+       <textarea class="form-control" id="tjn-payload" placeholder='{"firstName": "João", "email": "joao@teste.com"}' style="font-family:monospace;font-size:12px;min-height:70px"></textarea>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="doTestFireJornada('${j.workflowId}')">▷ Disparar Teste</button>`
+  );
+}
+
+async function doTestFireJornada(workflowId){
+  const subId=document.getElementById('tjn-sub')?.value;
+  if(!subId){toast('Selecione um subscriber','err');return;}
+  let payload={};
+  const rawPayload=document.getElementById('tjn-payload')?.value?.trim();
+  if(rawPayload){try{payload=JSON.parse(rawPayload);}catch(e){toast('JSON do payload inválido','err');return;}}
+  try{
+    await api.post('/v1/events/trigger',{name:workflowId,to:{subscriberId:subId},payload});
+    phCapture('jornada_test_fired',{workflow:workflowId,subscriber_id:subId});
+    toast('Teste disparado! Verifique o Feed de Atividade.','ok');
+    closeModal();
+  }catch(e){toast('Erro ao disparar: '+e.message,'err');}
+}
+
+function showJornadaWebhook(idx){
+  const j=getJornadas()[idx];
+  if(!j){toast('Jornada não encontrada','err');return;}
+  const wfId=j.workflowId||'SEU_WORKFLOW_ID';
+  const apiUrl=CFG.apiUrl;
+  const apiKey=CFG.apiKey;
+
+  const body=JSON.stringify({name:wfId,to:{subscriberId:'[person.distinct_id]'},payload:{firstName:'[person.properties.name]',email:'[person.properties.email]',event:'[event]'}},null,2);
+
+  openModal(`Webhook PostHog — ${j.name}`,
+    `<p class="text-sm text-muted" style="margin-bottom:16px">Configure este webhook no PostHog para que o evento <code>${j.phEvent}</code> dispare a jornada automaticamente.</p>
+     <div class="ph-steps">
+       <div class="ph-step">
+         <div class="ph-step-num">1</div>
+         <div class="ph-step-body">
+           <div class="ph-step-title">Abrir PostHog → Data Management → Actions</div>
+           <div class="ph-step-desc">Crie uma nova Action ou edite a existente que detecta o evento <code>${j.phEvent}</code>.</div>
+         </div>
+       </div>
+       <div class="ph-step">
+         <div class="ph-step-num">2</div>
+         <div class="ph-step-body">
+           <div class="ph-step-title">Adicionar Webhook como destino da Action</div>
+           <div class="ph-step-desc">Na seção "Destinations", adicione um webhook com os dados abaixo.</div>
+         </div>
+       </div>
+       <div class="ph-step">
+         <div class="ph-step-num">3</div>
+         <div class="ph-step-body">
+           <div class="ph-step-title">URL e configuração do webhook</div>
+           <div class="ph-step-desc" style="margin-bottom:8px"><strong>URL:</strong></div>
+           <div class="webhook-box" style="margin-bottom:8px;padding:10px 12px;font-size:12px">
+             ${apiUrl}/v1/events/trigger
+             <button class="webhook-copy" onclick="copyText('${apiUrl}/v1/events/trigger')">Copiar</button>
+           </div>
+           <div class="ph-step-desc" style="margin-bottom:4px"><strong>Headers:</strong></div>
+           <div class="webhook-box" style="margin-bottom:8px;font-size:11px">
+             Authorization: ApiKey ${apiKey}<br>Content-Type: application/json
+             <button class="webhook-copy" onclick="copyText('Authorization: ApiKey ${apiKey}\\nContent-Type: application/json')">Copiar</button>
+           </div>
+           <div class="ph-step-desc" style="margin-bottom:4px"><strong>Body (JSON):</strong></div>
+           <div class="webhook-box" style="font-size:11px">
+             <pre style="margin:0;white-space:pre-wrap;word-break:break-all">${escHtml(body)}</pre>
+             <button class="webhook-copy" onclick="copyText(\`${body.replace(/`/g,'\\`')}\`)">Copiar</button>
+           </div>
+         </div>
+       </div>
+       <div class="ph-step">
+         <div class="ph-step-num">4</div>
+         <div class="ph-step-body">
+           <div class="ph-step-title">Testar e salvar</div>
+           <div class="ph-step-desc">Use "Test Action" no PostHog para simular o evento e verificar no <strong>Feed de Atividade</strong> se a notificação foi criada no Novu.</div>
+         </div>
+       </div>
+     </div>
+     ${!j.workflowId||j.workflowId==='SEU_WORKFLOW_ID'?`<div style="margin-top:12px;padding:10px 12px;background:var(--yel-lt);border:1px solid var(--yel-bd);border-radius:8px;font-size:11px;color:var(--yellow)"><strong>Atenção:</strong> Esta jornada não tem um workflow Novu vinculado ainda. Crie o workflow em <strong>Workflows</strong> e edite esta jornada para adicionar o ID correto.</div>`:''}`,
+    `<button class="btn btn-secondary" onclick="closeModal()">Fechar</button>`,
+    true
+  );
+}
+
+function copyText(txt){
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast('Copiado!','ok')).catch(()=>_copyFallback(txt));
+  } else { _copyFallback(txt); }
+}
+function _copyFallback(txt){
+  const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');toast('Copiado!','ok');}catch(e){toast('Copie manualmente','err');}
+  document.body.removeChild(ta);
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ════════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════════
+function openSettings(){
+  openModal('Configurações',
+    `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px">Novu</div>
+     <div class="form-group"><label>URL da API</label><input class="form-control" id="cfg-url" value="${CFG.apiUrl}"></div>
+     <div class="form-group"><label>API Key</label><input class="form-control" id="cfg-key" value="${CFG.apiKey}"></div>
+     <div class="divider"></div>
+     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px">PostHog</div>
+     <div class="form-group"><label>Host</label><input class="form-control" id="cfg-ph-host" value="${CFG.phHost}" placeholder="https://us.posthog.com"></div>
+     <div class="form-group"><label>Project Token</label><input class="form-control" id="cfg-ph-token" value="${CFG.phToken}" placeholder="phc_..."><div class="form-hint">Usado para enviar eventos do painel ao PostHog (disparos, campanhas, jornadas).</div></div>
+     <div class="form-group"><label>Personal API Key <span class="text-muted text-sm">(para Audiências PostHog)</span></label><input class="form-control" id="cfg-ph-apikey" value="${CFG.phApiKey||''}" placeholder="phx_..."><div class="form-hint">Necessário para criar audiências a partir de eventos. Gere em PostHog → Settings → Personal API Keys.</div></div>
+     <div class="form-group"><label>Project ID <span class="text-muted text-sm">(para Audiências PostHog)</span></label><input class="form-control" id="cfg-ph-projid" value="${CFG.phProjectId||''}" placeholder="12345"><div class="form-hint">Número ou UUID visível em PostHog → Settings → Project → ID.</div></div>
+     <div class="divider"></div>
+     <div class="form-group"><label style="color:var(--muted);font-weight:500">Iniciar ambiente local</label>
+       <code style="display:block;background:#f4f4f5;padding:10px 12px;border-radius:8px;border:1px solid var(--border);line-height:1.9;font-size:12px">cd ~/Desktop/claude/projetos-bp/crm/novu-poc<br>docker compose up -d</code>
+     </div>`,
+    `<button class="btn btn-secondary" onclick="testConn()">Testar Novu</button><button class="btn btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveSettings()">Salvar</button>`,
+    true
+  );
+}
+async function testConn(){
+  toast('Testando...','info');
+  const url=document.getElementById('cfg-url')?.value?.trim();
+  const key=document.getElementById('cfg-key')?.value?.trim();
+  try{const r=await fetch(url+'/v1/health-check',{headers:{'Authorization':`ApiKey ${key}`}});if(r.ok)toast('Conexão OK!','ok');else toast('Erro '+r.status,'err');}
+  catch(e){toast('Sem resposta — execute: docker compose up -d','err');}
+}
+function saveSettings(){
+  CFG.apiUrl=document.getElementById('cfg-url')?.value?.trim()||CFG.apiUrl;
+  CFG.apiKey=document.getElementById('cfg-key')?.value?.trim()||CFG.apiKey;
+  CFG.phHost=document.getElementById('cfg-ph-host')?.value?.trim()||CFG.phHost;
+  CFG.phToken=document.getElementById('cfg-ph-token')?.value?.trim()||CFG.phToken;
+  CFG.phApiKey=document.getElementById('cfg-ph-apikey')?.value?.trim()||'';
+  CFG.phProjectId=document.getElementById('cfg-ph-projid')?.value?.trim()||'';
+  localStorage.setItem('crm-cfg',JSON.stringify(CFG));
+  toast('Salvo!','ok'); closeModal(); checkConn();
+}
+
+// ── INIT ──────────────────────────────────────────────────
+updateSuppBadge();
+updateJornBadge();
+checkConn();
+nav('dashboard');
+</script>
+</body>
+</html>
