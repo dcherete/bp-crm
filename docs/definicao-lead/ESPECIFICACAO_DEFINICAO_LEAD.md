@@ -1,8 +1,8 @@
 # Especificação canônica — definição de Lead
 
-**Versão:** 2026-09-04  
-**Status:** regra operacional v1; descoberta estatística dos subestados em andamento  
-**Fonte operacional:** `sql/22_stock_definicao_lead_90d.sql`  
+**Versão:** 2026-09-04
+**Status:** regra operacional v1; fronteira externa sustentada e subestados em revisão por público
+**Fonte operacional:** `sql/22_stock_definicao_lead_90d.sql`
 **Artifact público:** https://dcherete.github.io/bp-crm/definicao-lead/
 
 Este é o documento de referência para humanos e IAs. Quando outro documento do
@@ -155,16 +155,79 @@ Oportunidades e apenas 46.344 Prospects. A regra correta usa 15 dias para fundo
 de funil e rebaixa sinais de 16–90 dias para Prospect. O total de Leads ativos
 permaneceu praticamente igual; mudou apenas a distribuição interna.
 
-## 8. Limites do que foi provado
+## 8. Validação da árvore de sobrevivência — 2026-09-04
+
+Foi ajustada uma árvore de sobrevivência real (`sksurv.tree.SurvivalTree`), com
+treino em set–dez/2025, seleção em jan–fev/2026 e teste final fora do tempo em
+mar/2026. O alvo é tempo até primeira compra em 180 dias, com censura.
+
+### Fronteira Lead ativo × Contato
+
+- **Ex-membro:** o primeiro corte da árvore foi 85,5 dias desde qualquer sinal
+  qualificado. É evidência independente compatível com a regra operacional de
+  90 dias.
+- **Não-membro:** a árvore separou primeiro sinais de funil e comercial; entre
+  pessoas sem esses sinais recentes, encontrou cortes de 30,5 e 156,5 dias.
+  Portanto, a árvore não encontrou um único corte natural universal de 90 dias
+  para não-membros. Os 90 dias permanecem uma síntese operacional conservadora,
+  apoiada também pelos Métodos 1 e 3.
+- Discriminação no teste temporal: C-index 0,655 para não-membro e 0,633 para
+  ex-membro. O modelo separa risco, mas ainda não é uma classificação definitiva.
+
+### Subestados dentro dos 90 dias
+
+Em árvores ajustadas somente entre Leads ativos, os principais cortes foram:
+
+- não-membro: comercial em 22,5 dias, fundo de funil em 45,5 dias e
+  produto/oferta em 79,5 dias;
+- ex-membro: fundo de funil em 85,5 dias e frequência comercial recente.
+
+Esses cortes não validam o limite interno único de 15 dias. Eles indicam que os
+subestados devem ser diferentes por público ou, no mínimo, recalibrados.
+
+### Teste direto da taxonomia vigente
+
+Conversão observada na fotografia de março/2026, acompanhada por 179 dias:
+
+| Público | Oportunidade | Prospect | Somente Lead | Contato |
+|---|---:|---:|---:|---:|
+| Não-membro | 10,43% | 9,32% | 1,88% | 0,82% |
+| Ex-membro | 6,37% | 6,50% | 9,85% | 3,67% |
+
+- Não-membro: Prospect supera Somente Lead em 7,44 p.p. (`p < 0,001`) e
+  Somente Lead supera Contato em 1,05 p.p. (`p < 0,001`). Oportunidade versus
+  Prospect não é estatisticamente diferente (`p = 0,537`).
+- Ex-membro: Oportunidade e Prospect não diferem (`p = 0,878`); Somente Lead
+  supera Prospect em 3,35 p.p. (`p < 0,001`) e Contato em 6,18 p.p.
+  (`p < 0,001`). A ordem operacional vigente falha nesse público.
+
+Conclusão: manter 90 dias como regra externa v1; não declarar 15 dias nem a
+hierarquia interna como provados. Antes de automatizar decisões, auditar a
+direção dos eventos comerciais/Zenvia e propor definições específicas para
+não-membro e ex-membro.
+
+Arquivos reproduzíveis:
+
+- `ajustar_arvore_sobrevivencia.py`;
+- `avaliar_taxonomia_atual.py`;
+- `data/analysis/arvore_sobrevivencia_resumo.json`;
+- `data/analysis/arvore_sobrevivencia_folhas.csv`;
+- `data/analysis/arvore_sobrevivencia_regras.txt`;
+- `data/analysis/validacao_taxonomia_atual.csv`;
+- `data/analysis/testes_taxonomia_atual.csv`.
+
+## 9. Limites do que foi provado
 
 - Os 90 dias estão sustentados para separar sinal recente de histórico.
-- Os limites internos de Oportunidade e Prospect ainda são regras operacionais;
-  precisam ser testados pela árvore de sobrevivência.
+- O limite de 15 dias e a separação Oportunidade/Prospect não foram validados
+  estatisticamente; no holdout, esses estados não diferem em nenhum público.
+- A taxonomia interna de ex-membros é contradita pelos dados observados: sinais
+  hoje classificados como Somente Lead carregam maior conversão.
 - Faturamento observado não é receita incremental causada pelo CRM.
 - Ações históricas são enviesadas pela régua vigente. A melhor ação só pode ser
   tratada como causal após holdout ou experimento equivalente.
 
-## 9. Plano estatístico vigente
+## 10. Plano estatístico vigente
 
 1. **Definir/validar estados:** árvore de sobrevivência interpretável encontra
    eventos e cortes temporais que separam distribuições de tempo até compra.
@@ -175,16 +238,16 @@ permaneceu praticamente igual; mudou apenas a distribuição interna.
 4. **Escolher a ação:** Bellman usa transições condicionais à ação e recompensa
    causal para maximizar valor futuro. Bellman não mede as transições.
 
-Extração já concluída para o passo 1:
+Extração e primeiro ajuste concluídos para o passo 1:
 
 - arquivo: `data/analysis/coorte_arvore_sobrevivencia.parquet`;
 - 700.923 pessoa-snapshots;
 - 10.933 compras observadas em até 180 dias;
 - snapshots mensais de 2025-09-01 a 2026-03-01;
-- validação temporal planejada em meses posteriores;
+- validação temporal final em março/2026;
 - consulta: `sql/25_coorte_arvore_sobrevivencia.sql`;
 - extrator: `extrair_coorte_sobrevivencia.py`.
 
-O modelo ainda não foi ajustado. Não interpretar a existência da coorte como
-validação dos estados.
-
+O primeiro ajuste valida capacidade preditiva e testa a taxonomia vigente. Ele
+não encerra a descoberta dos estados: ainda são necessárias estabilidade
+temporal, auditoria semântica dos eventos e calibração separada por público.

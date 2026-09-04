@@ -1,0 +1,19 @@
+publico,comparacao,horizonte_dias,diferenca_pp,p_valor_bicaudal
+Ex-membro,Oportunidade vs Prospect,30,0.5976609221035094,0.12939237636480475
+Ex-membro,Oportunidade vs Prospect,90,0.3905271631180027,0.5450718946142139
+Ex-membro,Oportunidade vs Prospect,179,-0.13095702091696082,0.8779086518363376
+Ex-membro,Prospect vs Somente Lead,30,-1.6991362245542283,0.00023353440614047786
+Ex-membro,Prospect vs Somente Lead,90,-2.830473608213855,0.0001337066280958532
+Ex-membro,Prospect vs Somente Lead,179,-3.350914670793069,0.00047891358592783227
+Ex-membro,Somente Lead vs Contato,30,2.170173892804039,2.2546239459334666e-14
+Ex-membro,Somente Lead vs Contato,90,4.418106682771314,3.452747015950439e-21
+Ex-membro,Somente Lead vs Contato,179,6.1826942158597955,1.2517101937786104e-22
+Não-membro,Oportunidade vs Prospect,30,1.082519964507542,0.27330477553338284
+Não-membro,Oportunidade vs Prospect,90,1.01153504880213,0.49483725498797304
+Não-membro,Oportunidade vs Prospect,179,1.1180124223602483,0.5369645187896216
+Não-membro,Prospect vs Somente Lead,30,1.9532152709508217,1.6030806344308555e-14
+Não-membro,Prospect vs Somente Lead,90,4.703756253199325,6.133203166942852e-30
+Não-membro,Prospect vs Somente Lead,179,7.4387345684185116,3.356238850017847e-48
+Não-membro,Somente Lead vs Contato,30,0.28470357847457917,1.867079595242743e-09
+Não-membro,Somente Lead vs Contato,90,0.7652983006129018,5.5296508392939966e-21
+Não-membro,Somente Lead vs Contato,179,1.053168780276331,1.6867183564558828e-23

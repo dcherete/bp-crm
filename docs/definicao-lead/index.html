@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Especificação operacional e evidência estatística da definição de Lead ativo na Brasil Paralelo: estados, janelas de 15 e 90 dias, estoque e limitações.">
 <meta name="artifact-version" content="2026-09-04">
-<meta name="ai-summary" content="Lead ativo é pessoa identificada, não cliente, com interação voluntária qualificada em até 90 dias. Oportunidade usa fundo de funil em 0–15 dias; Prospect usa produto/oferta em 0–90 dias ou fundo de funil em 16–90 dias; os demais são Somente Lead. Acima de 90 dias, vira Contato de reativação ou inativo conforme reachability.">
+<meta name="ai-summary" content="Regra operacional v1: Lead ativo é pessoa identificada, não cliente, com interação voluntária qualificada em até 90 dias. A fronteira externa é sustentada; os subestados internos são provisórios. Oportunidade e Prospect não se diferenciaram no holdout, e a hierarquia atual falhou para ex-membros.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -15,7 +15,7 @@
   "dateModified": "2026-09-04",
   "inLanguage": "pt-BR",
   "version": "2026-09-04",
-  "abstract": "Lead ativo é uma pessoa identificada, não cliente, com interação voluntária qualificada nos últimos 90 dias. Oportunidade, Prospect e Somente Lead são subestados exclusivos.",
+  "abstract": "Regra operacional v1: Lead ativo é uma pessoa identificada, não cliente, com interação voluntária qualificada nos últimos 90 dias. A fronteira externa é sustentada, mas Oportunidade e Prospect permanecem subestados provisórios e devem ser recalibrados por público.",
   "keywords": ["lead ativo", "oportunidade", "prospect", "CRM", "sobrevivência", "transição de estados"],
   "isBasedOn": [
     "sql/17_curva_recencia_conversao.sql",
@@ -24,6 +24,40 @@
     "sql/22_stock_definicao_lead_90d.sql",
     "sql/25_coorte_arvore_sobrevivencia.sql"
   ]
+}
+</script>
+<script type="application/json" id="lead-definition-machine-readable">
+{
+  "document_role": "canonical_operational_definition",
+  "version": "2026-09-04",
+  "status": "operational_v1_internal_states_under_review",
+  "lead_active": {
+    "definition": "identified person who is not a current client and has at least one voluntary qualified interaction in the last 90 days",
+    "external_boundary_days": 90,
+    "clock_resets_on": "new voluntary qualified interaction"
+  },
+  "operational_states_in_precedence_order": [
+    {"state":"Cliente","rule":"active subscription at snapshot"},
+    {"state":"Oportunidade","rule":"bottom-funnel signal 0-15 days","validation":"provisional"},
+    {"state":"Prospect","rule":"product/offer 0-90 days or bottom-funnel 16-90 days","validation":"provisional"},
+    {"state":"Somente Lead","rule":"other voluntary qualified signal 0-90 days","validation":"provisional"},
+    {"state":"Contato de reativação","rule":">90 days without qualified signal and at least one live owned CRM channel"},
+    {"state":"Contato inativo","rule":">90 days without qualified signal and no live owned CRM channel"}
+  ],
+  "validation": {
+    "survival_holdout": "2026-03",
+    "external_boundary": "ex-member survival tree first split at 85.5 days; non-member tree did not produce one universal recency split",
+    "non_member_179d_conversion": {"Oportunidade":0.1043,"Prospect":0.0932,"Somente Lead":0.0188,"Contato":0.0082},
+    "ex_member_179d_conversion": {"Oportunidade":0.0637,"Prospect":0.0650,"Somente Lead":0.0985,"Contato":0.0367},
+    "key_conclusion": "Opportunity versus Prospect is not statistically different in either audience; the internal hierarchy fails for ex-members"
+  },
+  "evidence_limits": [
+    "90 days is an operational activity boundary, not the point at which economic value becomes zero",
+    "observed conversion and revenue are predictive associations, not causal CRM lift",
+    "do not treat the 15-day internal threshold as statistically validated"
+  ],
+  "canonical_markdown": "ESPECIFICACAO_DEFINICAO_LEAD.md",
+  "decision_log": "REGISTRO_PROJETO.md"
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,7 +221,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 <header>
   <div class="brand">Brasil Paralelo · CRM Sales Ops</div>
   <h1>O que é um Lead?</h1>
-  <p class="dek">O Insider reúne 6,14 milhões de pessoas identificadas e a operação não deve tratá-las todas como leads. Este documento mede por quanto tempo uma interação continua prevendo que a pessoa voltará a se engajar.</p>
+  <p class="dek">O Insider reúne 6,14 milhões de pessoas identificadas e a operação não deve tratá-las todas como leads. Este documento define a regra vigente, registra sua evidência e separa com clareza o que ainda precisa ser validado.</p>
   <div class="rule"></div>
 </header>
 
@@ -211,9 +245,30 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     <div class="axis"><div class="q">O que reinicia o relógio?</div><div class="a">Toda nova interação voluntária qualificada. Um novo fundo de funil também promove imediatamente a pessoa a Oportunidade.</div></div>
     <div class="axis"><div class="q">O que acontece com o tempo?</div><div class="a">Fundo de funil: Oportunidade em 0–15 dias, Prospect em 16–90 dias e Contato após 90 dias se não houver outro sinal.</div></div>
     <div class="axis"><div class="q">O que sustenta 90 dias?</div><div class="a">Conversão e reengajamento localizaram a mudança comportamental principal entre 71 e 83 dias; 90 é o arredondamento operacional conservador.</div></div>
-    <div class="axis"><div class="q">O que ainda está em validação?</div><div class="a">Os subestados de Oportunidade e Prospect. Uma árvore de sobrevivência testará eventos e cortes; depois, um modelo multiestado medirá as transições.</div></div>
+    <div class="axis"><div class="q">O que ainda está em validação?</div><div class="a">Os subestados de Oportunidade e Prospect. A primeira árvore não validou o corte de 15 dias; agora os eventos serão auditados e os estados recalibrados por público.</div></div>
   </div>
-  <div class="chart-note"><b>Status em 04/09/2026:</b> regra operacional v1 vigente. Estoque de 03/09: 600.012 Leads ativos — 19.951 Oportunidades, 122.110 Prospects e 457.951 somente Leads. A coorte da árvore já foi extraída (700.923 snapshots; 10.933 compras), mas o modelo ainda não foi ajustado. Faturamento observado não é efeito causal do CRM.</div>
+  <div class="chart-note"><b>Status em 04/09/2026:</b> regra operacional v1 vigente. A fronteira externa de 90 dias está sustentada; a hierarquia interna é provisória. Estoque de 03/09: 600.012 Leads ativos — 19.951 Oportunidades, 122.110 Prospects e 457.951 somente Leads. A árvore foi ajustada em 700.923 snapshots, com teste temporal em mar/2026. Faturamento e conversão observados não são efeito causal do CRM.</div>
+</section>
+
+<section id="validacao-estados" data-document-role="empirical-validation" data-version="2026-09-04">
+  <div class="step-h"><div class="chip">0.1</div><div class="kicker">O que já está provado — e o que não está</div></div>
+  <h2>A fronteira funciona; os subestados ainda não</h2>
+  <p><b>Decisão que permanece:</b> aos 90 dias sem interação voluntária qualificada, a pessoa deixa de ser Lead ativo. <b>Decisão ainda provisória:</b> usar 15 dias e a mesma hierarquia Oportunidade → Prospect → Somente Lead nos dois públicos.</p>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="itile"><div class="k">Fronteira externa · ex-membro</div><div class="v num" style="font-size:24px;color:var(--good)">85,5 dias</div><div class="d">Primeiro corte da árvore de sobrevivência. É compatível com o arredondamento operacional para 90 dias.</div></div>
+    <div class="itile"><div class="k">Fronteira externa · não-membro</div><div class="v num" style="font-size:24px;color:var(--warn)">Não é única</div><div class="d">A árvore combina tipo de evento e recência; sem funil/comercial recente, encontrou cortes em 30,5 e 156,5 dias.</div></div>
+    <div class="itile"><div class="k">Oportunidade × Prospect</div><div class="v num" style="font-size:24px;color:var(--int)">Sem diferença</div><div class="d">No holdout de mar/2026, p=0,537 para não-membros e p=0,878 para ex-membros em conversão até 179 dias.</div></div>
+    <div class="itile"><div class="k">Ex-membro · alerta</div><div class="v num" style="font-size:24px;color:var(--bad)">9,85%</div><div class="d">Somente Lead converteu mais que Prospect (6,50%) e Oportunidade (6,37%) em 179 dias. A hierarquia atual falha nesse público.</div></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <h3 style="font-size:20px">Conversão observada no teste temporal · compra em até 179 dias</h3>
+    <div class="axes" style="margin-top:14px">
+      <div class="axis"><div class="q">Não-membro</div><div class="a">Oportunidade 10,43% · Prospect 9,32% · Somente Lead 1,88% · Contato 0,82%. Prospect &gt; Somente Lead &gt; Contato é estatisticamente sustentado.</div></div>
+      <div class="axis"><div class="q">Ex-membro</div><div class="a">Oportunidade 6,37% · Prospect 6,50% · Somente Lead 9,85% · Contato 3,67%. Os eventos precisam ser reclassificados antes de fixar os subestados.</div></div>
+    </div>
+    <p class="fnote">Árvore de sobrevivência com treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. C-index no teste: 0,655 para não-membro e 0,633 para ex-membro. Resultado preditivo e observacional; não mede efeito causal da comunicação.</p>
+  </div>
+  <div class="chart-note"><b>Leitura correta:</b> 90 dias é a regra operacional v1 para separar atividade recente de histórico. O corte interno de 15 dias e uma taxonomia única para não-membros e ex-membros não devem ser apresentados como estatisticamente provados.</div>
 </section>
 
 <!-- 1 CONTEXTO -->
@@ -440,9 +495,9 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 
 <!-- 6 DECISAO -->
 <section class="step">
-  <div class="step-h"><div class="chip">6</div><div class="kicker">Definição proposta</div></div>
+  <div class="step-h"><div class="chip">6</div><div class="kicker">Definição operacional v1</div></div>
   <h2>A definição e as seis camadas</h2>
-  <div class="decision-hero">Aos 90 dias a pessoa sem uma interação voluntária qualificada deixa de ser Lead ativo, mas não perde necessariamente o valor econômico. Ela vira Contato de reativação e passa a receber uma estratégia de menor custo.<small>Regra única para não-membros e ex-membros. Prospect e Oportunidade são estágios superiores dentro de Lead ativo. Membro é Cliente.</small></div>
+  <div class="decision-hero">Aos 90 dias a pessoa sem uma interação voluntária qualificada deixa de ser Lead ativo, mas não perde necessariamente o valor econômico. Ela vira Contato de reativação e passa a receber uma estratégia de menor custo.<small>A fronteira externa é única na regra v1. Prospect e Oportunidade são subestados operacionais provisórios e serão recalibrados separadamente para não-membros e ex-membros. Membro é Cliente.</small></div>
   <p class="lead-in"><b>Lead ativo = não-membro ou ex-membro com pelo menos uma interação voluntária qualificada nos últimos 90 dias.</b> Cada novo sinal reinicia o relógio. Dentro dessa população, ação de fundo de funil nos últimos <b>15 dias</b> define Oportunidade. Do 16º ao 90º dia, esse sinal regride para Prospect; visita a produto ou oferta também define Prospect por até 90 dias. Os demais ficam como Somente Lead.</p>
   <div class="chart-note"><b>Estoque em 03/09/2026:</b> 600.012 Leads ativos = 19.951 Oportunidades + 122.110 Prospects + 457.951 somente Leads. As seis camadas abaixo são exclusivas e somam as 6.136.896 pessoas identificadas no Insider.</div>
 
@@ -516,7 +571,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   <ol class="steps-list">
     <li><b>Fechar a whitelist</b> de interações voluntárias qualificadas e validar identidade, bots, testes e links operacionais.</li>
     <li><b>Publicar a fotografia diária:</b> os volumes já foram recalculados; a consulta deve alimentar os segmentos todos os dias.</li>
-    <li><b>Virar segmento no Insider:</b> Cliente / Oportunidade / Prospect / Somente Lead / Contato de reativação / Contato Inativo.</li>
+    <li><b>Publicar primeiro a fronteira segura:</b> Cliente / Lead ativo / Contato de reativação / Contato inativo. Tratar Oportunidade, Prospect e Somente Lead como subestados v1 monitorados.</li>
     <li><b>Reachability como regra:</b> marcar canal vivo × morto por pessoa, pra saber quando parar de gastar CRM.</li>
     <li><b>Ligar o handoff pra ads</b> dos 624,5K Contatos inativos — mídia paga assume, CRM solta.</li>
   </ol>
@@ -526,10 +581,11 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   <b>Como foi medido.</b> Histórico de eventos desde 2019 (BigQuery), deduplicado por identidade unificada (dim_person_identity) — 7,15M emails → 6,69M pessoas. A conversão usa sete snapshots mensais entre set/2025 e mar/2026, todos com 180 dias completos de observação futura; em cada snapshot, calcula os dias de silêncio e observa compras nos 30, 90 e 180 dias seguintes. Para não-membro, o relógio parte da última interação qualificada. Para ex-membro, parte do churn e só é reiniciado por interação posterior ao churn. As linhas usam média móvel diária de 35 dias, exibida em pontos quinzenais. Recência mede <b>interação real</b> (clique, resposta, navegação e conteúdo), nunca mensagem entregue, abertura ou leitura passiva.<br>
   <b>Thresholds.</b> Segmentação unidimensional inspirada no método do estudo “Custos acumulados por lead”: minimização da variância intrafaixa ponderada pela população e escolha de K pelo cotovelo. Na conversão do não-membro, o corte livre em dois grupos é 83 dias; exigir mínimo de 12% da população por faixa desloca o corte para 90. No ex-membro, o corte em dois grupos é 76 dias e não depende dessa restrição. No reengajamento, os cortes permanecem 71 dias para não-membro e 21/80 dias para ex-membro. Implementações reproduzíveis em <code>segmentar_curva_conversao.py</code> e <code>segmentar_curva_reengajamento.py</code>.<br>
   <b>Três métodos.</b> O Método 1 mede conversão futura absoluta em 30/90/180 dias por tempo de silêncio. O Método 2 mede faturamento marginal real por períodos de 30 dias desde a entrada como Lead, sem reiniciar o relógio, separado entre não-membro e episódio pós-churn. O Método 3 mede reengajamento em 30 dias por tempo de silêncio. Os pontos comportamentais de 71–83 dias foram padronizados em uma janela operacional de 90 dias.<br>
+  <b>Árvore de sobrevivência.</b> Treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. O primeiro corte externo do ex-membro foi 85,5 dias; no não-membro, tipo de evento e recência interagem e não apareceu um único corte universal. No holdout de 179 dias, Oportunidade e Prospect não diferiram estatisticamente em nenhum público; em ex-membros, Somente Lead converteu mais que ambos. Implementações em <code>ajustar_arvore_sobrevivencia.py</code> e <code>avaliar_taxonomia_atual.py</code>.<br>
   <b>Regra decidida.</b> Lead ativo exige pelo menos uma interação voluntária qualificada nos últimos 90 dias. Sem novo sinal, vira Contato de reativação e recebe menor pressão; um novo sinal reinicia o relógio.<br>
   <b>Origem dos gráficos.</b> Conversão absoluta: extração do BigQuery refeita em 03/09/2026 e separada entre não-membros e ex-membros. Faturamento por idade: valor real de <code>vl_payment_gross</code> da primeira compra posterior à origem do Lead, dividido por todos os Leads maduros para observar cada período — inclusive quem não comprou, com valor zero; consulta reproduzível em <code>sql/21_faturamento_marginal_por_idade_lead.sql</code>. Reengajamento: análise com todos os sinais qualificados e relógio de ex-membro iniciado no churn.<br>
   <b>Fotografia operacional.</b> Em 03/09/2026, <code>dim_insider__contacts</code> contém 6.136.896 pessoas identificadas após deduplicação: 627.123 Clientes, 19.951 Oportunidades (fundo de funil em até 15 dias), 122.110 Prospects (produto/oferta em até 90 dias ou fundo de funil entre 16 e 90 dias), 457.951 somente Leads, 4.285.251 Contatos de reativação e 624.510 Contatos inativos. Lead ativo total = 600.012 pessoas. Consulta reproduzível em <code>sql/22_stock_definicao_lead_90d.sql</code>.<br>
-  <b>Ressalvas.</b> "Morto para CRM" ≠ irrecuperável: ads ainda alcança. "Descartar" = sair da régua de CRM, não deletar. Contagem por pessoa (dedup por identidade). Números são fotografia observada, as-of a data de cada evento.
+  <b>Ressalvas.</b> A fronteira externa de 90 dias é a regra operacional v1; o limite de 15 dias e a hierarquia interna não estão estatisticamente validados. "Morto para CRM" ≠ irrecuperável: ads ainda alcança. "Descartar" = sair da régua de CRM, não deletar. Contagem por pessoa (dedup por identidade). Números são fotografia observada, as-of a data de cada evento.
 </div>
 
 <script>

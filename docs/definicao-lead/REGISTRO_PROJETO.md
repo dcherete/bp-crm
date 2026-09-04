@@ -39,7 +39,61 @@ Arquivos: `sql/25_coorte_arvore_sobrevivencia.sql`,
 `extrair_coorte_sobrevivencia.py` e
 `data/analysis/coorte_arvore_sobrevivencia.parquet`.
 
-Status: extração concluída; árvore ainda não ajustada.
+### Ajuste, correção do desenho e validação temporal
+
+A primeira árvore usou folha mínima de 2% da população completa. Como
+Oportunidade é um estado pequeno, esse desenho tinha pouca capacidade de
+descobrir seus limites. O desenho foi corrigido para dois problemas separados:
+
+1. árvore na base completa, com folha mínima de 2%, para a fronteira Lead ativo
+   × Contato;
+2. árvore somente em pessoas com sinal em até 90 dias, com folha mínima de 1%,
+   para descobrir os subestados internos.
+
+As recências foram limitadas a 366 dias para que o código sentinela de “nunca”
+não produzisse cortes artificiais de milhares de dias. Treino: set–dez/2025;
+seleção: jan–fev/2026; teste final: mar/2026.
+
+Resultados da fronteira externa:
+
+- ex-membro: primeiro corte em 85,5 dias; C-index no teste 0,633;
+- não-membro: sinais de funil/comercial dominam; sem esses sinais, cortes em
+  30,5 e 156,5 dias; C-index no teste 0,655.
+
+Resultado: a árvore sustenta diretamente aproximadamente 90 dias em
+ex-membros. Para não-membros, não encontra um único threshold universal; 90
+dias continua sendo a síntese operacional dos três métodos, não uma lei natural.
+
+Nas árvores internas, os cortes mais interpretáveis foram 22,5 dias para
+comercial, 45,5 para fundo de funil e 79,5 para produto/oferta em não-membros;
+em ex-membros, 85,5 dias para fundo de funil e frequência comercial recente.
+Logo, o corte de 15 dias ainda não está validado.
+
+### Teste direto dos estados operacionais
+
+Na fotografia de teste de março/2026, com 179 dias de acompanhamento:
+
+| Público | Oportunidade | Prospect | Somente Lead | Contato |
+|---|---:|---:|---:|---:|
+| Não-membro | 10,43% | 9,32% | 1,88% | 0,82% |
+| Ex-membro | 6,37% | 6,50% | 9,85% | 3,67% |
+
+Oportunidade e Prospect não são estatisticamente diferentes: `p = 0,537` em
+não-membros e `p = 0,878` em ex-membros. Prospect supera Somente Lead nos
+não-membros (`p < 0,001`), mas ocorre o inverso nos ex-membros: Somente Lead
+supera Prospect em 3,35 p.p. (`p < 0,001`). Somente Lead supera Contato nos dois
+públicos (`p < 0,001`).
+
+Decisão: manter a fronteira externa de 90 dias como regra operacional v1 e
+marcar os subestados como provisórios. Não usar a mesma hierarquia interna para
+ex-membros sem revisar eventos e definições. Há indício de que conteúdo/produto,
+hoje agrupado em Somente Lead, qualifica melhor o ex-membro; também é necessário
+confirmar se eventos Zenvia são realmente voluntários e inbound.
+
+Arquivos: `ajustar_arvore_sobrevivencia.py`, `avaliar_taxonomia_atual.py` e
+saídas `data/analysis/arvore_sobrevivencia_*`,
+`data/analysis/validacao_taxonomia_atual.csv` e
+`data/analysis/testes_taxonomia_atual.csv`.
 
 ## 2026-09-03 — Definição operacional de Lead ativo
 
@@ -155,4 +209,3 @@ Primeiro commit de publicação: `3c262f1`.
 
 Observação: toda alteração local posterior deve ser sincronizada novamente com o
 repositório público.
-
