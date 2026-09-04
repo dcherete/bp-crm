@@ -18,7 +18,8 @@ registrada em `REGISTRO_PROJETO.md`.
   Lead ativo.
 - Cliente não é Lead: segue trilha de retenção e upsell.
 - Aos 90 dias sem novo sinal qualificado, a pessoa deixa de ser Lead ativo e
-  vira Contato de reativação; ela não perde necessariamente o valor econômico.
+  vira Contato de reativação; ela não é apagada e passa para uma régua de menor
+  custo.
 - Uma nova interação voluntária qualificada reinicia o relógio operacional de
   90 dias.
 
@@ -79,25 +80,10 @@ Os nomes técnicos vigentes estão em `sql/22_stock_definicao_lead_90d.sql`. A
 whitelist ainda precisa de governança de direção dos eventos da Zenvia, remoção
 de bots/testes e versionamento quando o tracking mudar.
 
-## 4. Relógios — não misturar
-
-### Relógio operacional
+## 4. Relógio operacional
 
 Usado para classificar a pessoa hoje. Reinicia em toda nova interação voluntária
 qualificada. Controla as janelas de 15 e 90 dias.
-
-### Relógio do Método 2
-
-Usado somente na análise histórica de faturamento por idade da coorte. Começa:
-
-- no não-membro: na primeira interação qualificada anterior à primeira compra;
-- no ex-membro: na primeira interação qualificada depois do churn, desde que não
-  exista outra assinatura ativa.
-
-Nesse método, novas interações não reiniciam o relógio. Quem compra permanece no
-denominador dos períodos seguintes e gera zero, pois só a primeira compra é
-contada. Portanto, o Método 2 mede faturamento por idade da coorte original; não
-mede a migração entre estados.
 
 ## 5. Evidência para 90 dias
 
@@ -108,9 +94,6 @@ mede a migração entre estados.
   silêncio. Cortes: 71 dias para não-membro e 21/80 dias para ex-membro.
 - Síntese: os métodos comportamentais colocam a fronteira principal em 71–83
   dias. A operação adotou 90 dias como corte arredondado, conservador e simples.
-- Método 2 não define o threshold. Ele mostra que sair de Lead ativo não elimina
-  necessariamente o valor econômico.
-
 Os Métodos 1 e 3 compartilham o mesmo eixo de silêncio e não são evidências
 totalmente independentes: o primeiro observa compra; o terceiro, reengajamento.
 
@@ -135,6 +118,9 @@ Cliente ou Lead ativo conserva seu estado prioritário mesmo que esteja sem cana
 
 ## 7. O que já foi corrigido
 
+As correções abaixo são histórico metodológico. Elas não fazem parte da prova
+vigente e não devem ser levadas ao artifact executivo.
+
 ### Contaminação de ex-membros
 
 A primeira versão do Método 2 tratava a expiração de uma assinatura como churn,
@@ -147,6 +133,11 @@ A consulta passou a exigir interação estritamente posterior ao churn e ausênc
 de qualquer assinatura ativa na origem. O valor em 330–359 dias caiu de R$ 13,95
 para R$ 3,79 por Lead; em 360–389 dias ficou em R$ 3,91, com intervalos de
 confiança sobrepostos aos vizinhos. Não há evidência de pico anual.
+
+O Método 2 foi posteriormente retirado da especificação executiva: faturamento
+por idade da coorte não define a fronteira de atividade nem os estados. Ele
+permanece apenas no registro histórico para evitar que a análise seja reutilizada
+com uma interpretação errada.
 
 ### Janela errada de Oportunidade
 

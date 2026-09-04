@@ -39,6 +39,11 @@ Próximo passo: auditar eventos e recalibrar os subestados separadamente para
 não-membros e ex-membros. A transição será modelada depois e Bellman só entra
 após a medição causal das ações.
 
+O artifact executivo apresenta somente as análises que respondem à definição
+de Lead: conversão futura, reengajamento e árvore de sobrevivência. A análise de
+faturamento por idade da coorte foi retirada por não medir atividade atual nem
+transição entre estados; sua passagem permanece apenas no registro histórico.
+
 ## Governança
 
 Mudanças na regra devem aparecer juntas na especificação canônica, no registro

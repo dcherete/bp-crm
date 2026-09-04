@@ -20,7 +20,6 @@
   "isBasedOn": [
     "sql/17_curva_recencia_conversao.sql",
     "sql/18_curva_reengajamento.sql",
-    "sql/21_faturamento_marginal_por_idade_lead.sql",
     "sql/22_stock_definicao_lead_90d.sql",
     "sql/25_coorte_arvore_sobrevivencia.sql"
   ]
@@ -247,11 +246,11 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     <div class="axis"><div class="q">O que sustenta 90 dias?</div><div class="a">Conversão e reengajamento localizaram a mudança comportamental principal entre 71 e 83 dias; 90 é o arredondamento operacional conservador.</div></div>
     <div class="axis"><div class="q">O que ainda está em validação?</div><div class="a">Os subestados de Oportunidade e Prospect. A primeira árvore não validou o corte de 15 dias; agora os eventos serão auditados e os estados recalibrados por público.</div></div>
   </div>
-  <div class="chart-note"><b>Status em 04/09/2026:</b> regra operacional v1 vigente. A fronteira externa de 90 dias está sustentada; a hierarquia interna é provisória. Estoque de 03/09: 600.012 Leads ativos — 19.951 Oportunidades, 122.110 Prospects e 457.951 somente Leads. A árvore foi ajustada em 700.923 snapshots, com teste temporal em mar/2026. Faturamento e conversão observados não são efeito causal do CRM.</div>
+  <div class="chart-note"><b>Status em 04/09/2026:</b> regra operacional v1 vigente. A fronteira externa de 90 dias está sustentada; a hierarquia interna é provisória. Estoque de 03/09: 600.012 Leads ativos — 19.951 Oportunidades, 122.110 Prospects e 457.951 somente Leads. A árvore foi ajustada em 700.923 snapshots, com teste temporal em mar/2026. As relações observadas são preditivas, não causais.</div>
 </section>
 
 <section id="validacao-estados" data-document-role="empirical-validation" data-version="2026-09-04">
-  <div class="step-h"><div class="chip">0.1</div><div class="kicker">O que já está provado — e o que não está</div></div>
+  <div class="step-h"><div class="chip">0.1</div><div class="kicker">Teste novo · árvore de sobrevivência</div></div>
   <h2>A fronteira funciona; os subestados ainda não</h2>
   <p><b>Decisão que permanece:</b> aos 90 dias sem interação voluntária qualificada, a pessoa deixa de ser Lead ativo. <b>Decisão ainda provisória:</b> usar 15 dias e a mesma hierarquia Oportunidade → Prospect → Somente Lead nos dois públicos.</p>
   <div class="grid g2" style="margin-top:18px">
@@ -259,6 +258,18 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     <div class="itile"><div class="k">Fronteira externa · não-membro</div><div class="v num" style="font-size:24px;color:var(--warn)">Não é única</div><div class="d">A árvore combina tipo de evento e recência; sem funil/comercial recente, encontrou cortes em 30,5 e 156,5 dias.</div></div>
     <div class="itile"><div class="k">Oportunidade × Prospect</div><div class="v num" style="font-size:24px;color:var(--int)">Sem diferença</div><div class="d">No holdout de mar/2026, p=0,537 para não-membros e p=0,878 para ex-membros em conversão até 179 dias.</div></div>
     <div class="itile"><div class="k">Ex-membro · alerta</div><div class="v num" style="font-size:24px;color:var(--bad)">9,85%</div><div class="d">Somente Lead converteu mais que Prospect (6,50%) e Oportunidade (6,37%) em 179 dias. A hierarquia atual falha nesse público.</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card">
+      <h3 style="font-size:20px">Não-membro · conversão em 179 dias</h3>
+      <div class="chart-wrap"><svg id="taxonomy-nm" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para não-membros, com intervalo de confiança de 95%"></svg></div>
+      <p class="fnote">Oportunidade e Prospect se sobrepõem; as quedas para Somente Lead e Contato são estatisticamente claras.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:20px">Ex-membro · conversão em 179 dias</h3>
+      <div class="chart-wrap"><svg id="taxonomy-ex" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para ex-membros, com intervalo de confiança de 95%"></svg></div>
+      <p class="fnote">Somente Lead é o grupo com maior conversão. A ordem esperada Oportunidade → Prospect → Somente Lead não aparece.</p>
+    </div>
   </div>
   <div class="card" style="margin-top:18px">
     <h3 style="font-size:20px">Conversão observada no teste temporal · compra em até 179 dias</h3>
@@ -268,6 +279,11 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     </div>
     <p class="fnote">Árvore de sobrevivência com treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. C-index no teste: 0,655 para não-membro e 0,633 para ex-membro. Resultado preditivo e observacional; não mede efeito causal da comunicação.</p>
   </div>
+  <details class="card" style="margin-top:18px">
+    <summary><b>Abrir o gráfico técnico completo da árvore</b></summary>
+    <p class="fnote">Cada ponto é uma folha da árvore, ordenada pelo risco previsto. As linhas mostram a conversão realmente observada no holdout em 30, 90 e 179 dias. O gráfico superior mede a fronteira Lead–Contato; o inferior testa os subestados dentro dos 90 dias.</p>
+    <img src="data/analysis/arvore_sobrevivencia_validacao.png" alt="Validação temporal das árvores de sobrevivência para não-membros e ex-membros" style="display:block;width:100%;height:auto;margin-top:14px;border-radius:12px">
+  </details>
   <div class="chart-note"><b>Leitura correta:</b> 90 dias é a regra operacional v1 para separar atividade recente de histórico. O corte interno de 15 dias e uma taxonomia única para não-membros e ex-membros não devem ser apresentados como estatisticamente provados.</div>
 </section>
 
@@ -344,8 +360,8 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 <!-- 4 EVIDENCIA -->
 <section class="step">
   <div class="step-h"><div class="chip">4</div><div class="kicker">Evidência</div></div>
-  <h2>Três métodos, três perguntas diferentes</h2>
-  <p>Os métodos são complementares e usam relógios diferentes. Conversão e reengajamento usam tempo de silêncio; faturamento usa idade contínua desde a entrada como Lead, sem reiniciar o relógio. O Método 2 é financeiro e não repete as curvas comportamentais.</p>
+  <h2>Duas curvas sustentam a fronteira de atividade</h2>
+  <p>Conversão futura responde se o sinal ainda prevê compra. Reengajamento responde se a pessoa ainda tende a emitir um novo sinal. São as duas análises que respondem à definição de Lead ativo.</p>
 
   <div class="grid" style="margin-top:18px;grid-template-columns:1fr">
     <div class="itile">
@@ -354,13 +370,6 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
       <div class="d">Compara a probabilidade de compra em 30, 90 e 180 dias conforme o silêncio aumenta.</div>
       <p class="fnote mono" style="max-width:none;white-space:nowrap;overflow-x:auto">P(compra em H | silêncio = d)</p>
       <div class="tagrow"><span class="tg">valida sinal comercial</span></div>
-    </div>
-    <div class="itile">
-      <div class="k">Método 2 · Faturamento por idade do Lead</div>
-      <div class="v" style="font-size:22px;color:var(--good)">Quanto cada período gera?</div>
-      <div class="d">Mede o faturamento real da primeira compra em cada período de 30 dias desde que a pessoa entrou como Lead. O relógio não reinicia.</div>
-      <p class="fnote mono" style="max-width:none;white-space:nowrap;overflow-x:auto">F(m) = faturamento no período m ÷ Leads maduros para observar m</p>
-      <div class="tagrow"><span class="tg">valor financeiro observado</span></div>
     </div>
     <div class="itile">
       <div class="k">Método 3 · Reengajamento</div>
@@ -372,16 +381,15 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   </div>
 
   <div class="card">
-    <h3 style="font-size:20px">Como os três entram na definição</h3>
+    <h3 style="font-size:20px">Como as evidências entram na definição</h3>
     <div class="axes" style="margin-top:14px">
       <div class="axis"><div class="q">Identidade de Lead</div><div class="a"><b>Interação voluntária qualificada.</b> É a regra semântica: houve um sinal real da pessoa, não apenas uma mensagem entregue ou aberta.</div></div>
-      <div class="axis"><div class="q">Valor financeiro observado</div><div class="a"><b>Faturamento marginal por idade do Lead.</b> Mostra quanto cada período de 30 dias adiciona por pessoa originalmente elegível.</div></div>
       <div class="axis"><div class="q">Temperatura</div><div class="a"><b>Mudanças da curva de reengajamento.</b> Determinam quente, aquecimento e frio por público.</div></div>
       <div class="axis"><div class="q">Validação</div><div class="a"><b>Conversão futura.</b> Confirma se o sinal e as faixas encontradas também ordenam a probabilidade de compra.</div></div>
     </div>
   </div>
 
-  <div class="chart-note"><b>Estado da evidência após reprocessamento:</b> sem restrição populacional, a conversão do não-membro muda de regime em 83 dias e a do ex-membro em 76 dias; o reengajamento muda em 71 dias para não-membro e 21/80 dias para ex-membro. Os resultados sustentam uma <b>região de 71–83 dias</b>, arredondada operacionalmente para 90. O faturamento por idade mede valor observado, não efeito causal do CRM.</div>
+  <div class="chart-note"><b>Estado da evidência:</b> a conversão muda de regime em 83 dias para não-membro e 76 dias para ex-membro; o reengajamento muda em 71 dias para não-membro e 21/80 dias para ex-membro. Os resultados sustentam uma <b>região principal de 71–83 dias</b>, arredondada operacionalmente para 90.</div>
 
   <div class="card">
     <h3 style="font-size:20px">Método 1 · conversão futura do não-membro</h3>
@@ -404,34 +412,6 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     </div>
     <div class="chart-wrap"><svg id="curve-conv-ex" viewBox="0 0 820 350" role="img" aria-label="Conversão futura de ex-membros por dias desde o churn ou interação posterior"></svg></div>
     <p class="fnote"><b>Relógio pós-churn:</b> começa no churn e é reiniciado apenas por interação qualificada posterior. Aos 90 dias, a conversão suavizada nos 90 dias seguintes é 3,849%. Não existe baseline “nunca interagiu” equivalente para este público, porque todo ex-membro entra no relógio pela data do churn.</p>
-  </div>
-
-  <div class="card">
-    <h3 style="font-size:20px">Método 2 · faturamento marginal por idade do Lead</h3>
-    <p class="fnote" style="margin-top:6px !important">A unidade é <b>R$ por Lead em cada período de 30 dias</b>, incluindo como zero as pessoas que não compraram. Para não-membro, o relógio começa na primeira interação qualificada anterior à primeira compra. Para ex-membro, começa na primeira interação qualificada <b>depois do churn, sem nenhuma assinatura ativa</b>, e anterior à reativação. Novas interações não reiniciam o relógio.</p>
-
-    <h4 style="margin:22px 0 4px;font-size:15px">Não-membro · primeira compra</h4>
-    <div class="grid g3" style="margin-top:14px">
-      <div class="itile"><div class="k">0–29 dias de vida</div><div class="v num" style="font-size:25px;color:var(--accent-2)">R$ 17,17</div><div class="d">2,15M Leads maduros · IC95%: R$ 16,95–17,38</div></div>
-      <div class="itile"><div class="k">90–119 dias de vida</div><div class="v num" style="font-size:25px;color:var(--warn)">R$ 1,43</div><div class="d">2,03M Leads maduros · IC95%: R$ 1,38–1,47</div></div>
-      <div class="itile"><div class="k">720–749 dias de vida</div><div class="v num" style="font-size:25px;color:var(--good)">R$ 0,72</div><div class="d">1,09M Leads maduros · IC95%: R$ 0,68–0,76</div></div>
-    </div>
-    <div class="chart-legend">
-      <span><i style="background:var(--accent-2)"></i>Faturamento marginal por Lead</span>
-      <span><i style="background:var(--accent-soft);border:1px solid var(--accent-2)"></i>Intervalo de confiança de 95%</span>
-    </div>
-    <div class="chart-wrap"><svg id="revenue-age-nm" viewBox="0 0 820 330" role="img" aria-label="Faturamento marginal por idade do Lead não-membro"></svg></div>
-
-    <h4 style="margin:26px 0 4px;font-size:15px">Ex-membro · primeira recompra após interação pós-churn</h4>
-    <div class="grid g3" style="margin-top:14px">
-      <div class="itile"><div class="k">0–29 dias de vida</div><div class="v num" style="font-size:25px;color:var(--accent-2)">R$ 32,01</div><div class="d">948K episódios maduros · IC95%: R$ 31,55–32,47</div></div>
-      <div class="itile"><div class="k">90–119 dias de vida</div><div class="v num" style="font-size:25px;color:var(--warn)">R$ 5,97</div><div class="d">914K episódios maduros · IC95%: R$ 5,75–6,18</div></div>
-      <div class="itile"><div class="k">720–749 dias de vida</div><div class="v num" style="font-size:25px;color:var(--good)">R$ 1,58</div><div class="d">431K episódios maduros · IC95%: R$ 1,46–1,70</div></div>
-    </div>
-    <div class="chart-wrap"><svg id="revenue-age-ex" viewBox="0 0 820 330" role="img" aria-label="Faturamento marginal por idade do Lead ex-membro"></svg></div>
-    <p class="fnote"><b>Auditoria do pico de 12 meses:</b> a versão anterior aceitava pessoas com outra assinatura ativa e não representava ex-membros puros. Com a elegibilidade corrigida, 330–359 dias gera R$ 3,79 por Lead e 360–389 dias gera R$ 3,91; os intervalos de confiança se sobrepõem aos períodos vizinhos. Portanto, <b>não há evidência de um pico anual</b> nesta curva.</p>
-
-    <div class="chart-note" style="margin-top:16px"><b>Conclusão do Método 2:</b> o faturamento marginal cai fortemente, mas permanece estatisticamente acima de zero durante os 24 períodos observados nos dois públicos. Isso comprova <b>faturamento histórico associado ao Lead</b>, não retorno causado pelo CRM. O ponto em que a comunicação deixa de se pagar ainda exige custo, margem e holdout.</div>
   </div>
 
   <h3 style="font-size:24px;margin-top:28px">Método 3 em detalhe · quando a pessoa para de interagir?</h3>
@@ -472,32 +452,14 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     <p class="fnote"><b>Relógio corrigido:</b> dia 0 é o churn; uma interação qualificada posterior reinicia o relógio. Interações enquanto membro não entram nesta curva. As linhas verticais marcam 21 e 80 dias.</p>
   </div>
 
-  <div class="chart-note"><b>Conclusão do Método 3:</b> há mudanças de regime — 71 dias para não-membro; 21 e 80 dias para ex-membro. O sinal não zera depois disso, mas 90 dias é uma padronização operacional conservadora dos dois públicos. O antigo pico de 365 dias do ex-membro era mistura de tempo como membro e foi eliminado ao corrigir o relógio.</div>
+  <div class="chart-note"><b>Conclusão do reengajamento:</b> há mudanças de regime — 71 dias para não-membro; 21 e 80 dias para ex-membro. O sinal não zera depois disso, mas 90 dias é uma padronização operacional conservadora dos dois públicos.</div>
 </section>
 
-<!-- 5 INSIGHTS -->
+<!-- 5 DECISAO -->
 <section class="step">
-  <div class="step-h"><div class="chip">5</div><div class="kicker">Insights consolidados</div></div>
-  <h2>O que aprendemos antes de tomar a decisão</h2>
-  <p>Os achados abaixo não respondem todos à mesma pergunta, mas juntos explicam a base, a propensão de compra e o comportamento.</p>
-  <div class="grid g2" style="margin-top:18px">
-    <div class="itile"><div class="k">Conversão · Método 1</div><div class="v num" style="font-size:24px;color:var(--accent)">5,8×</div><div class="d">Aos 90 dias, o não-membro apresenta conversão suavizada em 90 dias 5,8 vezes maior que o baseline sem interação qualificada.</div></div>
-    <div class="itile"><div class="k">Reengajamento · Método 3</div><div class="v num" style="font-size:24px;color:var(--warn)">71d · 80d</div><div class="d">Os principais pontos de mudança dos dois públicos ficam abaixo de 90 dias. Isso sustenta uma regra única, mensal e conservadora.</div></div>
-    <div class="itile"><div class="k">Corte de conversão · Método 1</div><div class="v num" style="font-size:24px;color:var(--good)">83d · 76d</div><div class="d">Sem restrição de tamanho, a mudança de regime aparece em 83 dias para não-membro e 76 dias para ex-membro.</div></div>
-    <div class="itile"><div class="k">Faturamento do não-membro · Método 2</div><div class="v num" style="font-size:24px;color:var(--good)">R$ 17,17 → 0,72</div><div class="d">Faturamento marginal por Lead: do primeiro período de 30 dias ao período de 720–749 dias de vida.</div></div>
-    <div class="itile"><div class="k">O que 90 dias representa</div><div class="v num" style="font-size:24px;color:var(--int)">Atividade</div><div class="d">É uma fronteira operacional de temperatura, sustentada pelos pontos de mudança de 71 e 80 dias; não é a data em que a chance de compra zera.</div></div>
-    <div class="itile"><div class="k">Reachability</div><div class="v num" style="font-size:24px;color:var(--good)">89,6%</div><div class="d">Ter valor não exige manter a mesma pressão: canal vivo, temperatura e custo definem como abordar; quem está fora da janela e sem canal próprio migra para mídia.</div></div>
-    <div class="itile"><div class="k">Faturamento do ex-membro · Método 2</div><div class="v num" style="font-size:24px;color:var(--warn)">R$ 32,01 → 1,58</div><div class="d">Faturamento marginal por episódio realmente pós-churn, sem assinatura ativa: do primeiro período ao período de 720–749 dias de vida.</div></div>
-    <div class="itile"><div class="k">Limite da evidência financeira</div><div class="v num" style="font-size:24px;color:var(--int)">Não é ROI</div><div class="d">Faturamento observado comprova valor histórico. Retorno causado pelo CRM exige holdout, margem e custo incremental.</div></div>
-  </div>
-  <div class="chart-note"><b>Síntese:</b> 90 dias separa sinal recente de histórico; não separa pessoa valiosa de pessoa sem valor. O nome muda de Lead ativo para Contato de reativação, e a estratégia muda de intensidade.</div>
-</section>
-
-<!-- 6 DECISAO -->
-<section class="step">
-  <div class="step-h"><div class="chip">6</div><div class="kicker">Definição operacional v1</div></div>
+  <div class="step-h"><div class="chip">5</div><div class="kicker">Definição operacional v1</div></div>
   <h2>A definição e as seis camadas</h2>
-  <div class="decision-hero">Aos 90 dias a pessoa sem uma interação voluntária qualificada deixa de ser Lead ativo, mas não perde necessariamente o valor econômico. Ela vira Contato de reativação e passa a receber uma estratégia de menor custo.<small>A fronteira externa é única na regra v1. Prospect e Oportunidade são subestados operacionais provisórios e serão recalibrados separadamente para não-membros e ex-membros. Membro é Cliente.</small></div>
+  <div class="decision-hero">Aos 90 dias sem uma interação voluntária qualificada, a pessoa deixa de ser Lead ativo. Ela não é apagada: vira Contato de reativação e passa a receber uma estratégia de menor custo.<small>A fronteira externa é única na regra v1. Prospect e Oportunidade são subestados operacionais provisórios e serão recalibrados separadamente para não-membros e ex-membros. Membro é Cliente.</small></div>
   <p class="lead-in"><b>Lead ativo = não-membro ou ex-membro com pelo menos uma interação voluntária qualificada nos últimos 90 dias.</b> Cada novo sinal reinicia o relógio. Dentro dessa população, ação de fundo de funil nos últimos <b>15 dias</b> define Oportunidade. Do 16º ao 90º dia, esse sinal regride para Prospect; visita a produto ou oferta também define Prospect por até 90 dias. Os demais ficam como Somente Lead.</p>
   <div class="chart-note"><b>Estoque em 03/09/2026:</b> 600.012 Leads ativos = 19.951 Oportunidades + 122.110 Prospects + 457.951 somente Leads. As seis camadas abaixo são exclusivas e somam as 6.136.896 pessoas identificadas no Insider.</div>
 
@@ -542,9 +504,9 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   </div>
 </section>
 
-<!-- 7 IMPACTO -->
+<!-- 6 IMPACTO -->
 <section class="step">
-  <div class="step-h"><div class="chip">7</div><div class="kicker">Impacto</div></div>
+  <div class="step-h"><div class="chip">6</div><div class="kicker">Impacto</div></div>
   <h2>O que muda na prática</h2>
   <div class="grid g3" style="margin-top:18px">
     <div class="itile"><div class="k">Recorte anterior de 365d</div><div class="v num" style="color:var(--accent)">2,18M</div><div class="d">vira referência histórica; não é mais apresentado como threshold matemático</div></div>
@@ -564,9 +526,9 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   </div>
 </section>
 
-<!-- 8 PROXIMO PASSO -->
+<!-- 7 PROXIMO PASSO -->
 <section class="step">
-  <div class="step-h"><div class="chip">8</div><div class="kicker">Próximo passo</div></div>
+  <div class="step-h"><div class="chip">7</div><div class="kicker">Próximo passo</div></div>
   <h2>Como colocar de pé</h2>
   <ol class="steps-list">
     <li><b>Fechar a whitelist</b> de interações voluntárias qualificadas e validar identidade, bots, testes e links operacionais.</li>
@@ -580,10 +542,10 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 <div class="foot">
   <b>Como foi medido.</b> Histórico de eventos desde 2019 (BigQuery), deduplicado por identidade unificada (dim_person_identity) — 7,15M emails → 6,69M pessoas. A conversão usa sete snapshots mensais entre set/2025 e mar/2026, todos com 180 dias completos de observação futura; em cada snapshot, calcula os dias de silêncio e observa compras nos 30, 90 e 180 dias seguintes. Para não-membro, o relógio parte da última interação qualificada. Para ex-membro, parte do churn e só é reiniciado por interação posterior ao churn. As linhas usam média móvel diária de 35 dias, exibida em pontos quinzenais. Recência mede <b>interação real</b> (clique, resposta, navegação e conteúdo), nunca mensagem entregue, abertura ou leitura passiva.<br>
   <b>Thresholds.</b> Segmentação unidimensional inspirada no método do estudo “Custos acumulados por lead”: minimização da variância intrafaixa ponderada pela população e escolha de K pelo cotovelo. Na conversão do não-membro, o corte livre em dois grupos é 83 dias; exigir mínimo de 12% da população por faixa desloca o corte para 90. No ex-membro, o corte em dois grupos é 76 dias e não depende dessa restrição. No reengajamento, os cortes permanecem 71 dias para não-membro e 21/80 dias para ex-membro. Implementações reproduzíveis em <code>segmentar_curva_conversao.py</code> e <code>segmentar_curva_reengajamento.py</code>.<br>
-  <b>Três métodos.</b> O Método 1 mede conversão futura absoluta em 30/90/180 dias por tempo de silêncio. O Método 2 mede faturamento marginal real por períodos de 30 dias desde a entrada como Lead, sem reiniciar o relógio, separado entre não-membro e episódio pós-churn. O Método 3 mede reengajamento em 30 dias por tempo de silêncio. Os pontos comportamentais de 71–83 dias foram padronizados em uma janela operacional de 90 dias.<br>
+  <b>Evidência comportamental.</b> Conversão futura mede compra em 30/90/180 dias por tempo de silêncio. Reengajamento mede a ocorrência de um novo sinal nos 30 dias seguintes. Os pontos comportamentais de 71–83 dias foram padronizados em uma janela operacional de 90 dias.<br>
   <b>Árvore de sobrevivência.</b> Treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. O primeiro corte externo do ex-membro foi 85,5 dias; no não-membro, tipo de evento e recência interagem e não apareceu um único corte universal. No holdout de 179 dias, Oportunidade e Prospect não diferiram estatisticamente em nenhum público; em ex-membros, Somente Lead converteu mais que ambos. Implementações em <code>ajustar_arvore_sobrevivencia.py</code> e <code>avaliar_taxonomia_atual.py</code>.<br>
   <b>Regra decidida.</b> Lead ativo exige pelo menos uma interação voluntária qualificada nos últimos 90 dias. Sem novo sinal, vira Contato de reativação e recebe menor pressão; um novo sinal reinicia o relógio.<br>
-  <b>Origem dos gráficos.</b> Conversão absoluta: extração do BigQuery refeita em 03/09/2026 e separada entre não-membros e ex-membros. Faturamento por idade: valor real de <code>vl_payment_gross</code> da primeira compra posterior à origem do Lead, dividido por todos os Leads maduros para observar cada período — inclusive quem não comprou, com valor zero; consulta reproduzível em <code>sql/21_faturamento_marginal_por_idade_lead.sql</code>. Reengajamento: análise com todos os sinais qualificados e relógio de ex-membro iniciado no churn.<br>
+  <b>Origem dos gráficos.</b> Conversão absoluta: extração do BigQuery refeita em 03/09/2026 e separada entre não-membros e ex-membros. Reengajamento: análise com todos os sinais qualificados e relógio de ex-membro iniciado no churn.<br>
   <b>Fotografia operacional.</b> Em 03/09/2026, <code>dim_insider__contacts</code> contém 6.136.896 pessoas identificadas após deduplicação: 627.123 Clientes, 19.951 Oportunidades (fundo de funil em até 15 dias), 122.110 Prospects (produto/oferta em até 90 dias ou fundo de funil entre 16 e 90 dias), 457.951 somente Leads, 4.285.251 Contatos de reativação e 624.510 Contatos inativos. Lead ativo total = 600.012 pessoas. Consulta reproduzível em <code>sql/22_stock_definicao_lead_90d.sql</code>.<br>
   <b>Ressalvas.</b> A fronteira externa de 90 dias é a regra operacional v1; o limite de 15 dias e a hierarquia interna não estão estatisticamente validados. "Morto para CRM" ≠ irrecuperável: ads ainda alcança. "Descartar" = sair da régua de CRM, não deletar. Contagem por pessoa (dedup por identidade). Números são fotografia observada, as-of a data de cada evento.
 </div>
@@ -613,6 +575,39 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     svg.innerHTML=out;
   };
 
+  const taxonomyChart=(id,values)=>{
+    const svg=document.getElementById(id); if(!svg)return;
+    const W=600,H=330,L=48,R=18,T=22,B=70,pw=W-L-R,ph=H-T-B,max=15;
+    const labels=['Oportunidade','Prospect','Somente Lead','Contato'];
+    const colors=['var(--int)','var(--warn)','var(--accent-2)','var(--frio)'];
+    const y=v=>T+ph*(1-v/max), band=pw/4, bw=band*.52;
+    let out='';
+    [0,3,6,9,12,15].forEach(v=>{
+      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
+      out+=`<text x="${L-7}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${v}%</text>`;
+    });
+    values.forEach((d,i)=>{
+      const x=L+i*band+(band-bw)/2, cx=x+bw/2;
+      out+=`<rect x="${x}" y="${y(d.p)}" width="${bw}" height="${T+ph-y(d.p)}" rx="5" fill="${colors[i]}" opacity=".9"/>`;
+      out+=`<line x1="${cx}" y1="${y(d.hi)}" x2="${cx}" y2="${y(d.lo)}" stroke="var(--ink)" stroke-width="2"/>`;
+      out+=`<line x1="${cx-7}" y1="${y(d.hi)}" x2="${cx+7}" y2="${y(d.hi)}" stroke="var(--ink)" stroke-width="2"/>`;
+      out+=`<line x1="${cx-7}" y1="${y(d.lo)}" x2="${cx+7}" y2="${y(d.lo)}" stroke="var(--ink)" stroke-width="2"/>`;
+      out+=`<text x="${cx}" y="${y(d.p)-10}" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="700" font-family="IBM Plex Mono">${d.p.toFixed(2).replace('.',',')}%</text>`;
+      out+=`<text x="${cx}" y="${T+ph+22}" text-anchor="middle" fill="var(--ink-2)" font-size="11">${labels[i]}</text>`;
+      out+=`<text x="${cx}" y="${T+ph+40}" text-anchor="middle" fill="var(--ink-3)" font-size="10" font-family="IBM Plex Mono">n=${d.n.toLocaleString('pt-BR')}</text>`;
+    });
+    svg.innerHTML=out;
+  };
+
+  taxonomyChart('taxonomy-nm',[
+    {p:10.43,lo:7.63,hi:14.11,n:345},{p:9.32,lo:7.76,hi:11.15,n:1127},
+    {p:1.88,lo:1.62,hi:2.18,n:9265},{p:.82,lo:.76,hi:.89,n:81104}
+  ]);
+  taxonomyChart('taxonomy-ex',[
+    {p:6.37,lo:5.17,hi:7.83,n:1303},{p:6.50,lo:5.56,hi:7.58,n:2292},
+    {p:9.85,lo:8.26,hi:11.71,n:1147},{p:3.67,lo:3.32,hi:4.05,n:10166}
+  ]);
+
   const convDays=[14,28,42,56,70,84,98,112,126,140,154,168,182,196,210,224,238,252,266,280,294,308,322,336,350,364,378,392,406,420,434,448,462,476,490,504,518,532,546,560,574,588,602,616,630,644,658,672,686,700,714,728,730];
   lineChart('curve-conv',{
     max:8,step:2,days:convDays,xlabel:'Dias desde a última interação qualificada',
@@ -630,43 +625,6 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
       {color:'var(--warn)',values:[7.090,5.485,4.849,4.570,4.320,3.964,3.865,3.597,3.502,3.373,3.274,3.232,3.137,3.091,3.005,3.005,2.833,2.835,2.728,2.688,2.566,2.504,2.354,2.240,2.099,1.934,1.876,1.894,1.862,1.816,1.793,1.765,1.670,1.620,1.593,1.627,1.586,1.551,1.475,1.463,1.379,1.388,1.370,1.480,1.474,1.521,1.569,1.613,1.547,1.505,1.474,1.474,1.501]},
       {color:'var(--good)',values:[11.220,9.452,8.487,8.047,7.682,7.184,7.001,6.618,6.426,6.216,6.098,6.010,5.910,5.848,5.768,5.669,5.447,5.337,5.076,4.910,4.703,4.656,4.484,4.320,4.171,3.884,3.760,3.733,3.712,3.642,3.644,3.540,3.310,3.208,3.135,3.118,3.085,3.088,3.001,3.055,2.984,2.997,2.938,3.053,2.956,2.948,2.961,3.031,2.985,2.974,3.008,3.062,3.089]}
     ]
-  });
-
-  const revenueAgeChart=(id,c)=>{
-    const svg=document.getElementById(id); if(!svg)return;
-    const W=820,H=330,L=58,R=18,T=24,B=54,pw=W-L-R,ph=H-T-B;
-    const x=m=>L+m*pw/24, y=v=>T+ph*(1-v/c.max);
-    let out='';
-    for(let v=0;v<=c.max;v+=c.step){
-      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
-      out+=`<text x="${L-9}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">R$ ${v}</text>`;
-    }
-    [0,3,6,9,12,15,18,21,24].forEach(m=>{
-      out+=`<line x1="${x(m)}" y1="${T}" x2="${x(m)}" y2="${T+ph}" stroke="var(--line)" stroke-dasharray="3 5"/>`;
-      out+=`<text x="${x(m)}" y="${T+ph+20}" text-anchor="middle" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${m===0?'0–29d':m+'m'}</text>`;
-    });
-    const upper=c.hi.map((v,m)=>`${x(m)},${y(v)}`);
-    const lower=c.lo.map((v,m)=>`${x(m)},${y(v)}`).reverse();
-    out+=`<polygon points="${upper.concat(lower).join(' ')}" fill="var(--accent-2)" opacity=".14"/>`;
-    const pts=c.mean.map((v,m)=>`${x(m)},${y(v)}`).join(' ');
-    out+=`<polyline points="${pts}" fill="none" stroke="var(--accent-2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-    c.mean.forEach((v,m)=>out+=`<circle cx="${x(m)}" cy="${y(v)}" r="3" fill="var(--accent-2)"/>`);
-    [0,3,12,24].forEach(m=>out+=`<text x="${x(m)+(m===0?8:0)}" y="${y(c.mean[m])-9}" text-anchor="${m===0?'start':'middle'}" fill="var(--ink)" font-size="11" font-weight="700" font-family="IBM Plex Mono">R$ ${c.mean[m].toFixed(2).replace('.',',')}</text>`);
-    out+=`<text x="${L+pw/2}" y="${H-5}" text-anchor="middle" fill="var(--ink-2)" font-size="12">Períodos de 30 dias desde a entrada como Lead</text>`;
-    svg.innerHTML=out;
-  };
-
-  revenueAgeChart('revenue-age-nm',{
-    max:18,step:3,
-    mean:[17.169,2.747,1.746,1.426,1.255,1.135,1.015,.997,1.092,.976,.951,.922,.946,.765,.696,.726,.652,.679,.746,.755,.733,.644,.683,.680,.718],
-    lo:[16.954,2.693,1.701,1.382,1.217,1.101,.980,.959,1.050,.943,.918,.885,.909,.715,.663,.689,.622,.645,.713,.719,.690,.612,.650,.647,.676],
-    hi:[17.383,2.801,1.790,1.470,1.292,1.169,1.050,1.036,1.133,1.010,.983,.958,.982,.814,.729,.763,.682,.713,.780,.791,.775,.676,.717,.713,.760]
-  });
-  revenueAgeChart('revenue-age-ex',{
-    max:35,step:5,
-    mean:[32.009,8.792,6.500,5.970,5.089,4.466,4.251,4.132,4.104,3.635,3.644,3.788,3.907,2.907,2.847,2.701,2.409,2.265,2.100,1.960,1.983,1.718,1.660,1.618,1.581],
-    lo:[31.549,8.540,6.136,5.755,4.915,4.284,4.078,3.959,3.932,3.492,3.453,3.590,3.551,2.773,2.703,2.562,2.277,2.072,1.977,1.846,1.857,1.599,1.542,1.500,1.462],
-    hi:[32.469,9.044,6.865,6.185,5.264,4.648,4.423,4.306,4.276,3.779,3.834,3.986,4.264,3.041,2.992,2.840,2.541,2.459,2.223,2.073,2.108,1.836,1.779,1.736,1.699]
   });
 
   const days=[14,28,42,56,70,84,98,112,126,140,154,168,182,196,210,224,238,252,266,280,294,308,322,336,350,364,378,392,406,420,434,448,462,476,490,504,518,532,546,560,574,588,602,616,630,644,658,672,686,700,714,728,730];

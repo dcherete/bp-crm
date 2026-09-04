@@ -3,6 +3,31 @@
 Registro cronológico das decisões, achados, correções e mudanças de direção. A
 regra vigente está consolidada em `ESPECIFICACAO_DEFINICAO_LEAD.md`.
 
+## 2026-09-04 — Curadoria da narrativa executiva
+
+Foi identificado que o artifact acumulava análises válidas, tentativas
+descartadas, correções e decisões na mesma narrativa. Isso dificultava distinguir
+o que está vigente do que era apenas histórico.
+
+Decisão de curadoria:
+
+- retirar integralmente o Método 2 do artifact e da especificação vigente;
+- motivo: faturamento por idade da coorte não mede atividade atual, não descobre
+  os estados e não acompanha a evolução da pessoa entre eles;
+- manter o Método 2 somente neste registro histórico e nos arquivos analíticos,
+  para preservar rastreabilidade;
+- manter no artifact apenas definição vigente, estoque, conversão futura,
+  reengajamento, árvore de sobrevivência, teste direto da taxonomia e próximos
+  passos;
+- remover do artifact explicações de erros já corrigidos, como a contaminação de
+  ex-membros e o falso pico anual;
+- apresentar a regra de 90 dias como decisão operacional sustentada e os
+  subestados de 15/90 dias como provisórios.
+
+Também foram adicionados ao artifact dois gráficos do holdout de março/2026,
+com conversão em 179 dias e intervalos de confiança por estado e público. O
+gráfico técnico completo da árvore ficou disponível como detalhe expansível.
+
 ## 2026-09-04 — Do rótulo operacional à descoberta dos estados
 
 ### Pergunta
