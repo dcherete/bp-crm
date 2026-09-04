@@ -4,60 +4,59 @@
 <meta charset="UTF-8">
 <title>O que é um Lead</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Proposta v2 dos estados de Lead da Brasil Paralelo, derivada de árvores de sobrevivência separadas para não-membros e ex-membros.">
-<meta name="artifact-version" content="2026-09-04">
-<meta name="ai-summary" content="Proposta v2: Lead ativo exige sinal voluntário qualificado em até 90 dias. Para não-membros: Oportunidade=fundo de funil; Prospect=primeira mensagem ou produto/oferta; Somente Lead=demais sinais. Para ex-membros: Oportunidade de reativação=fundo de funil; Lead reengajado=demais sinais. Ordem validada em 7 de 7 meses.">
+<meta name="description" content="Definição operacional de Lead da Brasil Paralelo, restrita a não-membros: recência do último sinal voluntário define quem é lead; o valor prioriza quem trabalhar. Corte de 90 dias tratado como dial econômico.">
+<meta name="artifact-version" content="2026-09-04b">
+<meta name="ai-summary" content="Definição (não-membros): um lead é uma pessoa identificada, não-cliente, com intenção voluntária nos últimos 90 dias. A recência DEFINE quem é lead (gatilho de uplift); o valor/score PRIORIZA quem trabalhar. O corte de 90 dias não é uma fronteira natural — é um dial econômico: a 90d um toque WhatsApp (R$0,36) paga se uma conversão valer ≥ R$20,76. A conversão do não-membro cai 5× com a recência (2,56% em 0-15d → 0,55% em 271-366d). Ex-membros ficam FORA: não há corte de recência viável para eles (um ex calado há 3+ anos ainda converte 1,18%, acima do não-membro ativo médio).">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "name": "Definição operacional de Lead — Brasil Paralelo",
+  "name": "Definição operacional de Lead (não-membros) — Brasil Paralelo",
   "dateModified": "2026-09-04",
   "inLanguage": "pt-BR",
-  "version": "2026-09-04",
-  "abstract": "Proposta v2: Lead ativo exige sinal voluntário qualificado em 90 dias. Os estados internos são diferentes para não-membros e ex-membros e foram validados em sete snapshots mensais.",
-  "keywords": ["lead ativo", "oportunidade", "prospect", "CRM", "sobrevivência", "transição de estados"],
+  "version": "2026-09-04b",
+  "abstract": "Para não-membros, um lead é a pessoa identificada e não-cliente que demonstrou intenção voluntária nos últimos 90 dias. A recência define o lead; o valor prioriza. O corte de 90 dias é um dial econômico, não uma fronteira natural. Ex-membros são excluídos: seu valor de base não decai com o silêncio.",
+  "keywords": ["lead", "recência", "uplift", "conversão", "break-even", "CRM", "não-membro"],
   "isBasedOn": [
-    "sql/17_curva_recencia_conversao.sql",
-    "sql/18_curva_reengajamento.sql",
-    "sql/27_coorte_arvores_estados_estrita.sql",
-    "sql/28_stock_taxonomia_candidata_v2.sql"
+    "data/analysis/coorte_arvores_estados_estrita.parquet",
+    "data/analysis/stock_taxonomia_candidata_v2.csv"
   ]
 }
 </script>
 <script type="application/json" id="lead-definition-machine-readable">
 {
-  "document_role": "recommended_state_definition",
-  "version": "2026-09-04",
-  "status": "v2_validated_recommendation_pending_operational_approval",
-  "lead_active": {
-    "definition": "identified person who is not a current client and has at least one voluntary qualified interaction in the last 90 days",
-    "external_boundary_days": 90,
+  "document_role": "operational_lead_definition_non_member",
+  "version": "2026-09-04b",
+  "status": "recency_based_recommendation_pending_operational_approval",
+  "scope": "non_member_only",
+  "lead_definition": {
+    "statement": "identified person, not a current client, who showed voluntary intent in the last 90 days",
+    "defining_axis": "recency of last voluntary qualified signal",
+    "value_role": "priority ranking only, not membership",
+    "window_days": 90,
+    "window_is": "economic_dial_not_natural_boundary",
     "clock_resets_on": "new voluntary qualified interaction"
   },
-  "recommended_states": [
-    {"audience":"all","state":"Cliente","rule":"active subscription at snapshot"},
-    {"audience":"non-member","state":"Oportunidade","rule":"bottom-funnel signal in 0-90 days"},
-    {"audience":"non-member","state":"Prospect","rule":"no recent bottom funnel and prospect first message or product/offer in 0-90 days"},
-    {"audience":"non-member","state":"Somente Lead","rule":"other voluntary qualified signal in 0-90 days"},
-    {"audience":"ex-member","state":"Oportunidade de reativação","rule":"bottom-funnel signal in 0-90 days"},
-    {"audience":"ex-member","state":"Lead reengajado","rule":"other voluntary qualified signal in 0-90 days"},
-    {"audience":"all","state":"Contato","rule":">90 days without qualified signal; reachability determines CRM reactivation versus inactive"}
-  ],
-  "validation": {
-    "survival_holdout": "2026-03",
-    "temporal_ordering": "correct in 7 of 7 monthly snapshots for both audiences",
-    "non_member_179d_conversion": {"Oportunidade":0.1419,"Prospect":0.0920,"Somente Lead":0.0193,"Contato":0.0085},
-    "ex_member_179d_conversion": {"Oportunidade de reativação":0.1788,"Lead reengajado":0.0880,"Contato":0.0370},
-    "key_conclusion": "three internal active states are supported for non-members; only two are supported for ex-members"
+  "economics": {
+    "whatsapp_touch_cost_brl": 0.36,
+    "breakeven_value_per_conversion_at_90d_brl": 20.76,
+    "interpretation": "a 90-day cut is rational iff a first conversion is worth at least ~R$21 in contribution; tighter cuts require less"
+  },
+  "non_member_conversion_by_recency_90d": {
+    "0-15d": 0.0256, "16-30d": 0.0167, "31-45d": 0.0202, "46-60d": 0.0127,
+    "61-90d": 0.0136, "91-120d": 0.0108, "121-180d": 0.0092, "181-270d": 0.0069, "271-366d": 0.0055
+  },
+  "ex_member_exclusion": {
+    "reason": "no viable recency cut; value floor survives silence",
+    "evidence_conversion_90d": {"0-90d": 0.076, "367-540d": 0.0193, "731-1095d": 0.0166, ">1095d": 0.0118},
+    "benchmark_non_member_active_0-90d": 0.0173,
+    "conclusion": "an ex-member silent 3+ years still converts above the average active non-member; recency is the wrong axis for ex-members"
   },
   "evidence_limits": [
-    "90 days is an operational activity boundary, not the point at which economic value becomes zero",
-    "observed conversion is predictive association, not causal CRM lift",
-    "recency inside 90 days determines priority and SLA; the 15-day state boundary was rejected"
+    "observed conversion is predictive association, not causal CRM uplift; a suppression holdout is required to prove the touch causes the sale",
+    "90 days is an economic dial set by value-per-conversion, not a discovered cliff",
+    "recency inside the window concentrates conversion density: the freshest 15 days hold ~30% of the pool's conversions"
   ],
-  "canonical_markdown": "PROPOSTA_ESTADOS_V2.md",
-  "recommended_states_markdown": "PROPOSTA_ESTADOS_V2.md",
   "decision_log": "REGISTRO_PROJETO.md"
 }
 </script>
@@ -98,15 +97,17 @@ h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;text-wr
 header{margin-bottom:14px}
 .brand{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
 h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 0}
-.dek{color:var(--ink-2);font-size:clamp(16px,2.2vw,19px);max-width:62ch;margin-top:16px}
+.dek{color:var(--ink-2);font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin-top:16px}
 .rule{height:3px;background:var(--accent);width:64px;border-radius:3px;margin:22px 0 0}
+.scopeflag{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid var(--line-2);border-radius:8px;padding:7px 13px;font-size:13px;color:var(--ink-2);margin-top:18px}
+.scopeflag b{color:var(--ink)}
 
 .step{margin-top:clamp(38px,6vw,64px)}
 .step-h{display:flex;align-items:center;gap:14px;margin-bottom:8px}
 .chip{flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;font-family:"Bricolage Grotesque";font-weight:800;font-size:17px;display:grid;place-items:center}
 .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
 .step h2{font-size:clamp(24px,3.6vw,33px);font-weight:700;line-height:1.05}
-.step p{color:var(--ink-2);font-size:16.5px;max-width:68ch}
+.step p{color:var(--ink-2);font-size:16.5px;max-width:70ch}
 .step p b{color:var(--ink);font-weight:600}
 .lead-in{font-size:18px !important;color:var(--ink) !important}
 
@@ -114,7 +115,6 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .grid{display:grid;gap:14px}
 @media(min-width:640px){.g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr}}
 
-/* funnel */
 .funnel{display:flex;flex-direction:column;gap:10px}
 .fbar{border-radius:11px;padding:16px 20px;color:#fff;display:flex;justify-content:space-between;align-items:baseline;overflow:hidden;min-width:0}
 .fbar .lbl{font-weight:600;font-size:15px}
@@ -122,10 +122,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .fbar small{display:block;font-family:"IBM Plex Sans";font-weight:400;font-size:12px;opacity:.85}
 .f1{background:var(--cem)} .f2{background:var(--frio)} .f3{background:var(--accent)}
 .fnote{font-size:13px;color:var(--ink-3);margin-top:12px !important}
-.dupflag{display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--ink-2);margin-top:14px}
-.dupflag b{color:var(--ink)}
 
-/* two-axis */
 .axes{display:grid;gap:14px}
 @media(min-width:560px){.axes{grid-template-columns:1fr 1fr}}
 .axis{border:1px solid var(--line);border-radius:13px;padding:18px 20px;background:var(--surface)}
@@ -134,48 +131,17 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .axis .tagrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 .tg{font-size:11.5px;font-family:"IBM Plex Mono";font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface-2);color:var(--ink-2)}
 
-/* donuts */
-.donuts{display:grid;gap:20px;grid-template-columns:repeat(2,1fr)}
-@media(min-width:720px){.donuts{grid-template-columns:repeat(4,1fr)}}
-.dw{display:flex;flex-direction:column;align-items:center;text-align:center}
-.donut{width:118px;height:118px;border-radius:50%;position:relative;display:grid;place-items:center}
-.donut::after{content:"";position:absolute;inset:20px;background:var(--surface);border-radius:50%}
-.donut .ctr{position:relative;z-index:1;font-family:"Bricolage Grotesque";font-weight:800;font-size:23px;line-height:1}
-.donut .ctr small{display:block;font-family:"IBM Plex Sans";font-weight:500;font-size:10px;color:var(--ink-3);letter-spacing:.04em}
-.dw .chn{font-weight:600;font-size:14.5px;margin-top:12px}
-.dw .brk{font-family:"IBM Plex Mono";font-size:11.5px;color:var(--ink-3);margin-top:3px;line-height:1.5}
-.donleg{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:20px;font-size:12.5px;color:var(--ink-2)}
-.donleg span{display:inline-flex;align-items:center;gap:6px}
-.donleg i{width:12px;height:12px;border-radius:3px}
-
-/* taxonomy explained */
-.taxo{display:flex;flex-direction:column;gap:12px;margin-top:6px}
-.tcard{display:grid;grid-template-columns:6px 1fr auto;gap:0 16px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--surface)}
-.tcard .bar{background:var(--frio)}
-.tcard .body{padding:16px 4px 16px 0}
-.tcard .top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.tcard .nm{font-family:"Bricolage Grotesque";font-weight:700;font-size:19px}
-.tcard .def{font-size:13px;font-family:"IBM Plex Mono";color:var(--ink-3)}
-.tcard .desc{font-size:14.5px;color:var(--ink-2);margin-top:6px;max-width:60ch}
-.tcard .desc b{color:var(--ink);font-weight:600}
-.tcard .size{padding:16px 18px;text-align:right;align-self:center}
-.tcard .size .n{font-family:"IBM Plex Mono";font-weight:600;font-size:19px}
-.tcard .size .p{font-size:11.5px;color:var(--ink-3)}
-
-/* reachable callout */
 .reach-hero{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
-.reach-hero .big{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(40px,8vw,66px);line-height:.9;color:var(--good)}
+.reach-hero .big{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(40px,8vw,66px);line-height:.9;color:var(--frio)}
 .reach-hero .txt{flex:1;min-width:240px;font-size:15px;color:var(--ink-2)}
 .reach-hero .txt b{color:var(--ink)}
 
-/* impacto */
 .itile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
 .itile .k{font-size:13px;color:var(--ink-3);font-weight:500}
 .itile .v{font-family:"Bricolage Grotesque";font-weight:800;font-size:30px;margin-top:2px;line-height:1}
 .itile .d{font-size:13px;color:var(--ink-2);margin-top:6px}
-.itile .tagrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
 .acts{display:flex;flex-direction:column;gap:0}
-.act{display:grid;grid-template-columns:160px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--line)}
+.act{display:grid;grid-template-columns:170px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--line)}
 .act:first-child{border-top:none}
 .act .who{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14.5px}
 .act .who .dot{width:10px;height:10px;border-radius:50%;flex:none}
@@ -191,9 +157,8 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-3);line-height:1.7}
 .foot b{color:var(--ink-2)}
 
-/* curva de conversao */
 .chart-wrap{overflow-x:auto;margin-top:10px}
-.chart-wrap svg{display:block;min-width:760px;width:100%;height:auto}
+.chart-wrap svg{display:block;min-width:720px;width:100%;height:auto}
 .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin:4px 0 14px;font-size:12.5px;color:var(--ink-2)}
 .chart-legend span{display:inline-flex;align-items:center;gap:7px}
 .chart-legend i{width:18px;height:3px;border-radius:3px}
@@ -201,10 +166,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .chart-note b{color:var(--ink)}
 .decision-hero{margin-top:18px;background:var(--accent);color:#fff;border-radius:16px;padding:clamp(20px,4vw,32px);box-shadow:var(--shadow);font-family:"Bricolage Grotesque";font-size:clamp(21px,3.3vw,29px);font-weight:700;line-height:1.25;letter-spacing:-.015em}
 .decision-hero small{display:block;margin-top:12px;font-family:"IBM Plex Sans";font-size:13px;font-weight:400;line-height:1.55;opacity:.82;letter-spacing:0}
-.metric-row{display:grid;grid-template-columns:110px 1fr 64px;gap:12px;align-items:center;margin-top:10px;font-size:13px}
-.metric-row .track{height:12px;background:var(--surface-2);border-radius:8px;overflow:hidden}
-.metric-row .fill{height:100%;border-radius:8px;background:var(--accent-2)}
-.metric-row .mv{font-family:"IBM Plex Mono";text-align:right;color:var(--ink)}
+
 .canonical{border:1px solid var(--accent-2);background:linear-gradient(145deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}
 .canonical h3{font-size:16px;margin-bottom:8px}
 .canonical .statement{font-family:"Bricolage Grotesque";font-size:clamp(20px,3vw,27px);font-weight:700;line-height:1.3;color:var(--accent);margin-bottom:18px}
@@ -214,6 +176,22 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .canonical-row dt{font-weight:700;color:var(--ink)}
 .canonical-row dd{margin:0;color:var(--ink-2);line-height:1.55}
 @media(max-width:620px){.canonical-row{grid-template-columns:1fr;gap:3px}}
+
+table.data{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+table.data th,table.data td{padding:9px 12px;text-align:right;border-top:1px solid var(--line)}
+table.data th:first-child,table.data td:first-child{text-align:left}
+table.data thead th{border-top:none;color:var(--ink-3);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+table.data td{font-family:"IBM Plex Mono";color:var(--ink-2)}
+table.data td:first-child{font-family:"IBM Plex Sans";color:var(--ink);font-weight:500}
+table.data tr.hl td{background:var(--accent-soft);color:var(--ink)}
+table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
+
+.mrow{display:grid;grid-template-columns:88px 1fr 116px;gap:12px;align-items:center;margin-top:11px;font-size:13px}
+.mrow .track{height:22px;background:var(--surface-2);border-radius:6px;overflow:hidden;position:relative}
+.mrow .fill{height:100%;border-radius:6px;background:var(--frio);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-family:"IBM Plex Mono";font-size:11.5px;font-weight:600}
+.mrow .lab{font-weight:600;color:var(--ink)}
+.mrow .rt{font-family:"IBM Plex Mono";text-align:right;color:var(--ink-2)}
+.mrow.core .fill{background:var(--accent)}
 </style>
 </head>
 <body>
@@ -222,456 +200,182 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 <header>
   <div class="brand">Brasil Paralelo · CRM Sales Ops</div>
   <h1>O que é um Lead?</h1>
-  <p class="dek">O Insider reúne 6,14 milhões de pessoas identificadas e a operação não deve tratá-las todas como leads. Este documento define a regra vigente, registra sua evidência e separa com clareza o que ainda precisa ser validado.</p>
+  <p class="dek">O CRM decide em quem gastar atenção — um recurso caro e finito. Este documento define, para <b>não-membros</b>, quem é lead: a <b>recência</b> da última interação, não uma janela arbitrária, e não o quanto a pessoa vale.</p>
   <div class="rule"></div>
+  <div class="scopeflag">🎯 <span>Escopo: <b>não-membros</b>. Ex-membros seguem outra lógica — não se definem por recência (ver Insight).</span></div>
 </header>
 
-<!-- Resumo normativo em texto. Fonte de leitura rápida para humanos e sistemas de IA. -->
-<section id="resumo-canonico" data-document-role="canonical-definition" data-version="2026-09-04">
-  <div class="step-h"><div class="chip">0</div><div class="kicker">Proposta v2 · leitura rápida</div></div>
-  <h2>Os públicos não têm os mesmos estados</h2>
+<!-- Resumo normativo -->
+<section id="resumo-canonico" data-document-role="canonical-definition" data-version="2026-09-04b">
   <div class="card canonical">
-    <p class="statement">Lead ativo é toda pessoa identificada, não cliente, que realizou pelo menos uma interação voluntária qualificada nos últimos 90 dias.</p>
-    <p>Os estados são exclusivos e aplicados por precedência. A árvore sustenta três níveis ativos para não-membros e apenas dois para ex-membros.</p>
+    <p class="statement">Um lead é uma pessoa identificada e não-cliente que demonstrou intenção voluntária nos últimos 90 dias.</p>
     <dl class="canonical-list">
-      <div class="canonical-row"><dt>1 · Cliente</dt><dd>Possui pelo menos uma assinatura ativa na data da fotografia. Não participa da régua de aquisição.</dd></div>
-      <div class="canonical-row"><dt>Não-membro · Oportunidade</dt><dd>Teve fundo de funil nos últimos 90 dias.</dd></div>
-      <div class="canonical-row"><dt>Não-membro · Prospect</dt><dd>Sem fundo de funil recente; enviou a primeira mensagem ou visitou produto/oferta nos últimos 90 dias.</dd></div>
-      <div class="canonical-row"><dt>Não-membro · Somente Lead</dt><dd>Teve outro sinal voluntário qualificado nos últimos 90 dias.</dd></div>
-      <div class="canonical-row"><dt>Ex-membro · Oportunidade de reativação</dt><dd>Teve fundo de funil nos últimos 90 dias.</dd></div>
-      <div class="canonical-row"><dt>Ex-membro · Lead reengajado</dt><dd>Teve outro sinal voluntário qualificado nos últimos 90 dias. Não há Prospect para este público na v2.</dd></div>
-      <div class="canonical-row"><dt>Contato</dt><dd>Está há mais de 90 dias sem sinal qualificado. Canal vivo separa reativação de inativo.</dd></div>
+      <div class="canonical-row"><dt>Recência define</dt><dd>Ser lead depende de <b>ter agido recentemente</b> — é o momento em que um toque pega a pessoa receptiva. É o gatilho.</dd></div>
+      <div class="canonical-row"><dt>Valor prioriza</dt><dd>Quanto a pessoa vale é um <b>score separado</b>, não parte da definição. Ele ordena quem trabalhar primeiro, não quem é lead.</dd></div>
+      <div class="canonical-row"><dt>90 dias é um dial</dt><dd>Não é uma fronteira natural. É o corte econômico: a 90 dias, um toque de WhatsApp (R$0,36) paga se uma conversão valer <b>≥ R$20,76</b>.</dd></div>
+      <div class="canonical-row"><dt>Relógio reinicia</dt><dd>Toda nova interação voluntária qualificada recomeça a contagem.</dd></div>
     </dl>
   </div>
-  <div class="axes" style="margin-top:14px">
-    <div class="axis"><div class="q">O que reinicia o relógio?</div><div class="a">Toda nova interação voluntária qualificada. Um novo fundo de funil também promove imediatamente a pessoa a Oportunidade.</div></div>
-    <div class="axis"><div class="q">O que acontece com o tempo?</div><div class="a">Dentro dos 90 dias, a recência ordena prioridade e SLA. Ela não cria sozinha um novo estado. Depois de 90 dias sem sinal, a pessoa vira Contato.</div></div>
-    <div class="axis"><div class="q">O que sustenta 90 dias?</div><div class="a">Conversão e reengajamento localizaram a mudança comportamental principal entre 71 e 83 dias; 90 é o arredondamento operacional conservador.</div></div>
-    <div class="axis"><div class="q">O que foi retirado?</div><div class="a"><code>conversation_started</code>, porque predominavam registros associados ao vendedor. O corte interno de 15 dias também foi rejeitado como fronteira de estado.</div></div>
-  </div>
-  <div class="chart-note"><b>Status em 04/09/2026:</b> proposta v2 validada fora do tempo e pendente de aprovação operacional. Estoque recalculado: 583.468 Leads ativos — 451.640 não-membros e 131.828 ex-membros. A ordenação correta apareceu em 7 de 7 snapshots mensais.</div>
-</section>
-
-<section id="validacao-estados" data-document-role="empirical-validation" data-version="2026-09-04">
-  <div class="step-h"><div class="chip">0.1</div><div class="kicker">Teste novo · árvore de sobrevivência</div></div>
-  <h2>A proposta v2 ordena os públicos em todos os meses</h2>
-  <p>A coorte foi reconstruída sem o evento contaminado e as árvores foram ajustadas separadamente. Março/2026 permaneceu fora do desenvolvimento e foi usado como holdout final.</p>
-  <div class="grid g2" style="margin-top:18px">
-    <div class="itile"><div class="k">Estabilidade temporal</div><div class="v num" style="font-size:24px;color:var(--good)">7 de 7</div><div class="d">A ordem dos estados se repetiu em todos os snapshots mensais dos dois públicos.</div></div>
-    <div class="itile"><div class="k">Não-membro</div><div class="v num" style="font-size:24px;color:var(--accent)">3 níveis ativos</div><div class="d">Oportunidade &gt; Prospect &gt; Somente Lead, seguidos por Contato.</div></div>
-    <div class="itile"><div class="k">Ex-membro</div><div class="v num" style="font-size:24px;color:var(--warn)">2 níveis ativos</div><div class="d">Oportunidade de reativação &gt; Lead reengajado, seguidos por Contato.</div></div>
-    <div class="itile"><div class="k">Corte interno de 15 dias</div><div class="v num" style="font-size:24px;color:var(--bad)">Rejeitado</div><div class="d">Não foi estável. Recência passa a ordenar prioridade dentro do estado, não a definir o estado.</div></div>
-  </div>
-  <div class="grid g2" style="margin-top:18px">
-    <div class="card">
-      <h3 style="font-size:20px">Não-membro · conversão em 179 dias</h3>
-      <div class="chart-wrap"><svg id="taxonomy-nm" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para não-membros, com intervalo de confiança de 95%"></svg></div>
-      <p class="fnote">14,19% &gt; 9,20% &gt; 1,93% &gt; 0,85%. Todas as separações são significativas em 179 dias.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-size:20px">Ex-membro · conversão em 179 dias</h3>
-      <div class="chart-wrap"><svg id="taxonomy-ex" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para ex-membros, com intervalo de confiança de 95%"></svg></div>
-      <p class="fnote">17,88% &gt; 8,80% &gt; 3,70%. Não foi criado Prospect porque ele não formou um nível intermediário estável.</p>
-    </div>
-  </div>
-  <div class="card" style="margin-top:18px">
-    <h3 style="font-size:20px">Conversão observada no teste temporal · compra em até 179 dias</h3>
-    <div class="axes" style="margin-top:14px">
-      <div class="axis"><div class="q">Não-membro</div><div class="a">Oportunidade 14,19% · Prospect 9,20% · Somente Lead 1,93% · Contato 0,85%.</div></div>
-      <div class="axis"><div class="q">Ex-membro</div><div class="a">Oportunidade de reativação 17,88% · Lead reengajado 8,80% · Contato 3,70%.</div></div>
-    </div>
-    <p class="fnote">Oportunidade vs Prospect no não-membro: p=0,015. Oportunidade vs Lead reengajado no ex-membro: p&lt;0,001. As demais fronteiras também têm p&lt;0,001. Resultado preditivo e observacional; não mede efeito causal da comunicação.</p>
-  </div>
-  <div class="chart-note"><b>Leitura correta:</b> 90 dias continua sendo a fronteira externa. Dentro da janela, o tipo de evento define o estado; a recência define prioridade e SLA. A proposta é validada preditivamente, mas ainda precisa de aprovação antes de alterar os segmentos de produção.</div>
+  <div class="chart-note"><b>Status em 04/09/2026:</b> recomendação baseada em recência, pendente de aprovação operacional. A conversão observada é <b>associação preditiva, não uplift causal</b> — só um holdout de supressão prova que o toque causa a venda.</div>
 </section>
 
 <!-- 1 CONTEXTO -->
 <section class="step">
   <div class="step-h"><div class="chip">1</div><div class="kicker">Contexto</div></div>
-  <h2>Uma base gigante tratada como se fosse toda igual</h2>
-  <p>O que a operação chama de "base" tem três tamanhos diferentes — e nenhum deles é a base de leads. Antes de tudo, deduplicamos por identidade unificada: a mesma pessoa aparece com vários emails.</p>
+  <h2>Uma base gigante não é uma base de leads</h2>
+  <p>O Insider reúne 6,14 milhões de pessoas identificadas. Tratar todas como lead quente <b>infla toda métrica</b> e <b>gasta CRM com quem não vai responder</b>. A operação precisa de uma régua — e ela tem que dizer <b>em quem gastar atenção agora</b>.</p>
   <div class="card">
     <div class="funnel">
-      <div class="fbar f1"><span class="lbl">Histórico completo<small>pessoas já tocadas, inclui quem saiu do Insider</small></span><span class="val num">6,69M</span></div>
-      <div class="fbar f2" style="width:92%"><span class="lbl">No Insider hoje<small>pessoas identificadas e deduplicadas</small></span><span class="val num">6,14M</span></div>
-      <div class="fbar f3" style="width:33%"><span class="lbl">Interagiram no último ano<small>recorte anterior — não é a definição final</small></span><span class="val num">2,18M</span></div>
+      <div class="fbar f1"><span class="lbl">No Insider hoje<small>pessoas identificadas e deduplicadas por identidade unificada</small></span><span class="val num">6,14M</span></div>
+      <div class="fbar f2" style="width:75%"><span class="lbl">Não-membros não-clientes<small>o universo deste estudo</small></span><span class="val num">4,58M</span></div>
+      <div class="fbar f3" style="width:16%"><span class="lbl">Leads ativos (sinal ≤ 90 dias)<small>10% dos não-membros — o resto é Contato</small></span><span class="val num">452K</span></div>
     </div>
-    <div class="dupflag">🔁 <span><b>7,15M emails → 6,69M pessoas</b> no histórico. A fotografia atual do Insider contém <b>6,14M pessoas identificadas</b>, deduplicadas por identidade unificada.</span></div>
+    <p class="fnote">Dos 4,58M não-membros, só <b>452 mil</b> deram um sinal voluntário nos últimos 90 dias. Os outros 90% não são leads ativos — são Contato, trabalhados por outra régua (mais barata) ou por ads.</p>
   </div>
 </section>
 
 <!-- 2 PROBLEMA -->
 <section class="step">
   <div class="step-h"><div class="chip">2</div><div class="kicker">Problema</div></div>
-  <h2>Ninguém definiu o que é um lead</h2>
-  <p>Na ausência de uma régua, a operação pode tratar os 6,14M do Insider como leads quentes e disparar pra todo mundo. Dois custos: <b>infla toda métrica</b> ("temos 6,1M leads" é ficção) e <b>gasta CRM com quem não vai — ou não dá pra — responder.</b></p>
-  <p style="margin-top:14px">Pra cortar <b>sem viés</b>, não partimos de um palpite de prazo. Partimos de duas perguntas objetivas sobre cada pessoa, que o dado responde:</p>
+  <h2>Definir o lead pela última interação — ou por quanto ele vale?</h2>
+  <p>A palavra "lead" vinha carregando <b>duas ideias que dão populações diferentes</b>. Escolher entre elas é a decisão que trava tudo:</p>
   <div class="card">
     <div class="axes">
-      <div class="axis"><div class="q">Ela se engaja?</div><div class="a">A pessoa reage — ou só recebe? Mede o interesse dela pela BP.</div><div class="tagrow"><span class="tg">clique</span><span class="tg">resposta</span><span class="tg">visita</span><span class="tg">app</span><span class="tg">conteúdo</span></div></div>
-      <div class="axis"><div class="q">A gente alcança ela?</div><div class="a">Existe um canal de CRM vivo pra falar com ela — ou todos morreram?</div><div class="tagrow"><span class="tg">email</span><span class="tg">whatsapp</span><span class="tg">push</span><span class="tg">sms</span></div></div>
+      <div class="axis"><div class="q">Definir por recência</div><div class="a">Lead = quem <b>agiu recentemente</b>. O não-membro que clicou hoje é lead; o que sumiu há meses não é.</div><div class="tagrow"><span class="tg">clique</span><span class="tg">resposta</span><span class="tg">visita</span><span class="tg">funil</span></div></div>
+      <div class="axis"><div class="q">Definir por valor</div><div class="a">Lead = quem <b>vale a pena</b>. Ordena todo mundo por conversão esperada, mesmo sem sinal recente.</div><div class="tagrow"><span class="tg">score</span><span class="tg">propensão</span><span class="tg">LTV</span></div></div>
     </div>
-    <p class="fnote">Engajamento × alcance. Toda a definição sai do cruzamento desses dois eixos — nada de régua arbitrária.</p>
+    <p class="fnote">E uma segunda pergunta: o corte de <b>90 dias</b> — herdado da regra antiga — é bom? Ou é folclore?</p>
   </div>
 </section>
 
 <!-- 3 INSIGHT -->
 <section class="step">
   <div class="step-h"><div class="chip">3</div><div class="kicker">Insight</div></div>
-  <h2>A base "morta" não está morta — está mal-alcançada</h2>
-  <p>Silêncio num canal que não entrega não prova nada. Antes de chamar alguém de perdido, olhamos <b>quantos canais de CRM estão vivos</b> pra cada pessoa — entregamos e a última tentativa não voltou como falha ou opt-out.</p>
+  <h2>Recência é o gatilho; valor é o ranking — e para o não-membro, recência manda</h2>
+  <p>O que paga um toque não é a probabilidade de compra — é o <b>uplift</b>, o quanto o toque causa de compra a mais. E o melhor sinal observável de uplift é a <b>recência</b>: quem acabou de agir está no mercado agora, e o toque cai no momento receptivo. Valor puro confunde "ia comprar de qualquer jeito" com "compra se cutucado" — por isso ele <b>prioriza</b>, mas não <b>define</b>.</p>
+  <p style="margin-top:14px">O dado do não-membro confirma: a conversão <b>despenca com a recência</b> — de 2,56% (agiu nos últimos 15 dias) a 0,55% (271–366 dias). Recência é uma boa definição porque <b>ela separa</b>.</p>
 
   <div class="card">
-    <div class="donuts">
-      <div class="dw">
-        <div class="donut" style="background:conic-gradient(var(--good) 0 52.4%,var(--surface-2) 52.4% 100%)"><span class="ctr">52%<small>VIVO</small></span></div>
-        <div class="chn">Email</div><div class="brk">opt-in, sem bloqueio, bounce ou spam</div>
-      </div>
-      <div class="dw">
-        <div class="donut" style="background:conic-gradient(var(--good) 0 72.6%,var(--surface-2) 72.6% 100%)"><span class="ctr">73%<small>VIVO</small></span></div>
-        <div class="chn">WhatsApp</div><div class="brk">telefone com opt-in e sem opt-out</div>
-      </div>
-      <div class="dw">
-        <div class="donut" style="background:conic-gradient(var(--good) 0 12.7%,var(--surface-2) 12.7% 100%)"><span class="ctr">13%<small>OPT-IN</small></span></div>
-        <div class="chn">Push</div><div class="brk">87% sem opt-in ativo</div>
-      </div>
-      <div class="dw">
-        <div class="donut" style="background:conic-gradient(var(--good) 0 78.8%,var(--surface-2) 78.8% 100%)"><span class="ctr">79%<small>OPT-IN</small></span></div>
-        <div class="chn">SMS</div><div class="brk">telefone com opt-in e sem opt-out</div>
-      </div>
+    <div class="chart-legend">
+      <span><i style="background:var(--accent-2)"></i>Conversão em 90 dias</span>
+      <span><i style="background:var(--frio)"></i>Conversão em 179 dias</span>
     </div>
-    <div class="donleg">
-      <span><i style="background:var(--good)"></i>Canal vivo (dá pra falar)</span>
-      <span><i style="background:var(--bad)"></i>Morto (bounce / opt-out / undelivered)</span>
-      <span><i style="background:var(--surface-2)"></i>Nunca entregamos / sem app</span>
-    </div>
+    <div class="chart-wrap"><svg id="curve-rec" viewBox="0 0 820 360" role="img" aria-label="Conversão futura do não-membro por dias desde o último sinal voluntário: cai de 2,56% em 0-15 dias para 0,55% em 271-366 dias"></svg></div>
+    <p class="chart-note" style="border-color:var(--accent)"><b>Como ler:</b> cada ponto é a conversão de quem teve o último sinal naquela faixa de recência. A queda é contínua — <b>não há um penhasco em 90 dias</b>. Onde cortar é uma escolha econômica, não um ponto natural.</p>
   </div>
 
   <div class="card">
     <div class="reach-hero">
-      <div class="big">90%</div>
-      <div class="txt"><b>da base atual tem pelo menos um canal de CRM vivo.</b> São 5,50M pessoas alcançáveis por email, WhatsApp, push ou SMS. As <b>638K sem nenhum canal vivo</b> não são um beco sem saída — <b>ads alcança</b> (custom audience). Morto para CRM não é morto para a BP; só muda de canal e de custo.</div>
+      <div class="big">1,18%</div>
+      <div class="txt"><b>Por que ex-membros ficam de fora.</b> Um ex-assinante calado há <b>3+ anos</b> ainda converte 1,18% — acima do não-membro <b>ativo</b> médio (1,73%) e 5× o não-membro no mesmo silêncio. O valor de ex-assinante <b>não decai com o tempo</b>: não existe corte de recência viável para ele. Recência é o eixo errado para o ex — ele se prioriza por valor, não por janela.</div>
     </div>
   </div>
 </section>
 
-<!-- 4 EVIDENCIA -->
+<!-- 4 SOLUÇÃO -->
 <section class="step">
-  <div class="step-h"><div class="chip">4</div><div class="kicker">Evidência</div></div>
-  <h2>Duas curvas sustentam a fronteira de atividade</h2>
-  <p>Conversão futura responde se o sinal ainda prevê compra. Reengajamento responde se a pessoa ainda tende a emitir um novo sinal. São as duas análises que respondem à definição de Lead ativo.</p>
-
-  <div class="grid" style="margin-top:18px;grid-template-columns:1fr">
-    <div class="itile">
-      <div class="k">Método 1 · Conversão futura</div>
-      <div class="v" style="font-size:22px;color:var(--accent)">Ainda compra?</div>
-      <div class="d">Compara a probabilidade de compra em 30, 90 e 180 dias conforme o silêncio aumenta.</div>
-      <p class="fnote mono" style="max-width:none;white-space:nowrap;overflow-x:auto">P(compra em H | silêncio = d)</p>
-      <div class="tagrow"><span class="tg">valida sinal comercial</span></div>
-    </div>
-    <div class="itile">
-      <div class="k">Método 3 · Reengajamento</div>
-      <div class="v" style="font-size:22px;color:var(--warn)">Ainda reage?</div>
-      <div class="d">Mede a chance de uma nova interação voluntária nos próximos 30 dias e encontra mudanças de regime.</div>
-      <p class="fnote mono" style="max-width:none;white-space:nowrap;overflow-x:auto">P(novo sinal em 30d | silêncio = d)</p>
-      <div class="tagrow"><span class="tg">define temperatura</span></div>
-    </div>
-  </div>
-
+  <div class="step-h"><div class="chip">4</div><div class="kicker">Solução / Proposta</div></div>
+  <h2>O corte de 90 dias é um dial econômico — e você pode movê-lo</h2>
+  <p>Como não há penhasco, o corte certo é onde a conversão da faixa ainda <b>paga o toque</b>. A tabela mostra, para cada janela: a densidade de conversão do pool e o <b>valor por conversão</b> que zera um toque de WhatsApp (R$0,36). Escolher a janela é escolher quanto você acredita que uma conversão vale.</p>
   <div class="card">
-    <h3 style="font-size:20px">Como as evidências entram na definição</h3>
-    <div class="axes" style="margin-top:14px">
-      <div class="axis"><div class="q">Identidade de Lead</div><div class="a"><b>Interação voluntária qualificada.</b> É a regra semântica: houve um sinal real da pessoa, não apenas uma mensagem entregue ou aberta.</div></div>
-      <div class="axis"><div class="q">Temperatura</div><div class="a"><b>Mudanças da curva de reengajamento.</b> Determinam quente, aquecimento e frio por público.</div></div>
-      <div class="axis"><div class="q">Validação</div><div class="a"><b>Conversão futura.</b> Confirma se o sinal e as faixas encontradas também ordenam a probabilidade de compra.</div></div>
-    </div>
+    <table class="data">
+      <thead><tr><th>Corte (recência ≤)</th><th>Conversão do pool</th><th>Conversões capturadas*</th><th>Paga o toque se conversão vale ≥</th></tr></thead>
+      <tbody>
+        <tr><td>15 dias</td><td>2,56%</td><td>8,2%</td><td>R$14,08</td></tr>
+        <tr><td>30 dias</td><td>2,10%</td><td>13,9%</td><td>R$17,18</td></tr>
+        <tr><td>60 dias</td><td>1,88%</td><td>21,2%</td><td>R$19,18</td></tr>
+        <tr class="hl"><td>90 dias (proposto)</td><td>1,73%</td><td>27,1%</td><td>R$20,76</td></tr>
+        <tr><td>180 dias</td><td>1,39%</td><td>39,5%</td><td>R$25,91</td></tr>
+        <tr><td>366 dias</td><td>1,02%</td><td>55,9%</td><td>R$35,31</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">*Fração das conversões de não-membros que vêm de quem sinalizou dentro da janela (o resto vem da base fria, a custo muito maior). De 90 → 366 dias o pool quadruplica para só dobrar as conversões: retorno decrescente pesado.</p>
   </div>
-
-  <div class="chart-note"><b>Estado da evidência:</b> a conversão muda de regime em 83 dias para não-membro e 76 dias para ex-membro; o reengajamento muda em 71 dias para não-membro e 21/80 dias para ex-membro. Os resultados sustentam uma <b>região principal de 71–83 dias</b>, arredondada operacionalmente para 90.</div>
-
-  <div class="card">
-    <h3 style="font-size:20px">Método 1 · conversão futura do não-membro</h3>
-    <div class="chart-legend">
-      <span><i style="background:var(--accent-2)"></i>Compra em 30 dias</span>
-      <span><i style="background:var(--warn)"></i>Compra em 90 dias</span>
-      <span><i style="background:var(--good)"></i>Compra em 180 dias</span>
-      <span><i style="background:var(--ink-3);height:1px;border-top:1px dashed var(--ink-3)"></i>Baseline sem interação qualificada</span>
-    </div>
-    <div class="chart-wrap"><svg id="curve-conv" viewBox="0 0 820 350" role="img" aria-label="Conversão futura de não-membros por dias desde a interação"></svg></div>
-    <p class="fnote">Leitura: a compra futura cai conforme o último sinal envelhece. O horizonte muda a altura da curva, portanto 30, 90 ou 180 dias são janelas do <b>resultado</b>, não candidatos automáticos a threshold. Curva reprocessada no BigQuery em 03/09/2026, com sete snapshots e suavização móvel de 35 dias.</p>
-  </div>
-
-  <div class="card">
-    <h3 style="font-size:20px">Método 1 · conversão futura do ex-membro</h3>
-    <div class="chart-legend">
-      <span><i style="background:var(--accent-2)"></i>Compra em 30 dias</span>
-      <span><i style="background:var(--warn)"></i>Compra em 90 dias</span>
-      <span><i style="background:var(--good)"></i>Compra em 180 dias</span>
-    </div>
-    <div class="chart-wrap"><svg id="curve-conv-ex" viewBox="0 0 820 350" role="img" aria-label="Conversão futura de ex-membros por dias desde o churn ou interação posterior"></svg></div>
-    <p class="fnote"><b>Relógio pós-churn:</b> começa no churn e é reiniciado apenas por interação qualificada posterior. Aos 90 dias, a conversão suavizada nos 90 dias seguintes é 3,849%. Não existe baseline “nunca interagiu” equivalente para este público, porque todo ex-membro entra no relógio pela data do churn.</p>
-  </div>
-
-  <h3 style="font-size:24px;margin-top:28px">Método 3 em detalhe · quando a pessoa para de interagir?</h3>
-  <p>Generalizamos o método do estudo anterior para qualquer interação qualificada: curva de risco, suavização em cinco semanas e segmentação que minimiza a variância interna ponderada pela população.</p>
-
-  <div class="card">
-    <h3 style="font-size:20px">Como o threshold é encontrado</h3>
-    <div class="axes" style="margin-top:14px">
-      <div class="axis"><div class="q">1 · Episódio</div><div class="a">Toda interação qualificada reinicia o relógio. Medimos os dias até um novo sinal.</div></div>
-      <div class="axis"><div class="q">2 · Alvo</div><div class="a">Chance de voltar a interagir nos 30 dias seguintes, dado o silêncio acumulado.</div></div>
-      <div class="axis"><div class="q">3 · Corte ótimo</div><div class="a">Testamos todos os cortes e escolhemos os que minimizam a variância dentro de cada faixa.</div></div>
-      <div class="axis"><div class="q">4 · Restrições</div><div class="a">Peso pela população, mínimo de 12% por faixa e número de grupos definido pelo cotovelo.</div></div>
-    </div>
-    <p class="fnote mono">SSE(c) = Σ n(d) × [p(d) − média_da_faixa]²</p>
-  </div>
-
-  <div class="grid g2">
-    <div class="itile"><div class="k">Não-membro · cotovelo em 2 grupos</div><div class="v num" style="font-size:24px;color:var(--accent)">71 dias</div><div class="d">1–71d: retorno médio 17,9% · 72–730d: 2,0% · 69,5% da variância explicada</div></div>
-    <div class="itile"><div class="k">Ex-membro · cotovelo em 3 grupos</div><div class="v num" style="font-size:24px;color:var(--accent)">21 e 80 dias</div><div class="d">1–21d: 36,0% · 22–80d: 14,1% · 81–730d: 4,3% · 93,1% explicada</div></div>
-  </div>
-
-  <div class="card">
-    <h3 style="font-size:20px">Não-membro · probabilidade de voltar em 30 dias</h3>
-    <div class="chart-legend">
-      <span><i style="background:var(--good)"></i>Produto</span>
-      <span><i style="background:var(--accent-2)"></i>CRM Insider</span>
-      <span><i style="background:var(--int)"></i>Comercial</span>
-      <span><i style="background:var(--ink)"></i>Qualquer interação · alvo do modelo</span>
-      <span><i style="background:var(--ink-3);height:1px;border-top:1px dashed var(--ink-3)"></i>Baseline sem interação anterior</span>
-    </div>
-    <div class="chart-wrap"><svg id="curve-nm" viewBox="0 0 820 350" role="img" aria-label="Reengajamento de não-membros por dias de silêncio"></svg></div>
-    <p class="fnote">A linha vertical marca 71 dias, ponto em que o comportamento muda de regime. Junto aos 80 dias do ex-membro, sustenta o arredondamento operacional para 90 dias.</p>
-  </div>
-
-  <div class="card">
-    <h3 style="font-size:20px">Ex-membro · probabilidade de voltar em 30 dias</h3>
-    <div class="chart-wrap"><svg id="curve-ex" viewBox="0 0 820 350" role="img" aria-label="Reengajamento de ex-membros por dias de silêncio"></svg></div>
-    <p class="fnote"><b>Relógio corrigido:</b> dia 0 é o churn; uma interação qualificada posterior reinicia o relógio. Interações enquanto membro não entram nesta curva. As linhas verticais marcam 21 e 80 dias.</p>
-  </div>
-
-  <div class="chart-note"><b>Conclusão do reengajamento:</b> há mudanças de regime — 71 dias para não-membro; 21 e 80 dias para ex-membro. O sinal não zera depois disso, mas 90 dias é uma padronização operacional conservadora dos dois públicos.</div>
-</section>
-
-<!-- 5 DECISAO -->
-<section class="step">
-  <div class="step-h"><div class="chip">5</div><div class="kicker">Estados recomendados · v2</div></div>
-  <h2>Uma definição externa; estados internos por público</h2>
-  <div class="decision-hero">Aos 90 dias sem uma interação voluntária qualificada, a pessoa deixa de ser Lead ativo. Ela não é apagada: vira Contato e passa a uma estratégia de menor custo.<small>Dentro dos 90 dias, o tipo de evento define o estado. A recência define prioridade e SLA — não um corte adicional de estado.</small></div>
-  <p class="lead-in"><b>Não-membro:</b> fundo de funil define Oportunidade; primeira mensagem ou produto/oferta define Prospect; demais sinais definem Somente Lead. <b>Ex-membro:</b> fundo de funil define Oportunidade de reativação; demais sinais definem Lead reengajado. Não há Prospect para ex-membro na v2.</p>
-  <div class="chart-note"><b>Estoque em 03/09/2026:</b> 583.468 Leads ativos = 451.640 não-membros + 131.828 ex-membros. Os volumes foram recalculados na base completa com a whitelist estrita.</div>
-
-  <div class="card">
-    <h3 style="font-size:20px">O que reinicia os 90 dias</h3>
-    <div class="axes" style="margin-top:14px">
-      <div class="axis"><div class="q">Interação voluntária qualificada</div><div class="a">Cadastro ou recadastro; clique ou resposta em email, WhatsApp ou SMS; entrada via push; consumo identificado de conteúdo; visita a produto, plano ou oferta; conversa comercial iniciada pela pessoa; carrinho, checkout, boleto ou tentativa de pagamento.</div></div>
-      <div class="axis"><div class="q">Não reinicia o relógio</div><div class="a">Envio ou entrega; abertura de email; leitura de WhatsApp; impressão de push ou anúncio; homepage ou sessão genérica; evento técnico; bounce; opt-out; ação unilateral do vendedor; churn.</div></div>
-    </div>
-    <p class="fnote">A regra deve virar uma whitelist fechada de eventos, com pessoa identificada, remoção de bots/testes e exclusão de links operacionais como descadastro.</p>
-  </div>
-  <div class="taxo">
-    <div class="tcard"><div class="bar" style="background:var(--compra)"></div><div class="body">
-      <div class="top"><span class="nm">Cliente</span><span class="def">assinatura ativa hoje</span></div>
-      <div class="desc">Já paga. É o topo. Aqui o jogo é <b>reter e fazer upsell</b>, não converter.</div></div>
-      <div class="size"><div class="n num">627,4K</div><div class="p">10,2% da base</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--int)"></div><div class="body">
-      <div class="top"><span class="nm">Oportunidade</span><span class="def">não-membro · fundo de funil ≤ 90 dias</span></div>
-      <div class="desc">Carrinho, boleto, pagamento aguardando ou abandono. A recência define a prioridade de fechamento.</div></div>
-      <div class="size"><div class="n num">32,9K</div><div class="p">não-membros</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--warn)"></div><div class="body">
-      <div class="top"><span class="nm">Prospect</span><span class="def">não-membro · primeira mensagem ou produto/oferta</span></div>
-      <div class="desc">Demonstrou intenção, mas não chegou ao fundo de funil nos últimos 90 dias.</div></div>
-      <div class="size"><div class="n num">47,6K</div><div class="p">não-membros</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--accent)"></div><div class="body">
-      <div class="top"><span class="nm">Somente Lead</span><span class="def">não-membro · outro sinal qualificado</span></div>
-      <div class="desc">Interagiu nos últimos 90 dias, sem sinal de fundo de funil ou intenção superior.</div></div>
-      <div class="size"><div class="n num">371,2K</div><div class="p">não-membros</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--int)"></div><div class="body">
-      <div class="top"><span class="nm">Oportunidade de reativação</span><span class="def">ex-membro · fundo de funil ≤ 90 dias</span></div>
-      <div class="desc">Ex-membro que voltou a executar uma ação de compra observável.</div></div>
-      <div class="size"><div class="n num">10,3K</div><div class="p">ex-membros</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--accent)"></div><div class="body">
-      <div class="top"><span class="nm">Lead reengajado</span><span class="def">ex-membro · outro sinal qualificado</span></div>
-      <div class="desc">Voltou a interagir nos últimos 90 dias, sem novo fundo de funil. Prospect não é usado neste público.</div></div>
-      <div class="size"><div class="n num">121,5K</div><div class="p">ex-membros</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--frio)"></div><div class="body">
-      <div class="top"><span class="nm">Contato de reativação</span><span class="def">mais de 90 dias sem sinal qualificado</span></div>
-      <div class="desc">Já interagiu no passado ou ainda nunca deu um sinal qualificado, mas não é Lead ativo hoje. Se houver canal vivo, recebe <b>reativação de menor custo</b>; ao interagir, volta a Lead ativo.</div></div>
-      <div class="size"><div class="n num">4,30M</div><div class="p">70,1% da base</div></div></div>
-
-    <div class="tcard"><div class="bar" style="background:var(--cem)"></div><div class="body">
-      <div class="top"><span class="nm">Contato Inativo</span><span class="def">fora da janela e sem canal de CRM vivo</span></div>
-      <div class="desc">Não é Lead ativo e não há canal próprio para falar (email bounce/opt-out, WhatsApp morto, sem app). <b>Sai da régua de CRM</b> — mas segue alcançável por ads.</div></div>
-      <div class="size"><div class="n num">624,7K</div><div class="p">10,2% da base</div></div></div>
+  <div class="decision-hero">
+    90 dias é o corte certo se uma conversão vale ≥ ~R$21 em contribuição.
+    <small>Dado os planos anuais (R$10–65) mais renovação e cross-sell, R$21 é folgado — então 90 dias é defensável, talvez conservador. Se você contar só o valor de curto prazo, o corte aperta para ~45 dias. Os <b>15 dias mais frescos</b> convertem 2–3× o resto: é onde o SLA deve apertar, qualquer que seja a janela.</small>
   </div>
 </section>
 
-<!-- 6 IMPACTO -->
+<!-- 5 IMPACTO -->
 <section class="step">
-  <div class="step-h"><div class="chip">6</div><div class="kicker">Impacto</div></div>
-  <h2>O que muda na prática</h2>
+  <div class="step-h"><div class="chip">5</div><div class="kicker">Impacto</div></div>
+  <h2>452 mil leads reais, e um núcleo fresco que carrega o resultado</h2>
   <div class="grid g3" style="margin-top:18px">
-    <div class="itile"><div class="k">Recorte anterior de 365d</div><div class="v num" style="color:var(--accent)">2,18M</div><div class="d">vira referência histórica; não é mais apresentado como threshold matemático</div></div>
-    <div class="itile"><div class="k">Lead ativo · proposta v2</div><div class="v num" style="color:var(--frio)">583,5K</div><div class="d">9,5% da base, com estados separados por público</div></div>
-    <div class="itile"><div class="k">Sai do CRM → vai pra ads</div><div class="v num" style="color:var(--cem)">624,7K</div><div class="d">Contato fora da janela e sem canal de CRM vivo</div></div>
+    <div class="itile"><div class="k">Leads ativos (≤90d)</div><div class="v">452K</div><div class="d">10% dos não-membros — o pool que merece atenção de CRM</div></div>
+    <div class="itile"><div class="k">Núcleo fresco (0–15d)</div><div class="v">92K</div><div class="d">20% do pool, mas <b>30% das conversões</b> — prioridade máxima</div></div>
+    <div class="itile"><div class="k">Contato NM (&gt;90d)</div><div class="v">0,42%</div><div class="d">4,13M pessoas; toque só paga se conversão valer ≥ R$86</div></div>
   </div>
   <div class="card">
-    <p class="lead-in" style="margin-top:0">Cada camada ganha um tratamento — é o que o time passa a fazer diferente:</p>
+    <h3 style="font-size:16px;margin-bottom:4px">Onde estão as conversões dentro do pool de 90 dias</h3>
+    <p style="font-size:13px;color:var(--ink-3);margin:0 0 6px">Barra = pessoas na faixa · número à direita = conversão da faixa e % das conversões do pool.</p>
+    <div class="mrow core"><div class="lab">0–15 dias</div><div class="track"><div class="fill" style="width:20.4%">92K</div></div><div class="rt">2,56% · 30%</div></div>
+    <div class="mrow"><div class="lab">16–30 dias</div><div class="track"><div class="fill" style="width:22.2%">100K</div></div><div class="rt">1,67% · 21%</div></div>
+    <div class="mrow"><div class="lab">31–45 dias</div><div class="track"><div class="fill" style="width:11.7%">53K</div></div><div class="rt">2,02% · 14%</div></div>
+    <div class="mrow"><div class="lab">46–60 dias</div><div class="track"><div class="fill" style="width:18.1%">82K</div></div><div class="rt">1,27% · 13%</div></div>
+    <div class="mrow"><div class="lab">61–90 dias</div><div class="track"><div class="fill" style="width:27.6%">125K</div></div><div class="rt">1,36% · 22%</div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:16px;margin-bottom:6px">Ação por faixa de recência</h3>
     <div class="acts">
-      <div class="act"><div class="who"><span class="dot" style="background:var(--compra)"></span>Cliente</div><div class="do"><b>Reter e upsell.</b> Fora da lógica de aquisição.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--int)"></span>Oportunidade</div><div class="do"><b>Fechar.</b> Fundo de funil; recência define prioridade e SLA.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--warn)"></span>Prospect</div><div class="do"><b>Converter a intenção.</b> Produto ou oferta considerados, ainda sem ação direta de compra.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--accent)"></span>Somente Lead / reengajado</div><div class="do"><b>Nutrir e avançar.</b> Sinal qualificado sem fundo de funil recente.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--frio)"></span>Contato de reativação</div><div class="do"><b>Reativação de menor custo.</b> Volta a Lead ativo assim que der novo sinal qualificado.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--cem)"></span>Contato Inativo</div><div class="do"><b>Handoff pra ads.</b> Sai de email/WhatsApp, entra em custom audience.</div></div>
+      <div class="act"><div class="who"><span class="dot" style="background:var(--accent)"></span>0–15 dias · fresco</div><div class="do">Responder <b>rápido</b>, event-triggered. É onde o uplift e a densidade estão. SLA curto.</div></div>
+      <div class="act"><div class="who"><span class="dot" style="background:var(--frio)"></span>16–90 dias · ativo</div><div class="do">Nutrir no ritmo normal do CRM, <b>priorizado por score</b>. Ainda paga o toque.</div></div>
+      <div class="act"><div class="who"><span class="dot" style="background:var(--cem)"></span>&gt;90 dias · Contato</div><div class="do">Deixa de ser lead. Régua barata ou <b>ads</b> (custom audience) — não broadcast pago de CRM.</div></div>
     </div>
   </div>
-</section>
-
-<!-- 7 PROXIMO PASSO -->
-<section class="step">
-  <div class="step-h"><div class="chip">7</div><div class="kicker">Próximo passo</div></div>
-  <h2>Como colocar de pé</h2>
-  <ol class="steps-list">
-    <li><b>Fechar a whitelist</b> de interações voluntárias qualificadas e validar identidade, bots, testes e links operacionais.</li>
-    <li><b>Publicar a fotografia diária:</b> os volumes já foram recalculados; a consulta deve alimentar os segmentos todos os dias.</li>
-    <li><b>Aprovar a taxonomia v2:</b> três estados ativos para não-membros e dois para ex-membros.</li>
-    <li><b>Reachability como regra:</b> marcar canal vivo × morto por pessoa, pra saber quando parar de gastar CRM.</li>
-    <li><b>Ligar o handoff pra ads</b> dos 624,5K Contatos inativos — mídia paga assume, CRM solta.</li>
-  </ol>
+  <div class="chart-note"><b>O que fecha a definição:</b> a conversão aqui é associação, não prova de que o toque <b>causa</b> a venda. O próximo passo é o <b>holdout de supressão</b> — suprimir outbound de uma amostra sorteada e medir se o toque no lead fresco realmente adiciona conversão. Só ele transforma "recência define o lead" em "tocar o lead paga".</div>
 </section>
 
 <div class="foot">
-  <b>Como foi medido.</b> Histórico de eventos desde 2019 (BigQuery), deduplicado por identidade unificada (dim_person_identity) — 7,15M emails → 6,69M pessoas. A conversão usa sete snapshots mensais entre set/2025 e mar/2026, todos com 180 dias completos de observação futura; em cada snapshot, calcula os dias de silêncio e observa compras nos 30, 90 e 180 dias seguintes. Para não-membro, o relógio parte da última interação qualificada. Para ex-membro, parte do churn e só é reiniciado por interação posterior ao churn. As linhas usam média móvel diária de 35 dias, exibida em pontos quinzenais. Recência mede <b>interação real</b> (clique, resposta, navegação e conteúdo), nunca mensagem entregue, abertura ou leitura passiva.<br>
-  <b>Thresholds.</b> Segmentação unidimensional inspirada no método do estudo “Custos acumulados por lead”: minimização da variância intrafaixa ponderada pela população e escolha de K pelo cotovelo. Na conversão do não-membro, o corte livre em dois grupos é 83 dias; exigir mínimo de 12% da população por faixa desloca o corte para 90. No ex-membro, o corte em dois grupos é 76 dias e não depende dessa restrição. No reengajamento, os cortes permanecem 71 dias para não-membro e 21/80 dias para ex-membro. Implementações reproduzíveis em <code>segmentar_curva_conversao.py</code> e <code>segmentar_curva_reengajamento.py</code>.<br>
-  <b>Evidência comportamental.</b> Conversão futura mede compra em 30/90/180 dias por tempo de silêncio. Reengajamento mede a ocorrência de um novo sinal nos 30 dias seguintes. Os pontos comportamentais de 71–83 dias foram padronizados em uma janela operacional de 90 dias.<br>
-  <b>Árvores estritas.</b> Modelos separados para não-membros e ex-membros, estabilidade medida em seis meses de desenvolvimento e teste final em março/2026. A ordem da taxonomia v2 apareceu em 7 de 7 snapshots. Implementações em <code>ajustar_arvores_estados_estaveis.py</code> e <code>validar_taxonomia_candidata_v2.py</code>.<br>
-  <b>Regra recomendada.</b> Lead ativo exige pelo menos uma interação voluntária qualificada nos últimos 90 dias. Dentro da janela, o tipo de evento define o estado; a recência define prioridade. Sem novo sinal, vira Contato.<br>
-  <b>Origem dos gráficos.</b> Conversão absoluta: extração do BigQuery refeita em 03/09/2026 e separada entre não-membros e ex-membros. Reengajamento: análise com todos os sinais qualificados e relógio de ex-membro iniciado no churn.<br>
-  <b>Fotografia da proposta v2.</b> Em 03/09/2026: 627.444 Clientes; não-membros com 32.913 Oportunidades, 47.568 Prospects e 371.159 somente Leads; ex-membros com 10.319 Oportunidades de reativação e 121.509 Leads reengajados. Lead ativo total = 583.468 pessoas. Consulta em <code>sql/28_stock_taxonomia_candidata_v2.sql</code>.<br>
-  <b>Ressalvas.</b> A proposta v2 foi validada preditivamente fora do tempo, mas ainda não foi aprovada nem implantada. Conversão observada não é efeito causal do CRM. "Morto para CRM" ≠ irrecuperável: ads ainda alcança. Contagem por pessoa deduplicada.
+  <b>Fonte:</b> coorte de árvore de sobrevivência (700.923 pessoa-snapshots, 7 fotografias mensais set/2025–mar/2026), recorte de não-membros (611.931 snapshots). Conversão = primeira compra em 90/179 dias por faixa de recência do último sinal voluntário.<br>
+  <b>Volumes de base:</b> estoque de 03/09/2026 (`stock_taxonomia_candidata_v2.csv`): 452K leads ativos não-membros, 4,13M Contato.<br>
+  <b>Reprodutível em:</b> `data/analysis/coorte_arvores_estados_estrita.parquet`. <b>Registro de decisões:</b> `REGISTRO_PROJETO.md`. Versão 2026-09-04b — escopo não-membro, definição por recência.
+</div>
 </div>
 
 <script>
 (() => {
-  const lineChart=(id,c)=>{
-    const svg=document.getElementById(id); if(!svg)return;
-    const W=820,H=350,L=58,R=18,T=24,B=52,pw=W-L-R,ph=H-T-B;
-    const x=d=>L+d*pw/730, y=v=>T+ph*(1-v/c.max);
+  const recBands=[
+    {x:8,  l:'0–15',  c90:2.56, c179:3.86},
+    {x:23, l:'16–30', c90:1.67, c179:2.93},
+    {x:38, l:'31–45', c90:2.02, c179:3.18},
+    {x:53, l:'46–60', c90:1.27, c179:2.21},
+    {x:75, l:'61–90', c90:1.36, c179:2.39},
+    {x:105,l:'91–120',c90:1.08, c179:2.02},
+    {x:150,l:'121–180',c90:0.92,c179:1.67},
+    {x:225,l:'181–270',c90:0.69,c179:1.37},
+    {x:318,l:'271–366',c90:0.55,c179:1.11}
+  ];
+  const svg=document.getElementById('curve-rec');
+  if(svg){
+    const W=820,H=360,L=54,R=20,T=22,B=64,pw=W-L-R,ph=H-T-B,max=4.2,xmax=340;
+    const x=d=>L+d*pw/xmax, y=v=>T+ph*(1-v/max);
     let out='';
-    for(let v=0;v<=c.max;v+=c.step){
-      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
-      out+=`<text x="${L-9}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${v}%</text>`;
-    }
-    [0,90,180,365,540,730].forEach(d=>{
-      out+=`<line x1="${x(d)}" y1="${T}" x2="${x(d)}" y2="${T+ph}" stroke="var(--line)" stroke-dasharray="3 5"/>`;
-      out+=`<text x="${x(d)}" y="${T+ph+19}" text-anchor="middle" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${d}d</text>`;
+    // grid + y labels
+    [0,1,2,3,4].forEach(v=>{
+      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      out+=`<text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" font-family="IBM Plex Mono" fill="var(--ink-3)">${v}%</text>`;
     });
-    c.series.forEach(s=>{
-      if(Number.isFinite(s.base)) out+=`<line x1="${L}" y1="${y(s.base)}" x2="${W-R}" y2="${y(s.base)}" stroke="${s.color}" opacity=".38" stroke-dasharray="7 5"/>`;
-      const pts=c.days.map((d,i)=>`${x(d)},${y(s.values[i])}`).join(' ');
-      out+=`<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>`;
-      c.days.forEach((d,i)=>out+=`<circle cx="${x(d)}" cy="${y(s.values[i])}" r="3" fill="${s.color}"/>`);
-    });
-    out+=`<text x="${L+pw/2}" y="${H-5}" text-anchor="middle" fill="var(--ink-2)" font-size="12">${c.xlabel}</text>`;
+    // 90d marker
+    out+=`<line x1="${x(90)}" y1="${T}" x2="${x(90)}" y2="${T+ph}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.55"/>`;
+    out+=`<text x="${x(90)+6}" y="${T+13}" font-size="11" font-family="IBM Plex Mono" fill="var(--accent)" font-weight="600">corte 90d</text>`;
+    // x labels
+    recBands.forEach(b=>{ out+=`<text x="${x(b.x)}" y="${T+ph+18}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono" fill="var(--ink-3)">${b.l}</text>`; });
+    out+=`<text x="${L+pw/2}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="var(--ink-2)">dias desde o último sinal voluntário</text>`;
+    // series
+    const draw=(key,color)=>{
+      const pts=recBands.map(b=>`${x(b.x)},${y(b[key])}`).join(' ');
+      out+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+      recBands.forEach(b=>{ out+=`<circle cx="${x(b.x)}" cy="${y(b[key])}" r="3.5" fill="${color}"/>`; });
+    };
+    draw('c179','var(--frio)');
+    draw('c90','var(--accent-2)');
+    // endpoint labels for c90
+    out+=`<text x="${x(recBands[0].x)+2}" y="${y(recBands[0].c90)-9}" font-size="11" font-family="IBM Plex Mono" font-weight="600" fill="var(--accent-2)">2,56%</text>`;
+    out+=`<text x="${x(recBands[8].x)-4}" y="${y(recBands[8].c90)-9}" text-anchor="end" font-size="11" font-family="IBM Plex Mono" font-weight="600" fill="var(--accent-2)">0,55%</text>`;
     svg.innerHTML=out;
-  };
-
-  const taxonomyChart=(id,c)=>{
-    const svg=document.getElementById(id); if(!svg)return;
-    const values=c.values,W=600,H=330,L=48,R=18,T=22,B=70,pw=W-L-R,ph=H-T-B,max=21;
-    const labels=c.labels;
-    const colors=['var(--int)','var(--warn)','var(--accent-2)','var(--frio)'];
-    const y=v=>T+ph*(1-v/max), band=pw/values.length, bw=band*.52;
-    let out='';
-    [0,5,10,15,20].forEach(v=>{
-      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
-      out+=`<text x="${L-7}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${v}%</text>`;
-    });
-    values.forEach((d,i)=>{
-      const x=L+i*band+(band-bw)/2, cx=x+bw/2;
-      out+=`<rect x="${x}" y="${y(d.p)}" width="${bw}" height="${T+ph-y(d.p)}" rx="5" fill="${colors[i]}" opacity=".9"/>`;
-      out+=`<line x1="${cx}" y1="${y(d.hi)}" x2="${cx}" y2="${y(d.lo)}" stroke="var(--ink)" stroke-width="2"/>`;
-      out+=`<line x1="${cx-7}" y1="${y(d.hi)}" x2="${cx+7}" y2="${y(d.hi)}" stroke="var(--ink)" stroke-width="2"/>`;
-      out+=`<line x1="${cx-7}" y1="${y(d.lo)}" x2="${cx+7}" y2="${y(d.lo)}" stroke="var(--ink)" stroke-width="2"/>`;
-      out+=`<text x="${cx}" y="${y(d.p)-10}" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="700" font-family="IBM Plex Mono">${d.p.toFixed(2).replace('.',',')}%</text>`;
-      out+=`<text x="${cx}" y="${T+ph+22}" text-anchor="middle" fill="var(--ink-2)" font-size="11">${labels[i]}</text>`;
-      out+=`<text x="${cx}" y="${T+ph+40}" text-anchor="middle" fill="var(--ink-3)" font-size="10" font-family="IBM Plex Mono">n=${d.n.toLocaleString('pt-BR')}</text>`;
-    });
-    svg.innerHTML=out;
-  };
-
-  taxonomyChart('taxonomy-nm',{
-    labels:['Oportunidade','Prospect','Somente Lead','Contato'],
-    values:[{p:14.19,lo:11.25,hi:17.74,n:444},{p:9.20,lo:7.01,hi:11.98,n:522},
-      {p:1.93,lo:1.67,hi:2.23,n:9360},{p:.85,lo:.79,hi:.91,n:81515}]
-  });
-  taxonomyChart('taxonomy-ex',{
-    labels:['Oport. reativação','Lead reengajado','Contato'],
-    values:[{p:17.88,lo:12.96,hi:24.15,n:179},{p:8.80,lo:7.80,hi:9.91,n:2772},
-      {p:3.70,lo:3.37,hi:4.05,n:11957}]
-  });
-
-  const convDays=[14,28,42,56,70,84,98,112,126,140,154,168,182,196,210,224,238,252,266,280,294,308,322,336,350,364,378,392,406,420,434,448,462,476,490,504,518,532,546,560,574,588,602,616,630,644,658,672,686,700,714,728,730];
-  lineChart('curve-conv',{
-    max:8,step:2,days:convDays,xlabel:'Dias desde a última interação qualificada',
-    series:[
-      {color:'var(--accent-2)',base:.097,values:[1.746,1.064,.836,.723,.668,.587,.548,.480,.425,.395,.383,.363,.328,.331,.317,.308,.299,.301,.311,.329,.312,.287,.302,.305,.312,.274,.250,.223,.192,.184,.200,.218,.201,.156,.149,.135,.147,.179,.218,.236,.127,.132,.110,.100,.126,.132,.139,.142,.146,.155,.165,.179,.185]},
-      {color:'var(--warn)',base:.303,values:[3.815,2.863,2.472,2.168,2.023,1.831,1.713,1.535,1.338,1.260,1.175,1.188,1.142,1.131,1.085,1.056,1.029,1.026,1.047,1.058,1.059,1.001,.988,.924,.931,.855,.792,.742,.679,.680,.666,.686,.630,.573,.565,.543,.538,.516,.496,.495,.391,.385,.407,.409,.468,.483,.497,.509,.524,.546,.522,.536,.534]},
-      {color:'var(--good)',base:.588,values:[6.000,4.800,4.215,3.777,3.562,3.244,3.045,2.805,2.521,2.423,2.307,2.361,2.286,2.282,2.205,2.128,2.080,2.051,2.066,2.069,2.052,1.969,1.925,1.806,1.821,1.682,1.551,1.449,1.331,1.358,1.339,1.382,1.269,1.051,1.027,.960,1.002,.972,1.001,.998,.914,.929,.994,1.005,1.028,1.035,1.017,1.028,1.036,1.056,1.019,1.021,1.029]}
-    ]
-  });
-
-  lineChart('curve-conv-ex',{
-    max:12,step:2,days:convDays,xlabel:'Dias desde o churn ou última interação qualificada posterior',
-    series:[
-      {color:'var(--accent-2)',values:[3.320,2.060,1.723,1.649,1.613,1.476,1.449,1.282,1.251,1.142,1.140,1.141,1.029,1.066,1.064,1.045,1.025,.987,.846,.814,.780,.774,.814,.874,.856,.729,.641,.586,.541,.541,.595,.667,.613,.532,.473,.476,.556,.534,.464,.555,.485,.452,.428,.451,.417,.452,.485,.523,.498,.546,.563,.558,.527]},
-      {color:'var(--warn)',values:[7.090,5.485,4.849,4.570,4.320,3.964,3.865,3.597,3.502,3.373,3.274,3.232,3.137,3.091,3.005,3.005,2.833,2.835,2.728,2.688,2.566,2.504,2.354,2.240,2.099,1.934,1.876,1.894,1.862,1.816,1.793,1.765,1.670,1.620,1.593,1.627,1.586,1.551,1.475,1.463,1.379,1.388,1.370,1.480,1.474,1.521,1.569,1.613,1.547,1.505,1.474,1.474,1.501]},
-      {color:'var(--good)',values:[11.220,9.452,8.487,8.047,7.682,7.184,7.001,6.618,6.426,6.216,6.098,6.010,5.910,5.848,5.768,5.669,5.447,5.337,5.076,4.910,4.703,4.656,4.484,4.320,4.171,3.884,3.760,3.733,3.712,3.642,3.644,3.540,3.310,3.208,3.135,3.118,3.085,3.088,3.001,3.055,2.984,2.997,2.938,3.053,2.956,2.948,2.961,3.031,2.985,2.974,3.008,3.062,3.089]}
-    ]
-  });
-
-  const days=[14,28,42,56,70,84,98,112,126,140,154,168,182,196,210,224,238,252,266,280,294,308,322,336,350,364,378,392,406,420,434,448,462,476,490,504,518,532,546,560,574,588,602,616,630,644,658,672,686,700,714,728,730];
-  const charts={
-    'curve-nm':{max:30,step:5,cuts:[71],xlabel:'Dias desde a última interação qualificada',base:{prod:.273,crm:.474,com:.168,all:.731},all:[26.884,15.762,10.402,8.461,7.057,6.135,5.477,4.977,4.526,4.171,3.808,3.521,3.165,2.932,2.824,2.704,2.579,2.406,2.392,2.488,2.528,2.509,2.422,2.378,2.356,2.076,1.832,1.668,1.483,1.471,1.435,1.456,1.466,1.144,1.014,.825,.922,.887,1.046,1.024,.902,.867,.824,.797,.837,.843,.771,.802,.756,.834,.774,.760,.736],prod:[7.794,4.888,3.466,2.844,2.332,2.037,1.821,1.657,1.462,1.296,1.202,1.140,1.033,.982,.906,.878,.877,.867,.866,.892,.872,.875,.849,.827,.825,.754,.696,.660,.615,.636,.613,.622,.569,.450,.422,.340,.369,.370,.435,.429,.359,.373,.336,.341,.347,.353,.327,.363,.350,.403,.413,.415,.407],crm:[12.450,8.818,6.731,5.556,4.754,4.114,3.675,3.333,2.971,2.680,2.384,2.191,1.990,1.800,1.703,1.585,1.545,1.448,1.439,1.418,1.415,1.316,1.257,1.202,1.159,1.083,1.005,.946,.876,.859,.825,.826,.885,.686,.583,.459,.531,.479,.565,.528,.516,.474,.441,.426,.490,.494,.444,.447,.422,.462,.396,.381,.361],com:[12.839,5.447,2.521,1.925,1.546,1.380,1.248,1.139,1.114,1.122,1.104,1.014,.870,.858,.883,.895,.798,.721,.717,.852,.905,.955,.954,.973,1.002,.801,.660,.556,.449,.433,.438,.450,.413,.329,.311,.286,.304,.347,.399,.435,.288,.289,.281,.249,.222,.214,.217,.239,.237,.238,.237,.225,.227]},
-    'curve-ex':{max:35,step:5,cuts:[21,80],xlabel:'Dias desde o churn ou última interação posterior',all:[33.869,19.822,14.252,11.275,9.986,8.831,7.940,6.813,6.579,6.243,6.415,6.182,5.942,6.061,5.735,5.248,4.607,4.362,4.094,4.065,3.885,4.013,4.224,4.605,4.474,3.960,3.292,2.908,2.716,2.867,3.053,3.245,3.086,2.641,2.211,2.064,2.121,2.162,2.027,2.181,2.019,1.840,1.703,1.799,1.878,2.001,2.104,1.983,1.908,1.983,1.785,1.717,1.619],prod:[10.902,6.878,5.137,4.295,3.712,3.179,2.920,2.560,2.435,2.290,2.293,2.190,2.108,2.025,1.859,1.744,1.712,1.672,1.545,1.496,1.386,1.391,1.367,1.419,1.325,1.243,1.125,1.052,1.006,1.045,1.072,1.087,.978,.873,.771,.755,.820,.831,.782,.825,.712,.688,.663,.678,.649,.678,.731,.734,.692,.727,.733,.729,.684],crm:[12.081,8.520,6.611,5.643,5.219,4.783,4.520,3.980,3.844,3.417,3.340,3.300,3.282,3.325,3.141,2.925,2.720,2.509,2.418,2.476,2.378,2.430,2.476,2.539,2.318,2.086,1.806,1.584,1.504,1.609,1.751,1.913,1.926,1.644,1.308,1.178,1.158,1.218,1.184,1.237,1.130,.992,.906,.978,1.093,1.262,1.397,1.317,1.238,1.203,.929,.834,.789],com:[20.689,9.310,5.872,4.052,3.471,2.990,2.426,1.941,1.917,2.064,2.338,2.245,2.079,2.226,2.164,1.925,1.516,1.486,1.346,1.326,1.287,1.358,1.601,1.967,2.070,1.716,1.326,1.175,1.074,1.076,1.146,1.218,1.069,.876,.816,.793,.903,.866,.758,.879,.848,.772,.706,.720,.697,.654,.630,.605,.610,.696,.763,.814,.758]}
-  };
-  Object.entries(charts).forEach(([id,c])=>{
-    const svg=document.getElementById(id); if(!svg)return;
-    const W=820,H=350,L=58,R=18,T=24,B=52,pw=W-L-R,ph=H-T-B;
-    const x=d=>L+d*pw/730, y=v=>T+ph*(1-v/c.max);
-    let out='';
-    for(let v=0;v<=c.max;v+=c.step){
-      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
-      out+=`<text x="${L-9}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${v}%</text>`;
-    }
-    [0,90,180,365,540,730].forEach(d=>{
-      out+=`<line x1="${x(d)}" y1="${T}" x2="${x(d)}" y2="${T+ph}" stroke="var(--line)" stroke-dasharray="3 5"/>`;
-      out+=`<text x="${x(d)}" y="${T+ph+19}" text-anchor="middle" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${d}d</text>`;
-    });
-    c.cuts.forEach(d=>{
-      out+=`<line x1="${x(d)}" y1="${T}" x2="${x(d)}" y2="${T+ph}" stroke="var(--warn)" stroke-width="2.2"/>`;
-      out+=`<text x="${x(d)+6}" y="${T+14}" fill="var(--warn)" font-size="11" font-family="IBM Plex Mono">corte ${d}d</text>`;
-    });
-    [{k:'prod',color:'var(--good)'},{k:'crm',color:'var(--accent-2)'},{k:'com',color:'var(--int)'}].forEach(s=>{
-      if(c.base) out+=`<line x1="${L}" y1="${y(c.base[s.k])}" x2="${W-R}" y2="${y(c.base[s.k])}" stroke="${s.color}" opacity=".42" stroke-dasharray="7 5"/>`;
-      const pts=c[s.k].map((v,i)=>`${x(days[i])},${y(v)}`).join(' ');
-      out+=`<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-    });
-    const ptsAll=c.all.map((v,i)=>`${x(days[i])},${y(v)}`).join(' ');
-    if(c.base) out+=`<line x1="${L}" y1="${y(c.base.all)}" x2="${W-R}" y2="${y(c.base.all)}" stroke="var(--ink)" opacity=".5" stroke-width="1.5" stroke-dasharray="7 5"/>`;
-    out+=`<polyline points="${ptsAll}" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
-    out+=`<text x="${L+pw/2}" y="${H-5}" text-anchor="middle" fill="var(--ink-2)" font-size="12">${c.xlabel}</text>`;
-    svg.innerHTML=out;
-  });
+  }
 })();
 </script>
-</div>
 </body>
 </html>
