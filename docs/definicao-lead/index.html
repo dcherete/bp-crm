@@ -5,8 +5,8 @@
 <title>O que é um Lead</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Definição operacional de Lead da Brasil Paralelo (não-membros): quatro estados em dois eixos — reengajamento define a fronteira (Contato), tipo de sinal define Oportunidade/Prospect/Lead. Com tamanho e potencial de faturamento de cada estado.">
-<meta name="artifact-version" content="2026-09-04f">
-<meta name="ai-summary" content="Definição de lead (não-membros), em dois eixos. EIXO 1 reengajamento — P(volta a interagir em 30d | silêncio), qualquer interação dele conta (clique, resposta, visita, produto), cai de ~41% (fresco) a um piso de ~0,8% (~1 ano): separa ATIVO de CONTATO (parou de voltar), sem corte de dias inventado. EIXO 2 tipo do sinal — o que a pessoa fez ordena os três estados ativos, validado por conversão. QUATRO ESTADOS: Oportunidade (fundo de funil: checkout/carrinho/boleto — 32.913 pessoas, conversão 14,2%), Prospect (intenção: 1ª mensagem ou viu produto/oferta — 47.568, 9,2%), Lead (sinal genérico: clique/resposta/conteúdo/cadastro — 371.159, 1,9%), Contato (parou de voltar, reengajamento no piso — 4,13M, 0,85%). POTENCIAL DE FATURAMENTO = pessoas x conversão x ticket (R$228 = Select anual, R$19x12): Oportunidade ~R$1,06 mi, Prospect ~R$1,00 mi, Lead ~R$1,63 mi, Contato ~R$8,01 mi, total ~R$11,7 mi em 179 dias. Cuidado: o potencial do Contato é bruto e difuso (densidade 8,5 compras/mil vs 142/mil da Oportunidade, 17x menor) — quase todo taxa-base, baixo uplift; o toque paga nos densos. Escopo não-membro.">
+<meta name="artifact-version" content="2026-09-04g">
+<meta name="ai-summary" content="Definição de lead (não-membros), em dois eixos. EIXO 1 reengajamento — P(volta a interagir em 30d | silêncio), qualquer interação dele conta (clique, resposta, visita, produto), cai de ~41% (fresco) a um piso de ~0,8% (~1 ano): separa ATIVO de CONTATO (parou de voltar), sem corte de dias inventado. EIXO 2 tipo do sinal — o que a pessoa fez ordena os três estados ativos, validado por conversão. QUATRO ESTADOS: Oportunidade (fundo de funil: checkout/carrinho/boleto — 32.913 pessoas, conversão 14,2%), Prospect (intenção: 1ª mensagem ou viu produto/oferta — 47.568, 9,2%), Lead (sinal genérico: clique/resposta/conteúdo/cadastro — 371.159, 1,9%), Contato (parou de voltar, reengajamento no piso — 4,13M, 0,85%). POTENCIAL DE FATURAMENTO = pessoas x conversão x ticket médio R$180: Oportunidade ~R$0,84 mi, Prospect ~R$0,79 mi, Lead ~R$1,29 mi, Contato ~R$6,32 mi, total ~R$9,24 mi em 179 dias. Cuidado: o potencial do Contato é bruto e difuso (densidade 8,5 compras/mil vs 142/mil da Oportunidade, 17x menor) — quase todo taxa-base, baixo uplift; o toque paga nos densos. Escopo não-membro.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -41,11 +41,11 @@
   ],
   "revenue_potential": {
     "formula": "people x conversion x ticket",
-    "reference_ticket_brl": 228,
-    "ticket_note": "Select annual = R$19 x 12",
+    "reference_ticket_brl": 180,
+    "ticket_note": "average ticket",
     "window_days": 179,
-    "by_state_brl": {"Oportunidade": 1064844, "Prospect": 997788, "Lead": 1633248, "Contato": 8005716},
-    "total_brl": 11701596,
+    "by_state_brl": {"Oportunidade": 840600, "Prospect": 787680, "Lead": 1289340, "Contato": 6320340},
+    "total_brl": 9238140,
     "expected_buyers_by_state": {"Oportunidade": 4670, "Prospect": 4376, "Lead": 7163, "Contato": 35113},
     "density_buyers_per_1000": {"Oportunidade": 141.9, "Prospect": 92.0, "Lead": 19.3, "Contato": 8.5},
     "caveat": "Contato's potential is gross and diffuse (17x lower density than Oportunidade), almost all base-rate with near-zero uplift; a touch pays in the dense states"
@@ -53,7 +53,7 @@
   "evidence_limits": [
     "conversion is observed association, not causal proof a touch causes the sale",
     "the active->Contato line is where reengagement reaches its floor (~1 year): a decision, not a natural cliff",
-    "revenue potential scales linearly with the ticket, which is a parameter (R$228 = Select annual)"
+    "revenue potential scales linearly with the ticket, which is a parameter (R$180 average ticket)"
   ],
   "decision_log": "REGISTRO_PROJETO.md"
 }
@@ -237,16 +237,16 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
     <table class="data">
       <thead><tr><th>Estado</th><th>Pessoas</th><th>Compras esperadas</th><th>Potencial (R$)</th></tr></thead>
       <tbody>
-        <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>32.913</td><td>4.670</td><td>R$ 1,06 mi</td></tr>
-        <tr><td><span class="badge" style="background:var(--ativo)"></span>Prospect</td><td>47.568</td><td>4.376</td><td>R$ 1,00 mi</td></tr>
-        <tr><td><span class="badge" style="background:var(--accent-2)"></span>Lead</td><td>371.159</td><td>7.163</td><td>R$ 1,63 mi</td></tr>
-        <tr><td><span class="badge" style="background:var(--cem)"></span>Contato</td><td>4,13M</td><td>35.113</td><td>R$ 8,01 mi</td></tr>
-        <tr class="total"><td>Total</td><td>4,58M</td><td>51.323</td><td>~R$ 11,7 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>32.913</td><td>4.670</td><td>R$ 0,84 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--ativo)"></span>Prospect</td><td>47.568</td><td>4.376</td><td>R$ 0,79 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--accent-2)"></span>Lead</td><td>371.159</td><td>7.163</td><td>R$ 1,29 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--cem)"></span>Contato</td><td>4,13M</td><td>35.113</td><td>R$ 6,32 mi</td></tr>
+        <tr class="total"><td>Total</td><td>4,58M</td><td>51.323</td><td>~R$ 9,24 mi</td></tr>
       </tbody>
     </table>
-    <p class="cap">Potencial = pessoas × conversão × ticket. Ticket <b>R$ 228</b> — assinatura Select anual (R$ 19 × 12). Escala linear com o ticket. Janela de 179 dias.</p>
+    <p class="cap">Potencial = pessoas × conversão × ticket. Ticket médio <b>R$ 180</b>. Escala linear com o ticket. Janela de 179 dias.</p>
   </div>
-  <div class="chart-note warn"><b>Cuidado com o Contato:</b> ele tem o maior potencial <b>bruto</b> (R$ 8,01 mi) só pelo tamanho — mas a densidade é <b>8,5 compras por mil</b> pessoas, <b>17× menor</b> que a Oportunidade (142/mil). Esse potencial é difuso e quase todo taxa-base: o toque quase não muda o resultado. Onde o toque <b>paga</b> é nos densos (Oportunidade e Prospect). <b>Potencial bruto ≠ potencial trabalhável.</b></div>
+  <div class="chart-note warn"><b>Cuidado com o Contato:</b> ele tem o maior potencial <b>bruto</b> (R$ 6,32 mi) só pelo tamanho — mas a densidade é <b>8,5 compras por mil</b> pessoas, <b>17× menor</b> que a Oportunidade (142/mil). Esse potencial é difuso e quase todo taxa-base: o toque quase não muda o resultado. Onde o toque <b>paga</b> é nos densos (Oportunidade e Prospect). <b>Potencial bruto ≠ potencial trabalhável.</b></div>
   <div class="card">
     <h3 style="font-size:16px;margin-bottom:6px">Ação por estado</h3>
     <div class="acts">
@@ -256,12 +256,12 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
       <div class="act"><div class="who"><span class="dot" style="background:var(--cem)"></span>Contato</div><div class="do">Reativação de baixo custo ou <b>ads</b> (custom audience). Não broadcast caro — o potencial dele não é trabalhável a toque.</div></div>
     </div>
   </div>
-  <div class="chart-note warn" style="border-color:var(--bad);background:var(--bad-soft)"><b>Limite honesto:</b> a conversão é associação observada, não prova de que o <b>toque</b> causa a venda; e o ticket é um parâmetro (R$228, Select anual). O que fecha a causa é um <b>holdout de supressão</b>.</div>
+  <div class="chart-note warn" style="border-color:var(--bad);background:var(--bad-soft)"><b>Limite honesto:</b> a conversão é associação observada, não prova de que o <b>toque</b> causa a venda; e o ticket é um parâmetro (R$180, ticket médio). O que fecha a causa é um <b>holdout de supressão</b>.</div>
 </section>
 
 <div class="foot">
   <b>Reengajamento:</b> P(volta a interagir em 30d | dias de silêncio), qualquer interação da pessoa, 11 fotografias mensais (`curva_reengajamento_publico_diaria.csv`, `reengajamento_nm.py`).<br>
-  <b>Tamanho:</b> estoque da base em 03/09 (`stock_taxonomia_candidata_v2.csv`). <b>Conversão:</b> holdout de março, 179 dias. <b>Potencial:</b> pessoas × conversão × ticket R$228 (Select anual, R$19×12).<br>
+  <b>Tamanho:</b> estoque da base em 03/09 (`stock_taxonomia_candidata_v2.csv`). <b>Conversão:</b> holdout de março, 179 dias. <b>Potencial:</b> pessoas × conversão × ticket médio R$180.<br>
   <b>Versão 2026-09-04e</b> — não-membro, 4 estados em 2 eixos. <b>Registro:</b> `REGISTRO_PROJETO.md`.
 </div>
 </div>
