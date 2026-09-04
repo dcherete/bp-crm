@@ -4,56 +4,43 @@
 <meta charset="UTF-8">
 <title>O que é um Lead</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Definição operacional de Lead da Brasil Paralelo (não-membros): quatro estados em dois eixos — reengajamento define a fronteira (Contato), tipo de sinal define Oportunidade/Prospect/Lead. Com tamanho e potencial de faturamento de cada estado.">
-<meta name="artifact-version" content="2026-09-04g">
-<meta name="ai-summary" content="Definição de lead (não-membros), em dois eixos. EIXO 1 reengajamento — P(volta a interagir em 30d | silêncio), qualquer interação dele conta (clique, resposta, visita, produto), cai de ~41% (fresco) a um piso de ~0,8% (~1 ano): separa ATIVO de CONTATO (parou de voltar), sem corte de dias inventado. EIXO 2 tipo do sinal — o que a pessoa fez ordena os três estados ativos, validado por conversão. QUATRO ESTADOS: Oportunidade (fundo de funil: checkout/carrinho/boleto — 32.913 pessoas, conversão 14,2%), Prospect (intenção: 1ª mensagem ou viu produto/oferta — 47.568, 9,2%), Lead (sinal genérico: clique/resposta/conteúdo/cadastro — 371.159, 1,9%), Contato (parou de voltar, reengajamento no piso — 4,13M, 0,85%). POTENCIAL DE FATURAMENTO = pessoas x conversão x ticket médio R$180: Oportunidade ~R$0,84 mi, Prospect ~R$0,79 mi, Lead ~R$1,29 mi, Contato ~R$6,32 mi, total ~R$9,24 mi em 179 dias. Cuidado: o potencial do Contato é bruto e difuso (densidade 8,5 compras/mil vs 142/mil da Oportunidade, 17x menor) — quase todo taxa-base, baixo uplift; o toque paga nos densos. Escopo não-membro.">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "name": "Definição de Lead em 4 estados (não-membros) — Brasil Paralelo",
-  "dateModified": "2026-09-04",
-  "inLanguage": "pt-BR",
-  "version": "2026-09-04e",
-  "abstract": "Quatro estados de lead para não-membros em dois eixos: reengajamento (ainda volta?) separa ativo de Contato; tipo de sinal ordena Oportunidade/Prospect/Lead. Com tamanho real da base e potencial de faturamento por estado.",
-  "keywords": ["lead", "reengajamento", "oportunidade", "prospect", "contato", "faturamento", "CRM", "não-membro"],
-  "isBasedOn": [
-    "data/analysis/curva_reengajamento_publico_diaria.csv",
-    "data/analysis/stock_taxonomia_candidata_v2.csv",
-    "data/analysis/coorte_arvores_estados_estrita.parquet"
-  ]
-}
-</script>
+<meta name="description" content="Definição operacional de Lead da Brasil Paralelo, com alternância entre não-membros e ex-membros: reengajamento define a fronteira (Contato), tipo de sinal define os estados ativos. Tamanho e potencial de faturamento por estado.">
+<meta name="artifact-version" content="2026-09-04h">
+<meta name="ai-summary" content="Definição de lead da Brasil Paralelo em dois eixos, com alternância entre não-membros (NM) e ex-membros (EX). EIXO 1 reengajamento: P(volta a interagir em 30d | silêncio), qualquer interação dele conta — separa ATIVO de CONTATO; NM cai de ~41% a piso ~0,8%, EX de ~46% a piso ~1,9% (o dobro: ex não morre de vez). EIXO 2 tipo do sinal ordena os estados ativos. NÃO-MEMBRO (4 estados, 4,58M pessoas): Oportunidade (fundo de funil, 32.913, conv 179d 14,2%), Prospect (intenção, 47.568, 9,2%), Lead (genérico, 371.159, 1,9%), Contato (795k... na verdade 4,13M, 0,85%). Potencial NM @ ticket R$180: R$9,24 mi em 179 dias. EX-MEMBRO (3 estados, sem Prospect, 926.903 pessoas): Oportunidade (10.319, 17,9%), Lead reengajado (121.509, 8,8%), Contato (795.075, 3,7%). Potencial EX @R$180: R$7,55 mi. Ex é muito mais denso: 927k ex geram quase o mesmo que 4,58M NM; o ex Contato (3,7%) converte mais que o NM Lead ativo (1,9%). Conversão é acumulada em 179 dias, ~70% nos primeiros 90. NM e EX não se sobrepõem (6,14M = 4,58M NM + 0,93M EX + 0,63M clientes).">
 <script type="application/json" id="lead-definition-machine-readable">
 {
-  "document_role": "operational_lead_definition_non_member",
-  "version": "2026-09-04e",
-  "scope": "non_member_only",
-  "two_axes": {
-    "boundary_still_a_lead": "reengagement — P(any self-made interaction in 30d | silence); separates active from Contato; floor ~0.8%",
-    "value_which_active_state": "signal type — what the person did; validated by conversion"
+  "document_role": "operational_lead_definition",
+  "version": "2026-09-04h",
+  "publics": ["non_member", "ex_member"],
+  "axes": {"boundary": "reengagement P(any interaction in 30d | silence)", "value": "signal type"},
+  "conversion_window_days": 179,
+  "conversion_is_cumulative": true,
+  "reference_ticket_brl": 180,
+  "non_member": {
+    "people": 4582556,
+    "reengagement_p30_floor_pct": 0.84,
+    "states": [
+      {"name": "Oportunidade", "people": 32913, "conv_179d": 0.1419, "expected_buyers": 4670, "revenue_brl": 840600},
+      {"name": "Prospect", "people": 47568, "conv_179d": 0.0920, "expected_buyers": 4376, "revenue_brl": 787680},
+      {"name": "Lead", "people": 371159, "conv_179d": 0.0193, "expected_buyers": 7163, "revenue_brl": 1289340},
+      {"name": "Contato", "people": 4130916, "conv_179d": 0.0085, "expected_buyers": 35113, "revenue_brl": 6320340}
+    ],
+    "total_revenue_brl": 9238140
   },
-  "states": [
-    {"name": "Oportunidade", "rule": "recent bottom funnel (checkout, cart, boleto, waiting_payment)", "people": 32913, "conversion_179d": 0.1419},
-    {"name": "Prospect", "rule": "declared intent (first prospect message, product/offer view)", "people": 47568, "conversion_179d": 0.0920},
-    {"name": "Lead", "rule": "generic voluntary signal (click, reply, content, registration)", "people": 371159, "conversion_179d": 0.0193},
-    {"name": "Contato", "rule": "stopped returning — reengagement at floor", "people": 4130916, "conversion_179d": 0.0085}
-  ],
-  "revenue_potential": {
-    "formula": "people x conversion x ticket",
-    "reference_ticket_brl": 180,
-    "ticket_note": "average ticket",
-    "window_days": 179,
-    "by_state_brl": {"Oportunidade": 840600, "Prospect": 787680, "Lead": 1289340, "Contato": 6320340},
-    "total_brl": 9238140,
-    "expected_buyers_by_state": {"Oportunidade": 4670, "Prospect": 4376, "Lead": 7163, "Contato": 35113},
-    "density_buyers_per_1000": {"Oportunidade": 141.9, "Prospect": 92.0, "Lead": 19.3, "Contato": 8.5},
-    "caveat": "Contato's potential is gross and diffuse (17x lower density than Oportunidade), almost all base-rate with near-zero uplift; a touch pays in the dense states"
+  "ex_member": {
+    "people": 926903,
+    "reengagement_p30_floor_pct": 1.91,
+    "states": [
+      {"name": "Oportunidade", "people": 10319, "conv_179d": 0.1788, "expected_buyers": 1845, "revenue_brl": 332100},
+      {"name": "Lead reengajado", "people": 121509, "conv_179d": 0.0880, "expected_buyers": 10693, "revenue_brl": 1924740},
+      {"name": "Contato", "people": 795075, "conv_179d": 0.0370, "expected_buyers": 29418, "revenue_brl": 5295240}
+    ],
+    "total_revenue_brl": 7552080
   },
   "evidence_limits": [
     "conversion is observed association, not causal proof a touch causes the sale",
     "the active->Contato line is where reengagement reaches its floor (~1 year): a decision, not a natural cliff",
-    "revenue potential scales linearly with the ticket, which is a parameter (R$180 average ticket)"
+    "revenue scales linearly with the ticket (parameter R$180, average)"
   ],
   "decision_log": "REGISTRO_PROJETO.md"
 }
@@ -67,7 +54,7 @@
   --ink:#161b26; --ink-2:#48536a; --ink-3:#7a879e;
   --accent:#2f4a7c; --accent-2:#3f68b0; --accent-soft:#e2e9f5;
   --cem:#727d8c; --frio:#5b7a9d; --ativo:#b5822a; --int:#c4553b; --compra:#2e8b6f;
-  --good:#2e8b6f; --good-soft:#dcefe8; --warn:#b5822a; --warn-soft:#f5ecd7; --bad:#b5433a; --bad-soft:#f4ddd9;
+  --good:#2e8b6f; --warn:#b5822a; --warn-soft:#f5ecd7; --bad:#b5433a; --bad-soft:#f4ddd9;
   --shadow:0 1px 2px rgba(18,28,45,.05),0 6px 22px rgba(18,28,45,.06);
 }
 :root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
@@ -75,7 +62,7 @@
   --ink:#e9edf4; --ink-2:#a8b3c3; --ink-3:#727f92;
   --accent:#6f97d8; --accent-2:#8db0e8; --accent-soft:#1b2740;
   --cem:#8a93a2; --frio:#7b9bc0; --ativo:#dcaa4a; --int:#df6f54; --compra:#48b391;
-  --good:#48b391; --good-soft:#12312a; --warn:#dcaa4a; --warn-soft:#31280f; --bad:#d96455; --bad-soft:#331b18;
+  --good:#48b391; --warn:#dcaa4a; --warn-soft:#31280f; --bad:#d96455; --bad-soft:#331b18;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.28);
 }}
 :root[data-theme="dark"]{
@@ -83,7 +70,7 @@
   --ink:#e9edf4; --ink-2:#a8b3c3; --ink-3:#727f92;
   --accent:#6f97d8; --accent-2:#8db0e8; --accent-soft:#1b2740;
   --cem:#8a93a2; --frio:#7b9bc0; --ativo:#dcaa4a; --int:#df6f54; --compra:#48b391;
-  --good:#48b391; --good-soft:#12312a; --warn:#dcaa4a; --warn-soft:#31280f; --bad:#d96455; --bad-soft:#331b18;
+  --good:#48b391; --warn:#dcaa4a; --warn-soft:#31280f; --bad:#d96455; --bad-soft:#331b18;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.28);
 }
 *{box-sizing:border-box}
@@ -96,8 +83,12 @@ header{margin-bottom:14px}
 h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 0}
 .dek{color:var(--ink-2);font-size:clamp(16px,2.2vw,19px);max-width:64ch;margin-top:16px}
 .rule{height:3px;background:var(--accent);width:64px;border-radius:3px;margin:22px 0 0}
-.scopeflag{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid var(--line-2);border-radius:8px;padding:7px 13px;font-size:13px;color:var(--ink-2);margin-top:18px}
-.scopeflag b{color:var(--ink)}
+.toggle{display:inline-flex;margin-top:20px;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.tg-btn{border:none;background:transparent;color:var(--ink-2);font-family:"IBM Plex Sans";font-weight:600;font-size:14.5px;padding:10px 22px;cursor:pointer;transition:background .12s}
+.tg-btn.active{background:var(--accent);color:#fff}
+.only-ex{display:none}
+body[data-pub="ex"] .only-nm{display:none}
+body[data-pub="ex"] .only-ex{display:block}
 .step{margin-top:clamp(38px,6vw,64px)}
 .step-h{display:flex;align-items:center;gap:14px;margin-bottom:8px}
 .chip{flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;font-family:"Bricolage Grotesque";font-weight:800;font-size:17px;display:grid;place-items:center}
@@ -135,13 +126,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 .chart-note.warn{border-color:var(--warn);background:var(--warn-soft)}
 .chart-note b{color:var(--ink)}
 .canonical{border:1px solid var(--accent-2);background:linear-gradient(145deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}
-.canonical .statement{font-family:"Bricolage Grotesque";font-size:clamp(20px,3vw,27px);font-weight:700;line-height:1.3;color:var(--accent);margin-bottom:18px}
-.canonical-list{display:grid;gap:9px;margin-top:14px}
-.canonical-row{display:grid;grid-template-columns:minmax(130px,180px) 1fr;gap:14px;padding:11px 0;border-top:1px solid var(--line)}
-.canonical-row:first-child{border-top:0}
-.canonical-row dt{font-weight:700;color:var(--ink)}
-.canonical-row dd{margin:0;color:var(--ink-2);line-height:1.55}
-@media(max-width:620px){.canonical-row{grid-template-columns:1fr;gap:3px}}
+.canonical .statement{font-family:"Bricolage Grotesque";font-size:clamp(19px,2.8vw,25px);font-weight:700;line-height:1.3;color:var(--accent)}
 table.data{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
 table.data th,table.data td{padding:9px 12px;text-align:right;border-top:1px solid var(--line)}
 table.data th:first-child,table.data td:first-child{text-align:left}
@@ -153,28 +138,38 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 .badge{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle}
 </style>
 </head>
-<body>
+<body data-pub="nm">
 
 <div class="wrap">
 <header>
   <div class="brand">Brasil Paralelo · CRM Sales Ops</div>
   <h1>O que é um Lead?</h1>
-  <p class="dek">Para o <b>não-membro</b>: quatro estados em <b>dois eixos</b>. Um diz <b>se ainda é lead</b> (ele volta?); o outro diz <b>quanto vale</b> (o que ele fez). Nenhuma janela de dias chutada.</p>
-  <div class="rule"></div>
-  <div class="scopeflag">🎯 <span>Escopo: <b>não-membros</b>.</span></div>
+  <p class="dek">Quatro estados em <b>dois eixos</b>: reengajamento diz <b>se ainda é lead</b>; o tipo de sinal diz <b>quanto vale</b>. Nenhuma janela de dias chutada. Escolha o público:</p>
+  <div class="toggle" role="tablist">
+    <button class="tg-btn active" data-pub="nm">Não-membro</button>
+    <button class="tg-btn" data-pub="ex">Ex-membro</button>
+  </div>
+  <div class="rule" style="margin-top:22px"></div>
 </header>
 
 <!-- 1 CONTEXTO -->
 <section class="step">
   <div class="step-h"><div class="chip">1</div><div class="kicker">Contexto</div></div>
   <h2>Uma base gigante não é uma base de leads</h2>
-  <p>O Insider reúne 6,14 milhões de pessoas identificadas. Tratar todas como lead quente <b>infla toda métrica</b> e <b>gasta CRM com quem não vai responder</b>. A operação precisa de uma régua — e ela tem que dizer <b>em quem gastar atenção agora</b>.</p>
-  <div class="card">
+  <p>O Insider reúne 6,14 milhões de pessoas. Tratar todas como lead quente <b>infla toda métrica</b> e <b>gasta CRM com quem não vai responder</b>. A régua tem que dizer <b>em quem gastar atenção agora</b> — e os dois públicos não se sobrepõem.</p>
+  <div class="card only-nm">
     <div class="funnel">
-      <div class="fbar f1"><span class="lbl">No Insider hoje<small>pessoas identificadas e deduplicadas por identidade unificada</small></span><span class="val num">6,14M</span></div>
-      <div class="fbar f2" style="width:75%"><span class="lbl">Não-membros não-clientes<small>o universo deste estudo</small></span><span class="val num">4,58M</span></div>
+      <div class="fbar f1"><span class="lbl">No Insider hoje<small>identificados e deduplicados</small></span><span class="val num">6,14M</span></div>
+      <div class="fbar f2" style="width:75%"><span class="lbl">Não-membros (nunca assinaram)<small>o universo deste público</small></span><span class="val num">4,58M</span></div>
     </div>
-    <p class="fnote">A maioria não está mais voltando sozinha. Precisamos separar <b>quem ainda está</b> — e, entre esses, <b>quem vale mais</b> — sem chutar um número de dias.</p>
+    <p class="fnote">Base total: 4,58M NM + 0,93M ex-membros + 0,63M clientes = 6,14M. <b>Sem sobreposição.</b></p>
+  </div>
+  <div class="card only-ex">
+    <div class="funnel">
+      <div class="fbar f1"><span class="lbl">No Insider hoje<small>identificados e deduplicados</small></span><span class="val num">6,14M</span></div>
+      <div class="fbar f2" style="width:24%"><span class="lbl">Ex-membros (já assinaram e saíram)<small>o universo deste público</small></span><span class="val num">0,93M</span></div>
+    </div>
+    <p class="fnote">Só 0,93M — mas cada um vale muito mais: já foi cliente, e esse valor <b>não some com o silêncio</b>.</p>
   </div>
 </section>
 
@@ -182,12 +177,11 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 <section class="step">
   <div class="step-h"><div class="chip">2</div><div class="kicker">Problema</div></div>
   <h2>"Lead é quem agiu nos últimos X dias" não fecha</h2>
-  <p>A régua antiga era um corte de tempo — 365 dias, depois 90, depois 15. <b>Todo número desses é escolhido a olho</b>, e não dá pra provar nenhum: a chance de comprar cai de forma <b>suave</b> com o silêncio, sem degrau natural. Cada método deu um número diferente porque <b>não existe um corte de dias pra achar.</b></p>
+  <p>A régua antiga era um corte de tempo — 365, depois 90, depois 15 dias. <b>Todo número desses é escolhido a olho</b> e não dá pra provar: a chance de comprar cai <b>suave</b> com o silêncio, sem degrau. Trocamos por duas perguntas que o próprio comportamento responde:</p>
   <div class="card">
-    <p style="font-size:17px;color:var(--ink)">Então trocamos por duas perguntas que o próprio comportamento responde:</p>
-    <div class="axes" style="margin-top:16px">
-      <div class="axis"><div class="q">Ela ainda volta?</div><div class="a">Dado o silêncio, qual a chance dela <b>interagir de novo</b> (qualquer ação: clique, resposta, visita)? Separa <b>ativo</b> de <b>Contato</b>.</div><div class="tagrow"><span class="tg">reengajamento</span></div></div>
-      <div class="axis"><div class="q">Quanto ela vale?</div><div class="a"><b>O que ela fez</b> ordena os ativos em Oportunidade / Prospect / Lead. É a prioridade.</div><div class="tagrow"><span class="tg">tipo de sinal</span></div></div>
+    <div class="axes">
+      <div class="axis"><div class="q">Ela ainda volta?</div><div class="a">Dado o silêncio, a chance dela <b>interagir de novo</b> (qualquer ação: clique, resposta, visita). Separa <b>ativo</b> de <b>Contato</b>.</div><div class="tagrow"><span class="tg">reengajamento</span></div></div>
+      <div class="axis"><div class="q">Quanto ela vale?</div><div class="a"><b>O que ela fez</b> ordena os estados ativos. É a prioridade.</div><div class="tagrow"><span class="tg">tipo de sinal</span></div></div>
     </div>
   </div>
 </section>
@@ -196,36 +190,52 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 <section class="step">
   <div class="step-h"><div class="chip">3</div><div class="kicker">Insight</div></div>
   <h2>O eixo que separa o Contato: ela ainda volta?</h2>
-  <p>Direto do histórico: para cada tempo de silêncio, a chance da pessoa <b>voltar a interagir nos 30 dias seguintes</b> — qualquer interação dela conta (clicar num email, responder, visitar, ver produto). Cai de <b>~41%</b> (acabou de interagir) a um <b>piso de ~0,8%</b> (a mesma chance de um contato qualquer: ruído). Quem chega no piso <b>parou de voltar</b> — virou Contato. Isso saiu do dado, não de um chute.</p>
-  <div class="card">
-    <div class="chart-wrap"><svg id="curve-reeng" viewBox="0 0 820 380" role="img" aria-label="Chance do não-membro voltar a interagir em 30 dias, por dias de silêncio: cai de 41% para um piso de 0,8%"></svg></div>
-    <p class="chart-note"><b>Como ler:</b> a queda é o lead esfriando. <b>O grosso acontece nos primeiros 90 dias</b> (41% → 7%). O piso (~0,8%) é a própria assíntota da curva, por volta de <b>1 ano</b> de silêncio — não uma linha que eu desenhei.</p>
+  <div class="only-nm">
+    <p>Direto do histórico: por tempo de silêncio, a chance de <b>voltar a interagir em 30 dias</b> — qualquer ação dela conta. Cai de <b>~41%</b> (fresco) a um <b>piso de ~0,8%</b> (ruído). Quem chega no piso <b>parou de voltar</b> — virou Contato.</p>
+    <div class="card">
+      <div class="chart-wrap"><svg id="reeng-nm" viewBox="0 0 820 380" role="img" aria-label="Não-membro: chance de voltar a interagir em 30 dias por silêncio, de 41% a piso 0,8%"></svg></div>
+      <p class="chart-note"><b>O grosso da queda é nos primeiros 90 dias</b> (41% → 7%). O piso (~0,8%) é a assíntota da curva, por volta de 1 ano — não uma linha desenhada.</p>
+    </div>
+  </div>
+  <div class="only-ex">
+    <p>Mesmo eixo, para o ex: a chance de <b>voltar a interagir em 30 dias</b> cai de <b>~46%</b> (fresco) a um <b>piso de ~1,9%</b>. Repare: o piso do ex é <b>o dobro do não-membro</b> — o ex <b>não morre de vez</b>. Mesmo calado há mais de um ano, ele volta mais que o NM.</p>
+    <div class="card">
+      <div class="chart-wrap"><svg id="reeng-ex" viewBox="0 0 820 380" role="img" aria-label="Ex-membro: chance de voltar a interagir em 30 dias por silêncio, de 46% a piso 1,9%"></svg></div>
+      <p class="chart-note"><b>Piso mais alto (~1,9%).</b> Por isso o Contato do ex ainda é valioso — a relação de ex-assinante sobrevive ao silêncio.</p>
+    </div>
   </div>
 </section>
 
 <!-- 4 SOLUÇÃO -->
 <section class="step">
   <div class="step-h"><div class="chip">4</div><div class="kicker">Solução / Proposta</div></div>
-  <h2>Quatro estados</h2>
-  <div class="card canonical" data-document-role="canonical-definition" data-version="2026-09-04e">
-    <p class="statement">Um lead é um não-membro que ainda volta sozinho. Entre os que voltam, o que ele fez o separa em três; quem parou de voltar vira Contato.</p>
-    <dl class="canonical-list">
-      <div class="canonical-row"><dt>Reengajamento = fronteira</dt><dd>Separa <b>ativo</b> de <b>Contato</b> (chance de voltar no piso). Não é "dias" — é o comportamento dela.</dd></div>
-      <div class="canonical-row"><dt>Sinal = os 3 ativos</dt><dd>O <b>tipo</b> do que ela fez ordena Oportunidade / Prospect / Lead. Ordem validada pela conversão, não por suposição.</dd></div>
-      <div class="canonical-row"><dt>Relógio reinicia</dt><dd>Qualquer nova interação zera o silêncio e devolve a pessoa ao topo.</dd></div>
-    </dl>
+  <h2>Os estados</h2>
+  <div class="card canonical">
+    <p class="statement only-nm">Um não-membro é lead enquanto ainda volta sozinho. Entre os que voltam, o que ele fez o separa em Oportunidade / Prospect / Lead; quem parou de voltar vira Contato.</p>
+    <p class="statement only-ex">Um ex-membro é lead enquanto ainda volta. Entre os que voltam: Oportunidade e Lead reengajado; quem parou vira Contato — mas mesmo esse converte bem (o valor de ex-assinante não decai).</p>
   </div>
-  <div class="card">
+  <div class="card only-nm">
     <table class="data">
-      <thead><tr><th>Estado</th><th>O que é</th><th>Pessoas</th><th>Conversão</th></tr></thead>
+      <thead><tr><th>Estado</th><th>O que é</th><th>Pessoas</th><th>Conversão 179d</th></tr></thead>
       <tbody>
         <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>fundo de funil (checkout, carrinho, boleto)</td><td>32.913</td><td>14,2%</td></tr>
-        <tr><td><span class="badge" style="background:var(--ativo)"></span>Prospect</td><td>intenção declarada (1ª mensagem, viu produto/oferta)</td><td>47.568</td><td>9,2%</td></tr>
+        <tr><td><span class="badge" style="background:var(--ativo)"></span>Prospect</td><td>intenção (1ª mensagem, viu produto/oferta)</td><td>47.568</td><td>9,2%</td></tr>
         <tr><td><span class="badge" style="background:var(--accent-2)"></span>Lead</td><td>sinal genérico (clique, resposta, conteúdo, cadastro)</td><td>371.159</td><td>1,9%</td></tr>
         <tr><td><span class="badge" style="background:var(--cem)"></span>Contato</td><td>parou de voltar — reengajamento no piso</td><td>4,13M</td><td>0,85%</td></tr>
       </tbody>
     </table>
-    <p class="cap">Pessoas: estoque real da base em 03/09. Conversão: holdout de março, 179 dias. Os três ativos são cortados pelo <b>tipo de sinal</b> (fato: ou fez checkout ou não); o Contato, pelo <b>reengajamento</b> (não por dias). A linha ativo→Contato é onde a chance de voltar encosta no piso (~1 ano) — uma decisão, não um degrau.</p>
+    <p class="cap">Pessoas: estoque real 03/09. Os ativos são cortados pelo <b>tipo de sinal</b> (fato); o Contato, pelo <b>reengajamento</b> (não por dias).</p>
+  </div>
+  <div class="card only-ex">
+    <table class="data">
+      <thead><tr><th>Estado</th><th>O que é</th><th>Pessoas</th><th>Conversão 179d</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>fundo de funil (checkout, carrinho, boleto)</td><td>10.319</td><td>17,9%</td></tr>
+        <tr><td><span class="badge" style="background:var(--accent-2)"></span>Lead reengajado</td><td>sinal genérico (clique, resposta, visita)</td><td>121.509</td><td>8,8%</td></tr>
+        <tr><td><span class="badge" style="background:var(--cem)"></span>Contato</td><td>parou de voltar — reengajamento no piso</td><td>795.075</td><td>3,7%</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">Ex <b>não tem Prospect</b>: nos dados, a intenção declarada não formou um nível separado do genérico. O Contato do ex converte 3,7% — mais que o NM Lead ativo.</p>
   </div>
 </section>
 
@@ -233,9 +243,9 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 <section class="step">
   <div class="step-h"><div class="chip">5</div><div class="kicker">Impacto</div></div>
   <h2>Potencial de faturamento por estado</h2>
-  <div class="card">
+  <div class="card only-nm">
     <table class="data">
-      <thead><tr><th>Estado</th><th>Pessoas</th><th>Compras esperadas</th><th>Potencial (R$)</th></tr></thead>
+      <thead><tr><th>Estado</th><th>Pessoas</th><th>Compras esp.</th><th>Potencial (R$)</th></tr></thead>
       <tbody>
         <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>32.913</td><td>4.670</td><td>R$ 0,84 mi</td></tr>
         <tr><td><span class="badge" style="background:var(--ativo)"></span>Prospect</td><td>47.568</td><td>4.376</td><td>R$ 0,79 mi</td></tr>
@@ -244,57 +254,91 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
         <tr class="total"><td>Total</td><td>4,58M</td><td>51.323</td><td>~R$ 9,24 mi</td></tr>
       </tbody>
     </table>
-    <p class="cap">Potencial = pessoas × conversão × ticket. Ticket médio <b>R$ 180</b>. Escala linear com o ticket. Janela de 179 dias.</p>
+    <p class="cap">Potencial = pessoas × conversão × ticket médio <b>R$ 180</b>. Escala linear com o ticket. Janela de 179 dias.</p>
   </div>
-  <div class="chart-note warn"><b>Cuidado com o Contato:</b> ele tem o maior potencial <b>bruto</b> (R$ 6,32 mi) só pelo tamanho — mas a densidade é <b>8,5 compras por mil</b> pessoas, <b>17× menor</b> que a Oportunidade (142/mil). Esse potencial é difuso e quase todo taxa-base: o toque quase não muda o resultado. Onde o toque <b>paga</b> é nos densos (Oportunidade e Prospect). <b>Potencial bruto ≠ potencial trabalhável.</b></div>
+  <div class="card only-ex">
+    <table class="data">
+      <thead><tr><th>Estado</th><th>Pessoas</th><th>Compras esp.</th><th>Potencial (R$)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge" style="background:var(--int)"></span>Oportunidade</td><td>10.319</td><td>1.845</td><td>R$ 0,33 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--accent-2)"></span>Lead reengajado</td><td>121.509</td><td>10.693</td><td>R$ 1,92 mi</td></tr>
+        <tr><td><span class="badge" style="background:var(--cem)"></span>Contato</td><td>795.075</td><td>29.418</td><td>R$ 5,30 mi</td></tr>
+        <tr class="total"><td>Total</td><td>926.903</td><td>41.956</td><td>~R$ 7,55 mi</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">Potencial = pessoas × conversão × ticket médio <b>R$ 180</b>. Janela de 179 dias. <b>927K ex geram quase o mesmo que 4,58M NM</b> — densidade 4–5× maior.</p>
+  </div>
+
   <div class="card">
-    <h3 style="font-size:16px;margin-bottom:6px">Ação por estado</h3>
-    <div class="acts">
-      <div class="act"><div class="who"><span class="dot" style="background:var(--int)"></span>Oportunidade</div><div class="do">Fechar <b>agora</b>, event-triggered, SLA curto. Onde a chance de voltar e de comprar coincidem.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--ativo)"></span>Prospect</div><div class="do">Nutrir a intenção até o fundo de funil (o checkout).</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--accent-2)"></span>Lead</div><div class="do">Nutrir para provocar um sinal mais forte — qualquer interação <b>zera o relógio</b>.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--cem)"></span>Contato</div><div class="do">Reativação de baixo custo ou <b>ads</b> (custom audience). Não broadcast caro — o potencial dele não é trabalhável a toque.</div></div>
-    </div>
+    <h3 style="font-size:16px;margin-bottom:4px">Quando essas compras acontecem</h3>
+    <p style="font-size:13px;color:var(--ink-3);margin:0 0 4px">A conversão é acumulada — cresce até 179 dias, mas ~70% já veio nos primeiros 90.</p>
+    <table class="data only-nm">
+      <thead><tr><th>Estado (NM)</th><th>em 30d</th><th>em 90d</th><th>em 179d</th></tr></thead>
+      <tbody>
+        <tr><td>Oportunidade</td><td>4,3%</td><td>10,1%</td><td>14,2%</td></tr>
+        <tr><td>Prospect</td><td>2,5%</td><td>5,8%</td><td>9,2%</td></tr>
+        <tr><td>Lead</td><td>0,5%</td><td>1,3%</td><td>1,9%</td></tr>
+        <tr><td>Contato</td><td>0,2%</td><td>0,5%</td><td>0,85%</td></tr>
+      </tbody>
+    </table>
+    <table class="data only-ex">
+      <thead><tr><th>Estado (Ex)</th><th>em 30d</th><th>em 90d</th><th>em 179d</th></tr></thead>
+      <tbody>
+        <tr><td>Oportunidade</td><td>7,8%</td><td>12,9%</td><td>17,9%</td></tr>
+        <tr><td>Lead reengajado</td><td>2,1%</td><td>5,1%</td><td>8,8%</td></tr>
+        <tr><td>Contato</td><td>0,6%</td><td>1,9%</td><td>3,7%</td></tr>
+      </tbody>
+    </table>
   </div>
-  <div class="chart-note warn" style="border-color:var(--bad);background:var(--bad-soft)"><b>Limite honesto:</b> a conversão é associação observada, não prova de que o <b>toque</b> causa a venda; e o ticket é um parâmetro (R$180, ticket médio). O que fecha a causa é um <b>holdout de supressão</b>.</div>
+
+  <div class="chart-note warn only-nm"><b>Cuidado com o Contato:</b> maior potencial <b>bruto</b> (R$ 6,32 mi) só pelo tamanho — densidade 8,5 compras/mil vs 142/mil da Oportunidade (17× menor). Quase todo taxa-base: o toque quase não muda. <b>Potencial bruto ≠ trabalhável.</b></div>
+  <div class="chart-note warn only-ex"><b>O Contato do ex é diferente:</b> converte 3,7% (não é "morto"). O potencial dele (R$ 5,30 mi) é mais real que o do NM — mas ainda é volume grande a baixo custo; priorize por reengajamento recente dentro dele.</div>
+
+  <div class="chart-note" style="border-color:var(--bad);background:var(--bad-soft)"><b>Limite honesto:</b> a conversão é associação, não prova de que o <b>toque</b> causa a venda; o ticket é parâmetro (R$180). O que fecha a causa é um <b>holdout de supressão</b>.</div>
 </section>
 
 <div class="foot">
-  <b>Reengajamento:</b> P(volta a interagir em 30d | dias de silêncio), qualquer interação da pessoa, 11 fotografias mensais (`curva_reengajamento_publico_diaria.csv`, `reengajamento_nm.py`).<br>
-  <b>Tamanho:</b> estoque da base em 03/09 (`stock_taxonomia_candidata_v2.csv`). <b>Conversão:</b> holdout de março, 179 dias. <b>Potencial:</b> pessoas × conversão × ticket médio R$180.<br>
-  <b>Versão 2026-09-04e</b> — não-membro, 4 estados em 2 eixos. <b>Registro:</b> `REGISTRO_PROJETO.md`.
+  <b>Reengajamento:</b> P(volta a interagir em 30d | silêncio), qualquer interação, 11 fotografias mensais (`curva_reengajamento_publico_diaria.csv`). <b>Tamanho:</b> estoque 03/09 (`stock_taxonomia_candidata_v2.csv`). <b>Conversão:</b> holdout março, 30/90/179 dias (`validacao_taxonomia_candidata_v2.csv`). <b>Potencial:</b> pessoas × conversão × ticket médio R$180.<br>
+  <b>Versão 2026-09-04h</b> — não-membro + ex-membro, 2 eixos. <b>Registro:</b> `REGISTRO_PROJETO.md`.
 </div>
 </div>
 
 <script>
 (() => {
-  const pts=[
-    {x:3.5,v:40.84},{x:11,v:27.80},{x:22,v:16.36},{x:45,v:9.72},{x:75,v:6.74},
-    {x:120,v:4.74},{x:200,v:3.02},{x:307,v:2.40},{x:457,v:1.27},{x:640,v:0.84}
-  ];
-  const floor=0.84;
-  const svg=document.getElementById('curve-reeng');
-  if(!svg)return;
-  const W=820,H=380,L=52,R=24,T=22,B=60,pw=W-L-R,ph=H-T-B,max=44,xmax=730;
-  const x=d=>L+d*pw/xmax, y=v=>T+ph*(1-v/max);
-  let out='';
-  [0,10,20,30,40].forEach(v=>{
-    out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
-    out+=`<text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" font-family="IBM Plex Mono" fill="var(--ink-3)">${v}%</text>`;
-  });
-  out+=`<line x1="${L}" y1="${y(floor)}" x2="${W-R}" y2="${y(floor)}" stroke="var(--ink-3)" stroke-width="1.3" stroke-dasharray="5 5"/>`;
-  out+=`<text x="${W-R}" y="${y(floor)-6}" text-anchor="end" font-size="10.5" font-family="IBM Plex Mono" fill="var(--ink-3)">piso ~0,8% (ruído = Contato)</text>`;
-  [0,90,180,365,550,730].forEach(d=>{
-    out+=`<text x="${x(d)}" y="${T+ph+20}" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono" fill="var(--ink-3)">${d}</text>`;
-  });
-  out+=`<text x="${L+pw/2}" y="${H-6}" text-anchor="middle" font-size="11.5" fill="var(--ink-2)">dias de silêncio (desde a última interação)</text>`;
-  out+=`<line x1="${x(90)}" y1="${T}" x2="${x(90)}" y2="${T+ph}" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.5"/>`;
-  out+=`<text x="${x(90)+6}" y="${T+13}" font-size="10.5" font-family="IBM Plex Mono" fill="var(--accent)" font-weight="600">90d</text>`;
-  const poly=pts.map(p=>`${x(p.x)},${y(p.v)}`).join(' ');
-  out+=`<polyline points="${poly}" fill="none" stroke="var(--accent-2)" stroke-width="2.6" stroke-linejoin="round"/>`;
-  pts.forEach(p=>out+=`<circle cx="${x(p.x)}" cy="${y(p.v)}" r="3.4" fill="var(--accent-2)"/>`);
-  out+=`<text x="${x(3.5)+6}" y="${y(40.84)+2}" font-size="12" font-family="IBM Plex Mono" font-weight="600" fill="var(--accent-2)">41%</text>`;
-  svg.innerHTML=out;
+  // toggle
+  document.querySelectorAll('.tg-btn').forEach(b=>b.addEventListener('click',()=>{
+    document.body.dataset.pub=b.dataset.pub;
+    document.querySelectorAll('.tg-btn').forEach(x=>x.classList.toggle('active',x.dataset.pub===b.dataset.pub));
+  }));
+
+  // reengagement chart
+  const draw=(id,pts,floor,max,ticks,floorLabel)=>{
+    const svg=document.getElementById(id); if(!svg)return;
+    const W=820,H=380,L=52,R=24,T=22,B=60,pw=W-L-R,ph=H-T-B,xmax=730;
+    const x=d=>L+d*pw/xmax, y=v=>T+ph*(1-v/max);
+    let out='';
+    ticks.forEach(v=>{
+      out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      out+=`<text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" font-family="IBM Plex Mono" fill="var(--ink-3)">${v}%</text>`;
+    });
+    out+=`<line x1="${L}" y1="${y(floor)}" x2="${W-R}" y2="${y(floor)}" stroke="var(--ink-3)" stroke-width="1.3" stroke-dasharray="5 5"/>`;
+    out+=`<text x="${W-R}" y="${y(floor)-6}" text-anchor="end" font-size="10.5" font-family="IBM Plex Mono" fill="var(--ink-3)">${floorLabel}</text>`;
+    [0,90,180,365,550,730].forEach(d=>{
+      out+=`<text x="${x(d)}" y="${T+ph+20}" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono" fill="var(--ink-3)">${d}</text>`;
+    });
+    out+=`<text x="${L+pw/2}" y="${H-6}" text-anchor="middle" font-size="11.5" fill="var(--ink-2)">dias de silêncio (desde a última interação)</text>`;
+    out+=`<line x1="${x(90)}" y1="${T}" x2="${x(90)}" y2="${T+ph}" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.5"/>`;
+    out+=`<text x="${x(90)+6}" y="${T+13}" font-size="10.5" font-family="IBM Plex Mono" fill="var(--accent)" font-weight="600">90d</text>`;
+    const poly=pts.map(p=>`${x(p[0])},${y(p[1])}`).join(' ');
+    out+=`<polyline points="${poly}" fill="none" stroke="var(--accent-2)" stroke-width="2.6" stroke-linejoin="round"/>`;
+    pts.forEach(p=>out+=`<circle cx="${x(p[0])}" cy="${y(p[1])}" r="3.4" fill="var(--accent-2)"/>`);
+    out+=`<text x="${x(pts[0][0])+6}" y="${y(pts[0][1])+2}" font-size="12" font-family="IBM Plex Mono" font-weight="600" fill="var(--accent-2)">${Math.round(pts[0][1])}%</text>`;
+    svg.innerHTML=out;
+  };
+  const nm=[[3.5,40.84],[11,27.80],[22,16.36],[45,9.72],[75,6.74],[120,4.74],[200,3.02],[307,2.40],[457,1.27],[640,0.84]];
+  const ex=[[3.5,46.2],[11,35.6],[22,20.0],[45,13.4],[75,9.7],[120,6.9],[200,5.7],[307,4.2],[457,2.6],[640,1.9]];
+  draw('reeng-nm',nm,0.84,44,[0,10,20,30,40],'piso ~0,8% (Contato)');
+  draw('reeng-ex',ex,1.91,50,[0,10,20,30,40,50],'piso ~1,9% (o dobro do NM)');
 })();
 </script>
 </body>
