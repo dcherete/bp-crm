@@ -205,20 +205,6 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
   <div class="scopeflag">🎯 <span>Escopo: <b>não-membros</b>. Ex-membros seguem outra lógica — não se definem por recência (ver Insight).</span></div>
 </header>
 
-<!-- Resumo normativo -->
-<section id="resumo-canonico" data-document-role="canonical-definition" data-version="2026-09-04b">
-  <div class="card canonical">
-    <p class="statement">Um lead é uma pessoa identificada e não-cliente que demonstrou intenção voluntária nos últimos 90 dias.</p>
-    <dl class="canonical-list">
-      <div class="canonical-row"><dt>Recência define</dt><dd>Ser lead depende de <b>ter agido recentemente</b> — é o momento em que um toque pega a pessoa receptiva. É o gatilho.</dd></div>
-      <div class="canonical-row"><dt>Valor prioriza</dt><dd>Quanto a pessoa vale é um <b>score separado</b>, não parte da definição. Ele ordena quem trabalhar primeiro, não quem é lead.</dd></div>
-      <div class="canonical-row"><dt>90 dias é um dial</dt><dd>Não é uma fronteira natural. É o corte econômico: a 90 dias, um toque de WhatsApp (R$0,36) paga se uma conversão valer <b>≥ R$20,76</b>.</dd></div>
-      <div class="canonical-row"><dt>Relógio reinicia</dt><dd>Toda nova interação voluntária qualificada recomeça a contagem.</dd></div>
-    </dl>
-  </div>
-  <div class="chart-note"><b>Status em 04/09/2026:</b> recomendação baseada em recência, pendente de aprovação operacional. A conversão observada é <b>associação preditiva, não uplift causal</b> — só um holdout de supressão prova que o toque causa a venda.</div>
-</section>
-
 <!-- 1 CONTEXTO -->
 <section class="step">
   <div class="step-h"><div class="chip">1</div><div class="kicker">Contexto</div></div>
@@ -275,8 +261,16 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 <!-- 4 SOLUÇÃO -->
 <section class="step">
   <div class="step-h"><div class="chip">4</div><div class="kicker">Solução / Proposta</div></div>
-  <h2>O corte de 90 dias é um dial econômico — e você pode movê-lo</h2>
-  <p>Como não há penhasco, o corte certo é onde a conversão da faixa ainda <b>paga o toque</b>. A tabela mostra, para cada janela: a densidade de conversão do pool e o <b>valor por conversão</b> que zera um toque de WhatsApp (R$0,36). Escolher a janela é escolher quanto você acredita que uma conversão vale.</p>
+  <h2>A definição, e o corte de 90 dias como dial econômico</h2>
+  <div class="card canonical" data-document-role="canonical-definition" data-version="2026-09-04b">
+    <p class="statement">Um lead é uma pessoa identificada e não-cliente que demonstrou intenção voluntária nos últimos 90 dias.</p>
+    <dl class="canonical-list">
+      <div class="canonical-row"><dt>Recência define</dt><dd>Ser lead depende de <b>ter agido recentemente</b> — é o momento em que um toque pega a pessoa receptiva. É o gatilho.</dd></div>
+      <div class="canonical-row"><dt>Valor prioriza</dt><dd>Quanto a pessoa vale é um <b>score separado</b>, não parte da definição. Ele ordena quem trabalhar primeiro, não quem é lead.</dd></div>
+      <div class="canonical-row"><dt>Relógio reinicia</dt><dd>Toda nova interação voluntária qualificada recomeça a contagem de 90 dias.</dd></div>
+    </dl>
+  </div>
+  <p style="margin-top:18px">Os 90 dias não são uma fronteira natural — <b>não há penhasco</b>. O corte certo é onde a conversão da faixa ainda <b>paga o toque</b>. A tabela mostra, para cada janela: a densidade de conversão do pool e o <b>valor por conversão</b> que zera um toque de WhatsApp (R$0,36). Escolher a janela é escolher quanto você acredita que uma conversão vale.</p>
   <div class="card">
     <table class="data">
       <thead><tr><th>Corte (recência ≤)</th><th>Conversão do pool</th><th>Conversões capturadas*</th><th>Paga o toque se conversão vale ≥</th></tr></thead>
