@@ -5,7 +5,7 @@
 <title>O que é um Lead</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Definição operacional de Lead da Brasil Paralelo, com alternância entre não-membros e ex-membros: reengajamento define a fronteira (Contato), tipo de sinal define os estados ativos. Tamanho e potencial de faturamento por estado.">
-<meta name="artifact-version" content="2026-09-04h">
+<meta name="artifact-version" content="2026-09-04i">
 <meta name="ai-summary" content="Definição de lead da Brasil Paralelo em dois eixos, com alternância entre não-membros (NM) e ex-membros (EX). EIXO 1 reengajamento: P(volta a interagir em 30d | silêncio), qualquer interação dele conta — separa ATIVO de CONTATO; NM cai de ~41% a piso ~0,8%, EX de ~46% a piso ~1,9% (o dobro: ex não morre de vez). EIXO 2 tipo do sinal ordena os estados ativos. NÃO-MEMBRO (4 estados, 4,58M pessoas): Oportunidade (fundo de funil, 32.913, conv 179d 14,2%), Prospect (intenção, 47.568, 9,2%), Lead (genérico, 371.159, 1,9%), Contato (795k... na verdade 4,13M, 0,85%). Potencial NM @ ticket R$180: R$9,24 mi em 179 dias. EX-MEMBRO (3 estados, sem Prospect, 926.903 pessoas): Oportunidade (10.319, 17,9%), Lead reengajado (121.509, 8,8%), Contato (795.075, 3,7%). Potencial EX @R$180: R$7,55 mi. Ex é muito mais denso: 927k ex geram quase o mesmo que 4,58M NM; o ex Contato (3,7%) converte mais que o NM Lead ativo (1,9%). Conversão é acumulada em 179 dias, ~70% nos primeiros 90. NM e EX não se sobrepõem (6,14M = 4,58M NM + 0,93M EX + 0,63M clientes).">
 <script type="application/json" id="lead-definition-machine-readable">
 {
@@ -136,6 +136,18 @@ table.data td:first-child{font-family:"IBM Plex Sans";color:var(--ink);font-weig
 table.data tr.total td{border-top:2px solid var(--line-2);color:var(--ink);font-weight:600}
 table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
 .badge{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle}
+.grow{display:grid;grid-template-columns:140px 1fr 52px;gap:12px;align-items:center;margin-top:11px;font-size:13.5px}
+.grow .lab{font-weight:500;color:var(--ink)}
+.grow .track{position:relative;height:22px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.grow .seg{position:absolute;left:0;top:0;height:100%;border-radius:6px}
+.grow .s179{background:var(--accent-2);opacity:.30}
+.grow .s90{background:var(--accent-2);opacity:.62}
+.grow .s30{background:var(--accent)}
+.grow .end{font-family:"IBM Plex Mono";text-align:right;color:var(--ink);font-weight:600}
+.growleg{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12px;color:var(--ink-2)}
+.growleg span{display:inline-flex;align-items:center;gap:6px}
+.growleg i{width:11px;height:11px;border-radius:3px}
+@media(max-width:520px){.grow{grid-template-columns:96px 1fr 46px}}
 </style>
 </head>
 <body data-pub="nm">
@@ -165,11 +177,10 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
     <p class="fnote">Base total: 4,58M NM + 0,93M ex-membros + 0,63M clientes = 6,14M. <b>Sem sobreposição.</b></p>
   </div>
   <div class="card only-ex">
-    <div class="funnel">
-      <div class="fbar f1"><span class="lbl">No Insider hoje<small>identificados e deduplicados</small></span><span class="val num">6,14M</span></div>
-      <div class="fbar f2" style="width:24%"><span class="lbl">Ex-membros (já assinaram e saíram)<small>o universo deste público</small></span><span class="val num">0,93M</span></div>
+    <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(44px,10vw,78px);color:var(--frio);line-height:.85">0,93M</div>
+      <div style="flex:1;min-width:240px;font-size:15px;color:var(--ink-2)"><b>ex-membros</b> — já foram clientes e saíram. É um bloco pequeno dos 6,14M (o resto: 4,58M nunca assinaram, 0,63M são clientes hoje), mas cada um vale muito mais: o valor de ex-assinante <b>não some com o silêncio</b>.</div>
     </div>
-    <p class="fnote">Só 0,93M — mas cada um vale muito mais: já foi cliente, e esse valor <b>não some com o silêncio</b>.</p>
   </div>
 </section>
 
@@ -272,23 +283,18 @@ table.data .cap{font-size:12px;color:var(--ink-3);margin-top:8px}
   <div class="card">
     <h3 style="font-size:16px;margin-bottom:4px">Quando essas compras acontecem</h3>
     <p style="font-size:13px;color:var(--ink-3);margin:0 0 4px">A conversão é acumulada — cresce até 179 dias, mas ~70% já veio nos primeiros 90.</p>
-    <table class="data only-nm">
-      <thead><tr><th>Estado (NM)</th><th>em 30d</th><th>em 90d</th><th>em 179d</th></tr></thead>
-      <tbody>
-        <tr><td>Oportunidade</td><td>4,3%</td><td>10,1%</td><td>14,2%</td></tr>
-        <tr><td>Prospect</td><td>2,5%</td><td>5,8%</td><td>9,2%</td></tr>
-        <tr><td>Lead</td><td>0,5%</td><td>1,3%</td><td>1,9%</td></tr>
-        <tr><td>Contato</td><td>0,2%</td><td>0,5%</td><td>0,85%</td></tr>
-      </tbody>
-    </table>
-    <table class="data only-ex">
-      <thead><tr><th>Estado (Ex)</th><th>em 30d</th><th>em 90d</th><th>em 179d</th></tr></thead>
-      <tbody>
-        <tr><td>Oportunidade</td><td>7,8%</td><td>12,9%</td><td>17,9%</td></tr>
-        <tr><td>Lead reengajado</td><td>2,1%</td><td>5,1%</td><td>8,8%</td></tr>
-        <tr><td>Contato</td><td>0,6%</td><td>1,9%</td><td>3,7%</td></tr>
-      </tbody>
-    </table>
+    <div class="only-nm">
+      <div class="grow"><div class="lab">Oportunidade</div><div class="track"><div class="seg s179" style="width:100%"></div><div class="seg s90" style="width:71%"></div><div class="seg s30" style="width:30%"></div></div><div class="end">14,2%</div></div>
+      <div class="grow"><div class="lab">Prospect</div><div class="track"><div class="seg s179" style="width:65%"></div><div class="seg s90" style="width:41%"></div><div class="seg s30" style="width:18%"></div></div><div class="end">9,2%</div></div>
+      <div class="grow"><div class="lab">Lead</div><div class="track"><div class="seg s179" style="width:13.4%"></div><div class="seg s90" style="width:9.2%"></div><div class="seg s30" style="width:3.5%"></div></div><div class="end">1,9%</div></div>
+      <div class="grow"><div class="lab">Contato</div><div class="track"><div class="seg s179" style="width:6%"></div><div class="seg s90" style="width:3.5%"></div><div class="seg s30" style="width:1.1%"></div></div><div class="end">0,85%</div></div>
+    </div>
+    <div class="only-ex">
+      <div class="grow"><div class="lab">Oportunidade</div><div class="track"><div class="seg s179" style="width:100%"></div><div class="seg s90" style="width:72%"></div><div class="seg s30" style="width:44%"></div></div><div class="end">17,9%</div></div>
+      <div class="grow"><div class="lab">Lead reengajado</div><div class="track"><div class="seg s179" style="width:49%"></div><div class="seg s90" style="width:28%"></div><div class="seg s30" style="width:12%"></div></div><div class="end">8,8%</div></div>
+      <div class="grow"><div class="lab">Contato</div><div class="track"><div class="seg s179" style="width:21%"></div><div class="seg s90" style="width:11%"></div><div class="seg s30" style="width:3.4%"></div></div><div class="end">3,7%</div></div>
+    </div>
+    <div class="growleg"><span><i style="background:var(--accent)"></i>até 30 dias</span><span><i style="background:var(--accent-2);opacity:.62"></i>até 90 dias</span><span><i style="background:var(--accent-2);opacity:.30"></i>até 179 dias</span></div>
   </div>
 
   <div class="chart-note warn only-nm"><b>Cuidado com o Contato:</b> maior potencial <b>bruto</b> (R$ 6,32 mi) só pelo tamanho — densidade 8,5 compras/mil vs 142/mil da Oportunidade (17× menor). Quase todo taxa-base: o toque quase não muda. <b>Potencial bruto ≠ trabalhável.</b></div>
