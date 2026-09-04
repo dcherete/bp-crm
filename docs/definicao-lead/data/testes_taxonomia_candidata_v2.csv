@@ -1,0 +1,16 @@
+publico,comparacao,horizonte_dias,diferenca_pp,p_valor_bicaudal
+Ex-membro,Oportunidade vs Lead engajado,30,5.764951994002273,1.0694619057348433e-06
+Ex-membro,Oportunidade vs Lead engajado,90,7.7265068885180614,1.2963398088551945e-05
+Ex-membro,Oportunidade vs Lead engajado,179,9.074786169758237,5.31417644183694e-05
+Ex-membro,Lead engajado vs Contato,30,1.4624826262360762,7.743060511535753e-14
+Ex-membro,Lead engajado vs Contato,90,3.2409122105534247,6.005797842363392e-23
+Ex-membro,Lead engajado vs Contato,179,5.105729392757911,1.4188866141719483e-30
+Não-membro,Oportunidade vs Prospect,30,1.788857823340582,0.12156073745755518
+Não-membro,Oportunidade vs Prospect,90,4.388008698353526,0.011089032793123123
+Não-membro,Oportunidade vs Prospect,179,4.993786890338614,0.015287438306344091
+Não-membro,Prospect vs Lead engajado,30,2.041703507220748,1.045262538880238e-09
+Não-membro,Prospect vs Lead engajado,90,4.486442676097849,2.1507207016191783e-16
+Não-membro,Prospect vs Lead engajado,179,7.261641615089891,7.200384065321817e-27
+Não-membro,Lead engajado vs Contato,30,0.28433102606567606,3.108172441602526e-09
+Não-membro,Lead engajado vs Contato,90,0.7712032969654267,5.69548103718727e-21
+Não-membro,Lead engajado vs Contato,179,1.0848371727504402,2.1785893063321016e-24

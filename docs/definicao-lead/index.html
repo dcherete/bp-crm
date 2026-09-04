@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <title>O que é um Lead</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Especificação operacional e evidência estatística da definição de Lead ativo na Brasil Paralelo: estados, janelas de 15 e 90 dias, estoque e limitações.">
+<meta name="description" content="Proposta v2 dos estados de Lead da Brasil Paralelo, derivada de árvores de sobrevivência separadas para não-membros e ex-membros.">
 <meta name="artifact-version" content="2026-09-04">
-<meta name="ai-summary" content="Regra operacional v1: Lead ativo é pessoa identificada, não cliente, com interação voluntária qualificada em até 90 dias. A fronteira externa é sustentada; os subestados internos são provisórios. Oportunidade e Prospect não se diferenciaram no holdout, e a hierarquia atual falhou para ex-membros.">
+<meta name="ai-summary" content="Proposta v2: Lead ativo exige sinal voluntário qualificado em até 90 dias. Para não-membros: Oportunidade=fundo de funil; Prospect=primeira mensagem ou produto/oferta; Somente Lead=demais sinais. Para ex-membros: Oportunidade de reativação=fundo de funil; Lead reengajado=demais sinais. Ordem validada em 7 de 7 meses.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -15,47 +15,49 @@
   "dateModified": "2026-09-04",
   "inLanguage": "pt-BR",
   "version": "2026-09-04",
-  "abstract": "Regra operacional v1: Lead ativo é uma pessoa identificada, não cliente, com interação voluntária qualificada nos últimos 90 dias. A fronteira externa é sustentada, mas Oportunidade e Prospect permanecem subestados provisórios e devem ser recalibrados por público.",
+  "abstract": "Proposta v2: Lead ativo exige sinal voluntário qualificado em 90 dias. Os estados internos são diferentes para não-membros e ex-membros e foram validados em sete snapshots mensais.",
   "keywords": ["lead ativo", "oportunidade", "prospect", "CRM", "sobrevivência", "transição de estados"],
   "isBasedOn": [
     "sql/17_curva_recencia_conversao.sql",
     "sql/18_curva_reengajamento.sql",
-    "sql/22_stock_definicao_lead_90d.sql",
-    "sql/25_coorte_arvore_sobrevivencia.sql"
+    "sql/27_coorte_arvores_estados_estrita.sql",
+    "sql/28_stock_taxonomia_candidata_v2.sql"
   ]
 }
 </script>
 <script type="application/json" id="lead-definition-machine-readable">
 {
-  "document_role": "canonical_operational_definition",
+  "document_role": "recommended_state_definition",
   "version": "2026-09-04",
-  "status": "operational_v1_internal_states_under_review",
+  "status": "v2_validated_recommendation_pending_operational_approval",
   "lead_active": {
     "definition": "identified person who is not a current client and has at least one voluntary qualified interaction in the last 90 days",
     "external_boundary_days": 90,
     "clock_resets_on": "new voluntary qualified interaction"
   },
-  "operational_states_in_precedence_order": [
-    {"state":"Cliente","rule":"active subscription at snapshot"},
-    {"state":"Oportunidade","rule":"bottom-funnel signal 0-15 days","validation":"provisional"},
-    {"state":"Prospect","rule":"product/offer 0-90 days or bottom-funnel 16-90 days","validation":"provisional"},
-    {"state":"Somente Lead","rule":"other voluntary qualified signal 0-90 days","validation":"provisional"},
-    {"state":"Contato de reativação","rule":">90 days without qualified signal and at least one live owned CRM channel"},
-    {"state":"Contato inativo","rule":">90 days without qualified signal and no live owned CRM channel"}
+  "recommended_states": [
+    {"audience":"all","state":"Cliente","rule":"active subscription at snapshot"},
+    {"audience":"non-member","state":"Oportunidade","rule":"bottom-funnel signal in 0-90 days"},
+    {"audience":"non-member","state":"Prospect","rule":"no recent bottom funnel and prospect first message or product/offer in 0-90 days"},
+    {"audience":"non-member","state":"Somente Lead","rule":"other voluntary qualified signal in 0-90 days"},
+    {"audience":"ex-member","state":"Oportunidade de reativação","rule":"bottom-funnel signal in 0-90 days"},
+    {"audience":"ex-member","state":"Lead reengajado","rule":"other voluntary qualified signal in 0-90 days"},
+    {"audience":"all","state":"Contato","rule":">90 days without qualified signal; reachability determines CRM reactivation versus inactive"}
   ],
   "validation": {
     "survival_holdout": "2026-03",
-    "external_boundary": "ex-member survival tree first split at 85.5 days; non-member tree did not produce one universal recency split",
-    "non_member_179d_conversion": {"Oportunidade":0.1043,"Prospect":0.0932,"Somente Lead":0.0188,"Contato":0.0082},
-    "ex_member_179d_conversion": {"Oportunidade":0.0637,"Prospect":0.0650,"Somente Lead":0.0985,"Contato":0.0367},
-    "key_conclusion": "Opportunity versus Prospect is not statistically different in either audience; the internal hierarchy fails for ex-members"
+    "temporal_ordering": "correct in 7 of 7 monthly snapshots for both audiences",
+    "non_member_179d_conversion": {"Oportunidade":0.1419,"Prospect":0.0920,"Somente Lead":0.0193,"Contato":0.0085},
+    "ex_member_179d_conversion": {"Oportunidade de reativação":0.1788,"Lead reengajado":0.0880,"Contato":0.0370},
+    "key_conclusion": "three internal active states are supported for non-members; only two are supported for ex-members"
   },
   "evidence_limits": [
     "90 days is an operational activity boundary, not the point at which economic value becomes zero",
-    "observed conversion and revenue are predictive associations, not causal CRM lift",
-    "do not treat the 15-day internal threshold as statistically validated"
+    "observed conversion is predictive association, not causal CRM lift",
+    "recency inside 90 days determines priority and SLA; the 15-day state boundary was rejected"
   ],
-  "canonical_markdown": "ESPECIFICACAO_DEFINICAO_LEAD.md",
+  "canonical_markdown": "PROPOSTA_ESTADOS_V2.md",
+  "recommended_states_markdown": "PROPOSTA_ESTADOS_V2.md",
   "decision_log": "REGISTRO_PROJETO.md"
 }
 </script>
@@ -226,65 +228,61 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 
 <!-- Resumo normativo em texto. Fonte de leitura rápida para humanos e sistemas de IA. -->
 <section id="resumo-canonico" data-document-role="canonical-definition" data-version="2026-09-04">
-  <div class="step-h"><div class="chip">0</div><div class="kicker">Definição canônica · leitura rápida</div></div>
-  <h2>A regra vigente, sem depender dos gráficos</h2>
+  <div class="step-h"><div class="chip">0</div><div class="kicker">Proposta v2 · leitura rápida</div></div>
+  <h2>Os públicos não têm os mesmos estados</h2>
   <div class="card canonical">
     <p class="statement">Lead ativo é toda pessoa identificada, não cliente, que realizou pelo menos uma interação voluntária qualificada nos últimos 90 dias.</p>
-    <p>Os estados são exclusivos e aplicados por precedência. <b>Lead ativo total = Oportunidade + Prospect + Somente Lead.</b></p>
+    <p>Os estados são exclusivos e aplicados por precedência. A árvore sustenta três níveis ativos para não-membros e apenas dois para ex-membros.</p>
     <dl class="canonical-list">
       <div class="canonical-row"><dt>1 · Cliente</dt><dd>Possui pelo menos uma assinatura ativa na data da fotografia. Não participa da régua de aquisição.</dd></div>
-      <div class="canonical-row"><dt>2 · Oportunidade</dt><dd>Não é Cliente e teve fundo de funil há 0–15 dias: conversa comercial qualificada, carrinho, boleto ou tentativa de pagamento.</dd></div>
-      <div class="canonical-row"><dt>3 · Prospect</dt><dd>Não está acima e visitou produto/oferta há 0–90 dias, ou teve fundo de funil há 16–90 dias.</dd></div>
-      <div class="canonical-row"><dt>4 · Somente Lead</dt><dd>Não está acima e teve outro sinal voluntário qualificado há 0–90 dias.</dd></div>
-      <div class="canonical-row"><dt>5 · Contato de reativação</dt><dd>Está há mais de 90 dias sem sinal qualificado, mas possui ao menos um canal próprio de CRM vivo.</dd></div>
-      <div class="canonical-row"><dt>6 · Contato inativo</dt><dd>Está fora da janela ativa e não possui canal próprio de CRM vivo. Sai da régua de CRM, sem ser apagado da base.</dd></div>
+      <div class="canonical-row"><dt>Não-membro · Oportunidade</dt><dd>Teve fundo de funil nos últimos 90 dias.</dd></div>
+      <div class="canonical-row"><dt>Não-membro · Prospect</dt><dd>Sem fundo de funil recente; enviou a primeira mensagem ou visitou produto/oferta nos últimos 90 dias.</dd></div>
+      <div class="canonical-row"><dt>Não-membro · Somente Lead</dt><dd>Teve outro sinal voluntário qualificado nos últimos 90 dias.</dd></div>
+      <div class="canonical-row"><dt>Ex-membro · Oportunidade de reativação</dt><dd>Teve fundo de funil nos últimos 90 dias.</dd></div>
+      <div class="canonical-row"><dt>Ex-membro · Lead reengajado</dt><dd>Teve outro sinal voluntário qualificado nos últimos 90 dias. Não há Prospect para este público na v2.</dd></div>
+      <div class="canonical-row"><dt>Contato</dt><dd>Está há mais de 90 dias sem sinal qualificado. Canal vivo separa reativação de inativo.</dd></div>
     </dl>
   </div>
   <div class="axes" style="margin-top:14px">
     <div class="axis"><div class="q">O que reinicia o relógio?</div><div class="a">Toda nova interação voluntária qualificada. Um novo fundo de funil também promove imediatamente a pessoa a Oportunidade.</div></div>
-    <div class="axis"><div class="q">O que acontece com o tempo?</div><div class="a">Fundo de funil: Oportunidade em 0–15 dias, Prospect em 16–90 dias e Contato após 90 dias se não houver outro sinal.</div></div>
+    <div class="axis"><div class="q">O que acontece com o tempo?</div><div class="a">Dentro dos 90 dias, a recência ordena prioridade e SLA. Ela não cria sozinha um novo estado. Depois de 90 dias sem sinal, a pessoa vira Contato.</div></div>
     <div class="axis"><div class="q">O que sustenta 90 dias?</div><div class="a">Conversão e reengajamento localizaram a mudança comportamental principal entre 71 e 83 dias; 90 é o arredondamento operacional conservador.</div></div>
-    <div class="axis"><div class="q">O que ainda está em validação?</div><div class="a">Os subestados de Oportunidade e Prospect. A primeira árvore não validou o corte de 15 dias; agora os eventos serão auditados e os estados recalibrados por público.</div></div>
+    <div class="axis"><div class="q">O que foi retirado?</div><div class="a"><code>conversation_started</code>, porque predominavam registros associados ao vendedor. O corte interno de 15 dias também foi rejeitado como fronteira de estado.</div></div>
   </div>
-  <div class="chart-note"><b>Status em 04/09/2026:</b> regra operacional v1 vigente. A fronteira externa de 90 dias está sustentada; a hierarquia interna é provisória. Estoque de 03/09: 600.012 Leads ativos — 19.951 Oportunidades, 122.110 Prospects e 457.951 somente Leads. A árvore foi ajustada em 700.923 snapshots, com teste temporal em mar/2026. As relações observadas são preditivas, não causais.</div>
+  <div class="chart-note"><b>Status em 04/09/2026:</b> proposta v2 validada fora do tempo e pendente de aprovação operacional. Estoque recalculado: 583.468 Leads ativos — 451.640 não-membros e 131.828 ex-membros. A ordenação correta apareceu em 7 de 7 snapshots mensais.</div>
 </section>
 
 <section id="validacao-estados" data-document-role="empirical-validation" data-version="2026-09-04">
   <div class="step-h"><div class="chip">0.1</div><div class="kicker">Teste novo · árvore de sobrevivência</div></div>
-  <h2>A fronteira funciona; os subestados ainda não</h2>
-  <p><b>Decisão que permanece:</b> aos 90 dias sem interação voluntária qualificada, a pessoa deixa de ser Lead ativo. <b>Decisão ainda provisória:</b> usar 15 dias e a mesma hierarquia Oportunidade → Prospect → Somente Lead nos dois públicos.</p>
+  <h2>A proposta v2 ordena os públicos em todos os meses</h2>
+  <p>A coorte foi reconstruída sem o evento contaminado e as árvores foram ajustadas separadamente. Março/2026 permaneceu fora do desenvolvimento e foi usado como holdout final.</p>
   <div class="grid g2" style="margin-top:18px">
-    <div class="itile"><div class="k">Fronteira externa · ex-membro</div><div class="v num" style="font-size:24px;color:var(--good)">85,5 dias</div><div class="d">Primeiro corte da árvore de sobrevivência. É compatível com o arredondamento operacional para 90 dias.</div></div>
-    <div class="itile"><div class="k">Fronteira externa · não-membro</div><div class="v num" style="font-size:24px;color:var(--warn)">Não é única</div><div class="d">A árvore combina tipo de evento e recência; sem funil/comercial recente, encontrou cortes em 30,5 e 156,5 dias.</div></div>
-    <div class="itile"><div class="k">Oportunidade × Prospect</div><div class="v num" style="font-size:24px;color:var(--int)">Sem diferença</div><div class="d">No holdout de mar/2026, p=0,537 para não-membros e p=0,878 para ex-membros em conversão até 179 dias.</div></div>
-    <div class="itile"><div class="k">Ex-membro · alerta</div><div class="v num" style="font-size:24px;color:var(--bad)">9,85%</div><div class="d">Somente Lead converteu mais que Prospect (6,50%) e Oportunidade (6,37%) em 179 dias. A hierarquia atual falha nesse público.</div></div>
+    <div class="itile"><div class="k">Estabilidade temporal</div><div class="v num" style="font-size:24px;color:var(--good)">7 de 7</div><div class="d">A ordem dos estados se repetiu em todos os snapshots mensais dos dois públicos.</div></div>
+    <div class="itile"><div class="k">Não-membro</div><div class="v num" style="font-size:24px;color:var(--accent)">3 níveis ativos</div><div class="d">Oportunidade &gt; Prospect &gt; Somente Lead, seguidos por Contato.</div></div>
+    <div class="itile"><div class="k">Ex-membro</div><div class="v num" style="font-size:24px;color:var(--warn)">2 níveis ativos</div><div class="d">Oportunidade de reativação &gt; Lead reengajado, seguidos por Contato.</div></div>
+    <div class="itile"><div class="k">Corte interno de 15 dias</div><div class="v num" style="font-size:24px;color:var(--bad)">Rejeitado</div><div class="d">Não foi estável. Recência passa a ordenar prioridade dentro do estado, não a definir o estado.</div></div>
   </div>
   <div class="grid g2" style="margin-top:18px">
     <div class="card">
       <h3 style="font-size:20px">Não-membro · conversão em 179 dias</h3>
       <div class="chart-wrap"><svg id="taxonomy-nm" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para não-membros, com intervalo de confiança de 95%"></svg></div>
-      <p class="fnote">Oportunidade e Prospect se sobrepõem; as quedas para Somente Lead e Contato são estatisticamente claras.</p>
+      <p class="fnote">14,19% &gt; 9,20% &gt; 1,93% &gt; 0,85%. Todas as separações são significativas em 179 dias.</p>
     </div>
     <div class="card">
       <h3 style="font-size:20px">Ex-membro · conversão em 179 dias</h3>
       <div class="chart-wrap"><svg id="taxonomy-ex" viewBox="0 0 600 330" role="img" aria-label="Conversão em 179 dias por estado atual para ex-membros, com intervalo de confiança de 95%"></svg></div>
-      <p class="fnote">Somente Lead é o grupo com maior conversão. A ordem esperada Oportunidade → Prospect → Somente Lead não aparece.</p>
+      <p class="fnote">17,88% &gt; 8,80% &gt; 3,70%. Não foi criado Prospect porque ele não formou um nível intermediário estável.</p>
     </div>
   </div>
   <div class="card" style="margin-top:18px">
     <h3 style="font-size:20px">Conversão observada no teste temporal · compra em até 179 dias</h3>
     <div class="axes" style="margin-top:14px">
-      <div class="axis"><div class="q">Não-membro</div><div class="a">Oportunidade 10,43% · Prospect 9,32% · Somente Lead 1,88% · Contato 0,82%. Prospect &gt; Somente Lead &gt; Contato é estatisticamente sustentado.</div></div>
-      <div class="axis"><div class="q">Ex-membro</div><div class="a">Oportunidade 6,37% · Prospect 6,50% · Somente Lead 9,85% · Contato 3,67%. Os eventos precisam ser reclassificados antes de fixar os subestados.</div></div>
+      <div class="axis"><div class="q">Não-membro</div><div class="a">Oportunidade 14,19% · Prospect 9,20% · Somente Lead 1,93% · Contato 0,85%.</div></div>
+      <div class="axis"><div class="q">Ex-membro</div><div class="a">Oportunidade de reativação 17,88% · Lead reengajado 8,80% · Contato 3,70%.</div></div>
     </div>
-    <p class="fnote">Árvore de sobrevivência com treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. C-index no teste: 0,655 para não-membro e 0,633 para ex-membro. Resultado preditivo e observacional; não mede efeito causal da comunicação.</p>
+    <p class="fnote">Oportunidade vs Prospect no não-membro: p=0,015. Oportunidade vs Lead reengajado no ex-membro: p&lt;0,001. As demais fronteiras também têm p&lt;0,001. Resultado preditivo e observacional; não mede efeito causal da comunicação.</p>
   </div>
-  <details class="card" style="margin-top:18px">
-    <summary><b>Abrir o gráfico técnico completo da árvore</b></summary>
-    <p class="fnote">Cada ponto é uma folha da árvore, ordenada pelo risco previsto. As linhas mostram a conversão realmente observada no holdout em 30, 90 e 179 dias. O gráfico superior mede a fronteira Lead–Contato; o inferior testa os subestados dentro dos 90 dias.</p>
-    <img src="data/analysis/arvore_sobrevivencia_validacao.png" alt="Validação temporal das árvores de sobrevivência para não-membros e ex-membros" style="display:block;width:100%;height:auto;margin-top:14px;border-radius:12px">
-  </details>
-  <div class="chart-note"><b>Leitura correta:</b> 90 dias é a regra operacional v1 para separar atividade recente de histórico. O corte interno de 15 dias e uma taxonomia única para não-membros e ex-membros não devem ser apresentados como estatisticamente provados.</div>
+  <div class="chart-note"><b>Leitura correta:</b> 90 dias continua sendo a fronteira externa. Dentro da janela, o tipo de evento define o estado; a recência define prioridade e SLA. A proposta é validada preditivamente, mas ainda precisa de aprovação antes de alterar os segmentos de produção.</div>
 </section>
 
 <!-- 1 CONTEXTO -->
@@ -457,11 +455,11 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
 
 <!-- 5 DECISAO -->
 <section class="step">
-  <div class="step-h"><div class="chip">5</div><div class="kicker">Definição operacional v1</div></div>
-  <h2>A definição e as seis camadas</h2>
-  <div class="decision-hero">Aos 90 dias sem uma interação voluntária qualificada, a pessoa deixa de ser Lead ativo. Ela não é apagada: vira Contato de reativação e passa a receber uma estratégia de menor custo.<small>A fronteira externa é única na regra v1. Prospect e Oportunidade são subestados operacionais provisórios e serão recalibrados separadamente para não-membros e ex-membros. Membro é Cliente.</small></div>
-  <p class="lead-in"><b>Lead ativo = não-membro ou ex-membro com pelo menos uma interação voluntária qualificada nos últimos 90 dias.</b> Cada novo sinal reinicia o relógio. Dentro dessa população, ação de fundo de funil nos últimos <b>15 dias</b> define Oportunidade. Do 16º ao 90º dia, esse sinal regride para Prospect; visita a produto ou oferta também define Prospect por até 90 dias. Os demais ficam como Somente Lead.</p>
-  <div class="chart-note"><b>Estoque em 03/09/2026:</b> 600.012 Leads ativos = 19.951 Oportunidades + 122.110 Prospects + 457.951 somente Leads. As seis camadas abaixo são exclusivas e somam as 6.136.896 pessoas identificadas no Insider.</div>
+  <div class="step-h"><div class="chip">5</div><div class="kicker">Estados recomendados · v2</div></div>
+  <h2>Uma definição externa; estados internos por público</h2>
+  <div class="decision-hero">Aos 90 dias sem uma interação voluntária qualificada, a pessoa deixa de ser Lead ativo. Ela não é apagada: vira Contato e passa a uma estratégia de menor custo.<small>Dentro dos 90 dias, o tipo de evento define o estado. A recência define prioridade e SLA — não um corte adicional de estado.</small></div>
+  <p class="lead-in"><b>Não-membro:</b> fundo de funil define Oportunidade; primeira mensagem ou produto/oferta define Prospect; demais sinais definem Somente Lead. <b>Ex-membro:</b> fundo de funil define Oportunidade de reativação; demais sinais definem Lead reengajado. Não há Prospect para ex-membro na v2.</p>
+  <div class="chart-note"><b>Estoque em 03/09/2026:</b> 583.468 Leads ativos = 451.640 não-membros + 131.828 ex-membros. Os volumes foram recalculados na base completa com a whitelist estrita.</div>
 
   <div class="card">
     <h3 style="font-size:20px">O que reinicia os 90 dias</h3>
@@ -475,32 +473,42 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     <div class="tcard"><div class="bar" style="background:var(--compra)"></div><div class="body">
       <div class="top"><span class="nm">Cliente</span><span class="def">assinatura ativa hoje</span></div>
       <div class="desc">Já paga. É o topo. Aqui o jogo é <b>reter e fazer upsell</b>, não converter.</div></div>
-      <div class="size"><div class="n num">627K</div><div class="p">10,2% da base</div></div></div>
+      <div class="size"><div class="n num">627,4K</div><div class="p">10,2% da base</div></div></div>
 
     <div class="tcard"><div class="bar" style="background:var(--int)"></div><div class="body">
-      <div class="top"><span class="nm">Oportunidade</span><span class="def">fundo de funil ≤ 15 dias</span></div>
-      <div class="desc">Iniciou conversa comercial, avançou para carrinho, boleto ou pagamento. Há <b>ação de compra observável</b>. Ação: fechar, com janela curta.</div></div>
-      <div class="size"><div class="n num">20,0K</div><div class="p">3,3% dos Leads ativos</div></div></div>
+      <div class="top"><span class="nm">Oportunidade</span><span class="def">não-membro · fundo de funil ≤ 90 dias</span></div>
+      <div class="desc">Carrinho, boleto, pagamento aguardando ou abandono. A recência define a prioridade de fechamento.</div></div>
+      <div class="size"><div class="n num">32,9K</div><div class="p">não-membros</div></div></div>
 
     <div class="tcard"><div class="bar" style="background:var(--warn)"></div><div class="body">
-      <div class="top"><span class="nm">Prospect</span><span class="def">produto/oferta ou funil de 16–90 dias</span></div>
-      <div class="desc">Visitou plano, produto ou oferta nos últimos 90 dias, ou teve ação de fundo de funil há 16–90 dias sem renovar o sinal. Ação: <b>converter ou reaquecer a intenção</b>.</div></div>
-      <div class="size"><div class="n num">122,1K</div><div class="p">20,4% dos Leads ativos</div></div></div>
+      <div class="top"><span class="nm">Prospect</span><span class="def">não-membro · primeira mensagem ou produto/oferta</span></div>
+      <div class="desc">Demonstrou intenção, mas não chegou ao fundo de funil nos últimos 90 dias.</div></div>
+      <div class="size"><div class="n num">47,6K</div><div class="p">não-membros</div></div></div>
 
     <div class="tcard"><div class="bar" style="background:var(--accent)"></div><div class="body">
-      <div class="top"><span class="nm">Somente Lead</span><span class="def">sinal voluntário qualificado ≤ 90 dias</span></div>
-      <div class="desc">Deu um sinal voluntário recente. É trabalhado pela régua de aquisição; a força e o tipo do sinal definem sua prioridade.</div></div>
-      <div class="size"><div class="n num">458,0K</div><div class="p">76,3% dos Leads ativos</div></div></div>
+      <div class="top"><span class="nm">Somente Lead</span><span class="def">não-membro · outro sinal qualificado</span></div>
+      <div class="desc">Interagiu nos últimos 90 dias, sem sinal de fundo de funil ou intenção superior.</div></div>
+      <div class="size"><div class="n num">371,2K</div><div class="p">não-membros</div></div></div>
+
+    <div class="tcard"><div class="bar" style="background:var(--int)"></div><div class="body">
+      <div class="top"><span class="nm">Oportunidade de reativação</span><span class="def">ex-membro · fundo de funil ≤ 90 dias</span></div>
+      <div class="desc">Ex-membro que voltou a executar uma ação de compra observável.</div></div>
+      <div class="size"><div class="n num">10,3K</div><div class="p">ex-membros</div></div></div>
+
+    <div class="tcard"><div class="bar" style="background:var(--accent)"></div><div class="body">
+      <div class="top"><span class="nm">Lead reengajado</span><span class="def">ex-membro · outro sinal qualificado</span></div>
+      <div class="desc">Voltou a interagir nos últimos 90 dias, sem novo fundo de funil. Prospect não é usado neste público.</div></div>
+      <div class="size"><div class="n num">121,5K</div><div class="p">ex-membros</div></div></div>
 
     <div class="tcard"><div class="bar" style="background:var(--frio)"></div><div class="body">
       <div class="top"><span class="nm">Contato de reativação</span><span class="def">mais de 90 dias sem sinal qualificado</span></div>
       <div class="desc">Já interagiu no passado ou ainda nunca deu um sinal qualificado, mas não é Lead ativo hoje. Se houver canal vivo, recebe <b>reativação de menor custo</b>; ao interagir, volta a Lead ativo.</div></div>
-      <div class="size"><div class="n num">4,29M</div><div class="p">69,8% da base</div></div></div>
+      <div class="size"><div class="n num">4,30M</div><div class="p">70,1% da base</div></div></div>
 
     <div class="tcard"><div class="bar" style="background:var(--cem)"></div><div class="body">
       <div class="top"><span class="nm">Contato Inativo</span><span class="def">fora da janela e sem canal de CRM vivo</span></div>
       <div class="desc">Não é Lead ativo e não há canal próprio para falar (email bounce/opt-out, WhatsApp morto, sem app). <b>Sai da régua de CRM</b> — mas segue alcançável por ads.</div></div>
-      <div class="size"><div class="n num">624,5K</div><div class="p">10,2% da base</div></div></div>
+      <div class="size"><div class="n num">624,7K</div><div class="p">10,2% da base</div></div></div>
   </div>
 </section>
 
@@ -510,16 +518,16 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   <h2>O que muda na prática</h2>
   <div class="grid g3" style="margin-top:18px">
     <div class="itile"><div class="k">Recorte anterior de 365d</div><div class="v num" style="color:var(--accent)">2,18M</div><div class="d">vira referência histórica; não é mais apresentado como threshold matemático</div></div>
-    <div class="itile"><div class="k">Lead ativo · janela de 90d</div><div class="v num" style="color:var(--frio)">600K</div><div class="d">9,8% da base: Oportunidade + Prospect + somente Lead</div></div>
-    <div class="itile"><div class="k">Sai do CRM → vai pra ads</div><div class="v num" style="color:var(--cem)">624,5K</div><div class="d">Contato fora da janela e sem canal de CRM vivo</div></div>
+    <div class="itile"><div class="k">Lead ativo · proposta v2</div><div class="v num" style="color:var(--frio)">583,5K</div><div class="d">9,5% da base, com estados separados por público</div></div>
+    <div class="itile"><div class="k">Sai do CRM → vai pra ads</div><div class="v num" style="color:var(--cem)">624,7K</div><div class="d">Contato fora da janela e sem canal de CRM vivo</div></div>
   </div>
   <div class="card">
     <p class="lead-in" style="margin-top:0">Cada camada ganha um tratamento — é o que o time passa a fazer diferente:</p>
     <div class="acts">
       <div class="act"><div class="who"><span class="dot" style="background:var(--compra)"></span>Cliente</div><div class="do"><b>Reter e upsell.</b> Fora da lógica de aquisição.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--int)"></span>Oportunidade</div><div class="do"><b>Fechar agora.</b> Ação de compra ou conversa comercial em andamento.</div></div>
+      <div class="act"><div class="who"><span class="dot" style="background:var(--int)"></span>Oportunidade</div><div class="do"><b>Fechar.</b> Fundo de funil; recência define prioridade e SLA.</div></div>
       <div class="act"><div class="who"><span class="dot" style="background:var(--warn)"></span>Prospect</div><div class="do"><b>Converter a intenção.</b> Produto ou oferta considerados, ainda sem ação direta de compra.</div></div>
-      <div class="act"><div class="who"><span class="dot" style="background:var(--accent)"></span>Somente Lead</div><div class="do"><b>Nutrir e avançar.</b> Sinal qualificado nos últimos 90 dias, sem intenção comercial superior.</div></div>
+      <div class="act"><div class="who"><span class="dot" style="background:var(--accent)"></span>Somente Lead / reengajado</div><div class="do"><b>Nutrir e avançar.</b> Sinal qualificado sem fundo de funil recente.</div></div>
       <div class="act"><div class="who"><span class="dot" style="background:var(--frio)"></span>Contato de reativação</div><div class="do"><b>Reativação de menor custo.</b> Volta a Lead ativo assim que der novo sinal qualificado.</div></div>
       <div class="act"><div class="who"><span class="dot" style="background:var(--cem)"></span>Contato Inativo</div><div class="do"><b>Handoff pra ads.</b> Sai de email/WhatsApp, entra em custom audience.</div></div>
     </div>
@@ -533,7 +541,7 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   <ol class="steps-list">
     <li><b>Fechar a whitelist</b> de interações voluntárias qualificadas e validar identidade, bots, testes e links operacionais.</li>
     <li><b>Publicar a fotografia diária:</b> os volumes já foram recalculados; a consulta deve alimentar os segmentos todos os dias.</li>
-    <li><b>Publicar primeiro a fronteira segura:</b> Cliente / Lead ativo / Contato de reativação / Contato inativo. Tratar Oportunidade, Prospect e Somente Lead como subestados v1 monitorados.</li>
+    <li><b>Aprovar a taxonomia v2:</b> três estados ativos para não-membros e dois para ex-membros.</li>
     <li><b>Reachability como regra:</b> marcar canal vivo × morto por pessoa, pra saber quando parar de gastar CRM.</li>
     <li><b>Ligar o handoff pra ads</b> dos 624,5K Contatos inativos — mídia paga assume, CRM solta.</li>
   </ol>
@@ -543,11 +551,11 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
   <b>Como foi medido.</b> Histórico de eventos desde 2019 (BigQuery), deduplicado por identidade unificada (dim_person_identity) — 7,15M emails → 6,69M pessoas. A conversão usa sete snapshots mensais entre set/2025 e mar/2026, todos com 180 dias completos de observação futura; em cada snapshot, calcula os dias de silêncio e observa compras nos 30, 90 e 180 dias seguintes. Para não-membro, o relógio parte da última interação qualificada. Para ex-membro, parte do churn e só é reiniciado por interação posterior ao churn. As linhas usam média móvel diária de 35 dias, exibida em pontos quinzenais. Recência mede <b>interação real</b> (clique, resposta, navegação e conteúdo), nunca mensagem entregue, abertura ou leitura passiva.<br>
   <b>Thresholds.</b> Segmentação unidimensional inspirada no método do estudo “Custos acumulados por lead”: minimização da variância intrafaixa ponderada pela população e escolha de K pelo cotovelo. Na conversão do não-membro, o corte livre em dois grupos é 83 dias; exigir mínimo de 12% da população por faixa desloca o corte para 90. No ex-membro, o corte em dois grupos é 76 dias e não depende dessa restrição. No reengajamento, os cortes permanecem 71 dias para não-membro e 21/80 dias para ex-membro. Implementações reproduzíveis em <code>segmentar_curva_conversao.py</code> e <code>segmentar_curva_reengajamento.py</code>.<br>
   <b>Evidência comportamental.</b> Conversão futura mede compra em 30/90/180 dias por tempo de silêncio. Reengajamento mede a ocorrência de um novo sinal nos 30 dias seguintes. Os pontos comportamentais de 71–83 dias foram padronizados em uma janela operacional de 90 dias.<br>
-  <b>Árvore de sobrevivência.</b> Treino em set–dez/2025, seleção em jan–fev/2026 e teste final em mar/2026. O primeiro corte externo do ex-membro foi 85,5 dias; no não-membro, tipo de evento e recência interagem e não apareceu um único corte universal. No holdout de 179 dias, Oportunidade e Prospect não diferiram estatisticamente em nenhum público; em ex-membros, Somente Lead converteu mais que ambos. Implementações em <code>ajustar_arvore_sobrevivencia.py</code> e <code>avaliar_taxonomia_atual.py</code>.<br>
-  <b>Regra decidida.</b> Lead ativo exige pelo menos uma interação voluntária qualificada nos últimos 90 dias. Sem novo sinal, vira Contato de reativação e recebe menor pressão; um novo sinal reinicia o relógio.<br>
+  <b>Árvores estritas.</b> Modelos separados para não-membros e ex-membros, estabilidade medida em seis meses de desenvolvimento e teste final em março/2026. A ordem da taxonomia v2 apareceu em 7 de 7 snapshots. Implementações em <code>ajustar_arvores_estados_estaveis.py</code> e <code>validar_taxonomia_candidata_v2.py</code>.<br>
+  <b>Regra recomendada.</b> Lead ativo exige pelo menos uma interação voluntária qualificada nos últimos 90 dias. Dentro da janela, o tipo de evento define o estado; a recência define prioridade. Sem novo sinal, vira Contato.<br>
   <b>Origem dos gráficos.</b> Conversão absoluta: extração do BigQuery refeita em 03/09/2026 e separada entre não-membros e ex-membros. Reengajamento: análise com todos os sinais qualificados e relógio de ex-membro iniciado no churn.<br>
-  <b>Fotografia operacional.</b> Em 03/09/2026, <code>dim_insider__contacts</code> contém 6.136.896 pessoas identificadas após deduplicação: 627.123 Clientes, 19.951 Oportunidades (fundo de funil em até 15 dias), 122.110 Prospects (produto/oferta em até 90 dias ou fundo de funil entre 16 e 90 dias), 457.951 somente Leads, 4.285.251 Contatos de reativação e 624.510 Contatos inativos. Lead ativo total = 600.012 pessoas. Consulta reproduzível em <code>sql/22_stock_definicao_lead_90d.sql</code>.<br>
-  <b>Ressalvas.</b> A fronteira externa de 90 dias é a regra operacional v1; o limite de 15 dias e a hierarquia interna não estão estatisticamente validados. "Morto para CRM" ≠ irrecuperável: ads ainda alcança. "Descartar" = sair da régua de CRM, não deletar. Contagem por pessoa (dedup por identidade). Números são fotografia observada, as-of a data de cada evento.
+  <b>Fotografia da proposta v2.</b> Em 03/09/2026: 627.444 Clientes; não-membros com 32.913 Oportunidades, 47.568 Prospects e 371.159 somente Leads; ex-membros com 10.319 Oportunidades de reativação e 121.509 Leads reengajados. Lead ativo total = 583.468 pessoas. Consulta em <code>sql/28_stock_taxonomia_candidata_v2.sql</code>.<br>
+  <b>Ressalvas.</b> A proposta v2 foi validada preditivamente fora do tempo, mas ainda não foi aprovada nem implantada. Conversão observada não é efeito causal do CRM. "Morto para CRM" ≠ irrecuperável: ads ainda alcança. Contagem por pessoa deduplicada.
 </div>
 
 <script>
@@ -575,14 +583,14 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     svg.innerHTML=out;
   };
 
-  const taxonomyChart=(id,values)=>{
+  const taxonomyChart=(id,c)=>{
     const svg=document.getElementById(id); if(!svg)return;
-    const W=600,H=330,L=48,R=18,T=22,B=70,pw=W-L-R,ph=H-T-B,max=15;
-    const labels=['Oportunidade','Prospect','Somente Lead','Contato'];
+    const values=c.values,W=600,H=330,L=48,R=18,T=22,B=70,pw=W-L-R,ph=H-T-B,max=21;
+    const labels=c.labels;
     const colors=['var(--int)','var(--warn)','var(--accent-2)','var(--frio)'];
-    const y=v=>T+ph*(1-v/max), band=pw/4, bw=band*.52;
+    const y=v=>T+ph*(1-v/max), band=pw/values.length, bw=band*.52;
     let out='';
-    [0,3,6,9,12,15].forEach(v=>{
+    [0,5,10,15,20].forEach(v=>{
       out+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--line)"/>`;
       out+=`<text x="${L-7}" y="${y(v)+4}" text-anchor="end" fill="var(--ink-3)" font-size="11" font-family="IBM Plex Mono">${v}%</text>`;
     });
@@ -599,14 +607,16 @@ h1{font-size:clamp(34px,6.5vw,62px);font-weight:800;line-height:1;margin:14px 0 
     svg.innerHTML=out;
   };
 
-  taxonomyChart('taxonomy-nm',[
-    {p:10.43,lo:7.63,hi:14.11,n:345},{p:9.32,lo:7.76,hi:11.15,n:1127},
-    {p:1.88,lo:1.62,hi:2.18,n:9265},{p:.82,lo:.76,hi:.89,n:81104}
-  ]);
-  taxonomyChart('taxonomy-ex',[
-    {p:6.37,lo:5.17,hi:7.83,n:1303},{p:6.50,lo:5.56,hi:7.58,n:2292},
-    {p:9.85,lo:8.26,hi:11.71,n:1147},{p:3.67,lo:3.32,hi:4.05,n:10166}
-  ]);
+  taxonomyChart('taxonomy-nm',{
+    labels:['Oportunidade','Prospect','Somente Lead','Contato'],
+    values:[{p:14.19,lo:11.25,hi:17.74,n:444},{p:9.20,lo:7.01,hi:11.98,n:522},
+      {p:1.93,lo:1.67,hi:2.23,n:9360},{p:.85,lo:.79,hi:.91,n:81515}]
+  });
+  taxonomyChart('taxonomy-ex',{
+    labels:['Oport. reativação','Lead reengajado','Contato'],
+    values:[{p:17.88,lo:12.96,hi:24.15,n:179},{p:8.80,lo:7.80,hi:9.91,n:2772},
+      {p:3.70,lo:3.37,hi:4.05,n:11957}]
+  });
 
   const convDays=[14,28,42,56,70,84,98,112,126,140,154,168,182,196,210,224,238,252,266,280,294,308,322,336,350,364,378,392,406,420,434,448,462,476,490,504,518,532,546,560,574,588,602,616,630,644,658,672,686,700,714,728,730];
   lineChart('curve-conv',{

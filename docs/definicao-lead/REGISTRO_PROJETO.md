@@ -3,6 +3,41 @@
 Registro cronológico das decisões, achados, correções e mudanças de direção. A
 regra vigente está consolidada em `ESPECIFICACAO_DEFINICAO_LEAD.md`.
 
+## 2026-09-04 — Árvores estritas e taxonomia candidata v2
+
+A auditoria semântica mostrou que `conversation_started` não podia representar
+uma ação voluntária: entre 7,28 milhões de registros no período auditado, 4,69
+milhões tinham `seller` como último autor. O evento foi removido e a coorte foi
+reextraída com 700.923 snapshots e 10.933 compras.
+
+A primeira rodada das árvores estritas também revelou cortes de 300–360 dias
+que apenas separavam “já teve evento” de “nunca teve”, acompanhando o início do
+tracking. O desenho foi corrigido: a árvore externa passou a usar somente
+recência do último sinal; as árvores internas passaram a colapsar recências
+acima de 90 dias em “sem evento recente”. Histórico deixou de definir estado.
+
+Resultado das árvores e validação mensal:
+
+- não-membro: fundo de funil, intenção e demais sinais formaram três níveis
+  ordenados em 7 de 7 meses;
+- ex-membro: somente fundo de funil formou um nível superior consistente;
+  primeira mensagem/produto-oferta não sustentou um Prospect separado;
+- o corte de 15 dias não foi estável e deve controlar prioridade, não estado.
+
+Taxonomia candidata v2:
+
+- não-membro: Oportunidade = fundo de funil até 90 dias; Prospect = primeira
+  mensagem do prospect ou produto/oferta até 90 dias; Somente Lead = demais
+  sinais recentes;
+- ex-membro: Oportunidade de reativação = fundo de funil até 90 dias; Lead
+  reengajado = demais sinais recentes; não há Prospect nesta versão.
+
+No holdout de março/2026, a ordenação foi significativa em 179 dias. Ela também
+apareceu em todos os sete snapshots. Estoque completo da v2: 583.468 Leads
+ativos — 451.640 não-membros e 131.828 ex-membros.
+
+Especificação detalhada: `PROPOSTA_ESTADOS_V2.md`.
+
 ## 2026-09-04 — Curadoria da narrativa executiva
 
 Foi identificado que o artifact acumulava análises válidas, tentativas

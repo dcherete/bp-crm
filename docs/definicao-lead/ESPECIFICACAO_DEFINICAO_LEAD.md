@@ -1,7 +1,11 @@
-# Especificação canônica — definição de Lead
+# Especificação v1 — arquivada
+
+> **NÃO USAR COMO REGRA VIGENTE.** Esta versão foi superada pela proposta
+> [`PROPOSTA_ESTADOS_V2.md`](PROPOSTA_ESTADOS_V2.md), validada em sete snapshots.
+> A v1 permanece somente para rastreabilidade histórica.
 
 **Versão:** 2026-09-04
-**Status:** regra operacional v1; fronteira externa sustentada e subestados em revisão por público
+**Status:** arquivada e substituída pela proposta v2
 **Fonte operacional:** `sql/22_stock_definicao_lead_90d.sql`
 **Artifact público:** https://dcherete.github.io/bp-crm/definicao-lead/
 
