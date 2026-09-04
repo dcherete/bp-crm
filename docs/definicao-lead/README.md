@@ -24,3 +24,8 @@ Oportunidade, Prospect e Somente Lead formam o total de Leads ativos. Os limites
 internos ainda serão validados por árvore de sobrevivência; a transição será
 modelada separadamente e Bellman só entra depois da medição causal das ações.
 
+## Governança
+
+Mudanças na regra devem aparecer juntas na especificação canônica, no registro
+cronológico e no artifact. Resultados precisam ser identificados como hipótese,
+observação, decisão operacional ou evidência causal.
